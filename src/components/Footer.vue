@@ -1,0 +1,28 @@
+<template>
+    <v-footer color="primary" :height="100" padless>  
+      <div class="px-4 py-2 w-100 d-flex align-center">
+        <img src="/brand/logo.png" alt="Logo" style="max-width: 200px;" class="img-fluid"/>
+        <v-spacer></v-spacer>
+        <div class="text-white ms-2">
+          <p class="CopyRight">Copy right reserved © 2024 Quasiris GmbH</p>
+        </div>
+      </div>
+    </v-footer>
+</template>
+<script>
+export default {
+  name: "qsc-footer"
+};
+</script>
+<style lang="scss">
+.v-footer {
+  padding-top: 3rem;
+  max-height: 110px !important;
+  padding-bottom:   3rem;
+}
+.CopyRight {
+  margin-bottom: 0px !important ;
+  font-size: 14px !important;
+  font-weight: bold;
+}
+</style>

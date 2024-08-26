@@ -1,0 +1,718 @@
+<template>
+  <v-container>
+    <v-row>
+      <v-col cols="12">
+        <br><br><br>
+        <v-card-text
+          class="ps-6 d-flex justify-space-between align-center flex-wrap mt-3"
+        >
+          <div class="my-2" v-if="!localSearchQuery">
+            <h3 class="">All Products</h3>
+            <p class="gray--text text--darken-1 mb-0">
+              {{ totalproducts }} results found
+            </p>
+          </div>
+          <div class="my-2" v-else>
+            <h3>Hits for "{{ localSearchQuery }}"</h3>
+            <p class="gray--text text--darken-1 mb-0">
+              {{ totalproducts }} results found
+            </p>
+          </div>
+          <div class="d-flex align-center flex-wrap">
+            <v-select  v-if="sorts.length > 0"
+              class="d-flex align-end"
+              :items="sorts"
+              label="Sort by"
+              v-model="selectedSort"
+              @change="selectSort"
+              item-title="name"
+              item-value="id"
+              variant="outlined"
+            ></v-select>
+            <!--  In this bar, i have results and Sorting and views -->
+            <div class="grey--text text--darken-1 me-2 my-2"></div>
+            <v-btn   v-if="display.width._object.width >= 600"
+              icon
+              @click="viewMode = 'grid'"
+              :disabled="viewMode === 'grid'"
+            >
+              <svg width="24" height="24" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="5" width="38" height="38" rx="2" stroke="#333" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path   d="M5 18H43" stroke="#333" stroke-width="3" stroke-linecap="round" fill="currentColor"/>
+                <path   d="M5 30H43" stroke="#333" stroke-width="3" stroke-linecap="round" fill="currentColor"/>
+                <path   d="M17 5V43" stroke="#333" stroke-width="3" stroke-linecap="round" fill="currentColor"/>
+                <path   d="M30 5V43" stroke="#333" stroke-width="3" stroke-linecap="round" fill="currentColor"/>
+              </svg>
+            </v-btn>
+            <v-btn
+              v-if="display.width._object.width >= 600"
+              icon
+              @click="viewMode = 'gift'"
+              :disabled="viewMode === 'gift'"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M2 3C2 2.44772 2.44772 2 3 2H10C10.5523 2 11 2.44772 11 3V10C11 10.5523 10.5523 11 10 11H3C2.44772 11 2 10.5523 2 10V3ZM4 4V9H9V4H4Z" fill="currentColor"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M13 3C13 2.44772 13.4477 2 14 2H21C21.5523 2 22 2.44772 22 3V10C22 10.5523 21.5523 11 21 11H14C13.4477 11 13 10.5523 13 10V3ZM15 4V9H20V4H15Z" fill="currentColor"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M13 14C13 13.4477 13.4477 13 14 13H21C21.5523 13 22 13.4477 22 14V21C22 21.5523 21.5523 22 21 22H14C13.4477 22 13 21.5523 13 21V14ZM15 15V20H20V15H15Z" fill="currentColor"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M2 14C2 13.4477 2.44772 13 3 13H10C10.5523 13 11 13.4477 11 14V21C11 21.5523 10.5523 22 10 22H3C2.44772 22 2 21.5523 2 21V14ZM4 15V20H9V15H4Z" fill="currentColor"/>
+              </svg>
+            </v-btn>
+            <v-btn   v-if="display.width._object.width >= 600"
+              icon
+              @click="viewMode = 'list'"
+              :disabled="viewMode === 'list'"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z" fill="currentColor"/>
+                <path d="M2 12.0322C2 11.4799 2.44772 11.0322 3 11.0322H21C21.5523 11.0322 22 11.4799 22 12.0322C22 12.5845 21.5523 13.0322 21 13.0322H3C2.44772 13.0322 2 12.5845 2 12.0322Z" fill="currentColor"/>
+                <path d="M3 17.0645C2.44772 17.0645 2 17.5122 2 18.0645C2 18.6167 2.44772 19.0645 3 19.0645H21C21.5523 19.0645 22 18.6167 22 18.0645C22 17.5122 21.5523 17.0645 21 17.0645H3Z" fill="currentColor"/>
+              </svg>
+            </v-btn>
+          </div>
+        </v-card-text>
+        <v-divider class="mx-6 my-1 "></v-divider>
+      </v-col>
+      <v-col cols="12">
+        <div class="box-wrapper">
+          <div
+            class="box-overlay"
+            :class="{ open: isSidebar }"
+            @click="isSidebar = !isSidebar"
+          >
+          </div>
+          <v-navigation-drawer v-if="facets && facets.length > 0" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+            <v-list-item  title=""><h3 class="pt-3 d-flex align-center justify-center flex-column">
+                Our Products Range
+              </h3></v-list-item>
+            <v-list-item v-for="facet in facets" :key="facet.id">
+              <v-divider  v-if="products.length != 0" class="mt-3"></v-divider>
+              <div v-if="facet.id == 'price' && facet.count !=0">
+                <h4 class="pt-3 d-flex align-center justify-center flex-column">
+                  {{ facet.name }}
+                </h4>
+                <div class="price-slider-container mt-3">
+                  <!-- Input Fields for Min and Max Values -->
+                  <div class="price-input-wrapper">
+                    <div class="price-input">
+                      <input
+                        id="min-price-input"
+                        class="price-input-field"
+                        type="number"
+                        v-model="selectedMinPrice"
+                        :placeholder="minPrice"
+                      />
+                      <label for="min-price-input" class="price-input-label">Min (€)</label>
+                    </div>
+
+                    <div class="price-input">
+                      <input
+                        id="max-price-input"
+                        class="price-input-field"
+                        type="number"
+                        v-model="selectedMaxPrice"
+                        :placeholder="maxPrice"
+                      />
+                      <label for="max-price-input" class="price-input-label">Max (€)</label>
+                    </div>
+                  </div>
+                  <v-range-slider
+                    v-model="sliderValues"
+                    :max="maxPrice"
+                    :min="minPrice"
+                    :step="1"
+                    class="price-slider"
+                    hide-details
+                  ></v-range-slider>
+                  <!-- Apply Filter Button -->
+                  <div class="d-flex align-center justify-center">
+                    <v-btn @click="handlePriceChange(facet.filterName)" color="primary"
+                      class="text-capitalize search-bar-dropdown px-4 font-600" >
+                      Apply Filter
+                    </v-btn>
+                  </div>
+                </div>
+              </div>
+              <h4 v-if="facet.id != 'price'"
+                class="pt-3 d-flex align-center justify-center flex-column"
+              >
+                {{ facet.name }}
+              </h4>
+              <div v-if="facet.id != 'price'">
+                <div 
+                v-for="value in facet.values"
+                :key="value.value"
+                >
+                  <v-checkbox
+                    hide-details
+                    class="smaller-checkbox"
+                    type="checkbox"
+                    color="primary"
+                    :value="value.filter"
+                    v-model="selectedFilters"
+                    :id="'filter-' + value.filter"
+                  >
+                    <template #label>
+                      <label
+                        :for="'filter-' + value.filter"
+                        class="text-decoration-none grey--text text--darken-2"
+                      >
+                        <span
+                          class="hover-color"
+                          @mouseover="hoverColor = true"
+                          @mouseout="hoverColor = false"
+                          style="font-size: 12px;"
+                        >
+                          {{ value.value }}
+                          &nbsp; ({{ value.count }})
+                        </span>
+                      </label>
+                    </template>
+                  </v-checkbox>
+                </div>
+              </div>
+            </v-list-item>
+            <v-divider class="mt-3"></v-divider>
+            <v-list-item class="d-flex justify-center mt-3"> 
+              <v-btn
+                color="primary"
+                class="text-capitalize search-bar-dropdown px-10 font-600"
+                @click="clearFilters()"
+                >Reset Filters</v-btn
+              >
+            </v-list-item>            
+          </v-navigation-drawer>
+          <div class="box-content">
+            <v-row>
+              <v-col cols="12">
+              <div class="d-flex justify-end pa-2 d-block d-md-none">
+                  <v-btn  icon @click.stop="isSidebar = !isSidebar"  v-show="facets && facets.length > 0">
+                  <v-icon color="#1867c0">
+                    mdi-format-list-bulleted-square
+                  </v-icon>
+                </v-btn>
+              </div>
+              <div class="box-container">
+                <v-row>
+                  <div class="sQuery" v-show="localSearchQuery"  @click="clearSearchQuery" >
+                    &nbsp;  "{{ localSearchQuery }}" &nbsp;
+                    <div 
+                      v-if="localSearchQuery"
+                      class="clear-input justify-center "
+                      @click="clearSearchQuery"
+                    >
+                      &times;&nbsp;
+                    </div> 
+                  
+                  </div> 
+                  <v-col cols="12" class="col-auto">
+                    <v-row v-if="products.length === 0 && searchQuery!=''" class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
+                        <p class="font-weight-bold">No products found for "{{ searchQuery }}"</p>
+                        <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> <!-- or any icon you prefer -->
+                      </v-col>
+                    </v-row>
+                    <v-data-iterator :items="products" hide-default-footer>
+                      <!--  Here I have Products-->
+                        <v-row >                          
+                          <v-col
+                            v-for="(product, index) in products"
+                            :key="index"
+                            :cols="
+                              viewMode === 'list'
+                                ? 12
+                                : viewMode === 'gift'
+                                ? 12
+                                : 12
+                            "
+                            :sm="
+                              viewMode === 'list'
+                                ? 12
+                                : viewMode === 'gift'
+                                ? 6
+                                : 6
+                            "
+                            :md="
+                              viewMode === 'list'
+                                ? 12
+                                : viewMode === 'gift'
+                                ? 6
+                                : 6
+                            "
+                            :lg="
+                              viewMode === 'list'
+                                ? 12
+                                : viewMode === 'gift'
+                                ? 6
+                                : 4
+                            "
+                            :xl="
+                              viewMode === 'list'
+                                ? 12
+                                : viewMode === 'gift'
+                                ? 6
+                                : 3
+                            "
+                          >
+                            <v-card
+                              :style="{ height: cardHeight }"
+                              :class="{ 'list-view': viewMode === 'list' }"
+                            >
+                              <a
+                                v-bind:href="
+                                  [config.document.url] +
+                                    product.document[config.document.sku]
+                                "
+                              >
+                                <div class="image">
+                                  <img
+                                    class="rounded-t-lg"
+                                    v-if="
+                                      product.document &&
+                                        product.document[config.document.image]
+                                    "
+                                    :src="
+                                      product.document[
+                                        config.document.image
+                                      ].replace(/^.*?format=auto\//, '')
+                                    "
+                                    style="max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;"
+                                  />
+                                </div>
+
+                                <v-card-text
+                                  class="d-flex justify-content-between align-end"
+                                >
+                                  <div class="flex-grow-1 my-3">
+                                    <h6
+                                      class="mb-0 text-grey-darken-2"
+                                      style="font-size: 12px;"
+                                    >
+                                      {{ product.document[config.document.name] }}
+                                    </h6>
+                                  </div>
+                                </v-card-text>
+                              </a>
+                            </v-card>
+                          </v-col>
+                        </v-row>
+                      <!--  Here I have Code of Pagination-->
+                      <template v-slot:footer>
+                        <v-row  v-if="products.length != 0" class="my-5 me-1" align="center" justify="center">
+                          <v-spacer></v-spacer>
+
+                          <span class="mr-4 grey--text" >
+                            Page {{ currentPage }} of {{ totalPages }}
+                          </span>
+                          <v-btn
+                            fab
+                            :disabled="currentPage == 1"
+                            v-model="currentPage"
+                            @click="handleClick"
+                            small
+                            color="primary"
+                            class="mr-1"
+                          >
+                            <v-icon>mdi-chevron-left</v-icon>
+                          </v-btn>
+                          <v-btn
+                            fab
+                            :disabled="currentPage == totalPages"
+                            v-model="currentPage"
+                            @click="myhandleClick"
+                            small
+                            color="primary"
+                            class="ml-1"
+                          >
+                            <v-icon>mdi-chevron-right</v-icon>
+                          </v-btn>
+                        </v-row>
+                      </template>
+                    </v-data-iterator>
+                  </v-col>
+                </v-row>
+              </div>
+              </v-col>
+            </v-row>
+          </div>
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+<script>
+
+import config from "@/../config.json";
+import { useDisplay } from 'vuetify'
+import axios from "axios";
+import { mapGetters } from "vuex";
+
+export default {
+  components: {},
+  data() {
+    return {
+      localSearchQuery: this.searchQuery,
+      products: [],
+      totalproducts: "",
+      selectedFilters: [],
+      facets: [],
+      sorts: [],
+      selectedSort: "",
+      currentPage: 1,
+      isSidebar: false,
+      config: config[0],
+      viewMode: "grid",
+      totalPages: "",
+      minPrice: 0,
+      maxPrice: 10000,
+      selectedMinPrice: 0,
+      selectedMaxPrice: 0,
+    };
+  },
+  props: {
+    searchQuery: { type: String, default: "" }
+  },
+  setup() {
+    const display = useDisplay()
+    return { display }
+  },
+  computed: {
+    computedMinPrice: {
+      get() {
+        return this.selectedMinPrice === '' ? this.minPrice : this.selectedMinPrice;
+      },
+      set(value) {
+        this.selectedMinPrice = value;
+      }
+    },
+    computedMaxPrice: {
+      get() {
+        return this.selectedMaxPrice === '' ? this.maxPrice : this.selectedMaxPrice;
+      },
+      set(value) {
+        this.selectedMaxPrice = value;
+      }
+    },
+    sliderValues: {
+      get() {
+        return [this.computedMinPrice, this.computedMaxPrice];
+      },
+      set(values) {
+        this.computedMinPrice = values[0];
+        this.computedMaxPrice = values[1];
+      }
+    },
+    cardHeight() {
+      return (this.viewMode === 'list' ? '270px' : '300px');
+    },
+
+    ...mapGetters(["getProducts"])
+  },
+  created() {
+    window.addEventListener("scroll", this.handleScroll);
+    this.items = this.getProducts;
+  },
+  unmounted() {
+    window.removeEventListener("scroll", this.handleScroll);
+  },
+  mounted() {
+    const url = window.location.href;
+    for (const configItem of config) {
+     
+      if (url.includes(configItem.id)) {
+        this.config = configItem;
+       
+        break; // Exit the loop once a match is found
+      }
+    }
+    this.fetchProducts();
+  },
+  watch: {
+    searchQuery(newVal) {
+      this.localSearchQuery=newVal
+      this.clearFilters();
+      this.currentPage=1;
+    },
+    selectedFilters() {
+      this.currentPage= 1;
+      this.fetchProducts();
+    },
+    selectedSort() {
+      this.fetchProducts();
+    },
+  },
+
+  methods: {
+    handlePriceChange(filter) {
+      if(this.selectedMinPrice && this.selectedMaxPrice){
+        if (this.selectedMinPrice > this.selectedMaxPrice) {
+          this.selectedMinPrice = this.selectedMaxPrice;
+          return;
+        }
+        let filterValue=filter+'.range='+this.selectedMinPrice+','+this.selectedMaxPrice
+        this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter + '.range='));
+        this.selectedFilters.push(filterValue)
+      }else{
+        this.selectedMinPrice=this.minPrice;
+        this.selectedMaxPrice=this.maxPrice;
+      }
+    },
+    fetchProducts() {
+      const selectedFilters = this.selectedFilters.join("&");
+      const selectedSort = this.selectedSort;
+      const apiUrl = this.config.baseurl;
+
+      const queryParameters = [];
+
+      if (this.localSearchQuery) {
+        queryParameters.push(`q=${this.localSearchQuery}`);
+      }
+
+      if (selectedFilters) {
+        queryParameters.push(selectedFilters);
+      }
+
+      if (selectedSort) {
+        queryParameters.push(`sort=${selectedSort}`);
+      }
+
+      if (this.currentPage) {
+        queryParameters.push(`page=${this.currentPage}`);
+      }
+
+      const queryString = queryParameters.join("&");
+      const apiUrlWithQuery = `${apiUrl}?${queryString}`;
+
+      axios
+        .get(apiUrlWithQuery)
+        .then(response => {
+          const products = response.data.result[this.config.product].documents;
+          this.products = products;
+
+          this.totalproducts = response.data.result[this.config.product].total;
+
+          this.facets = response.data.result[this.config.product].facets;
+          const priceFacet = this.facets.find(facet => facet.id === 'price');
+          if (priceFacet) {
+            // Assign minRange and maxRange to this.minPrice and this.maxPrice
+            if(priceFacet.minValue && priceFacet.maxValue){
+              this.selectedMinPrice = priceFacet.minValue;
+              this.selectedMaxPrice = priceFacet.maxValue;
+              this.minPrice = priceFacet.minRange;
+              this.maxPrice =  priceFacet.maxRange;
+            }else{
+              this.minPrice = this.selectedMinPrice = priceFacet.minRange;
+              this.maxPrice = this.selectedMaxPrice = priceFacet.maxRange;
+            }
+          }
+          this.sorts = response.data.result[this.config.product].sort.sort;
+          //this.selectedSort = this.sorts.length > 0 ? this.sorts[0].id : '';
+          this.totalPages=response.data.result[this.config.product].paging.pageCount;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    selectmyFilters(filter) {
+      this.selectedFilters = filter;
+    },
+    selectSort(sort) {
+      this.selectedSort = sort;
+    },
+    nextPage() {
+      if (this.currentPage + 1 <= this.totalPages) this.currentPage += 1;
+      this.fetchProducts();
+    },
+    myhandleClick() {
+      this.nextPage();
+      this.scrollToTop();
+    },
+    handleClick() {
+      this.formerPage();
+      this.scrollToTop();
+    },
+    formerPage() {
+      if (this.currentPage - 1 >= 1) this.currentPage -= 1;
+      this.fetchProducts();
+    },
+    scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: "auto"
+      });
+    },
+    clearFilters() {
+      this.selectedFilters = [];
+      this.selectedMinPrice= 0;
+      this.selectedMaxPrice= 0;
+
+    
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    },
+    clearSearchQuery() {
+      this.localSearchQuery = "";
+      this.$emit("onSearch", this.localSearchQuery);
+    }
+  }
+};
+</script>
+<style >
+
+.drawer {
+  min-height: 65vh;
+  position: relative !important;
+  transform: translateX(-8px) !important;
+}
+.image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  padding-top:12px;
+  margin-right: 25px;
+  margin-left: 25px;
+}
+.v-slider-thumb__surface,.v-slider-track__fill{
+  background-color: #1867c0 !important;
+}
+.smaller-checkbox .v-input--selection-controls__input {
+  transform: scale(0.8); 
+}
+.box-content{
+  width: calc(100% - 300px);
+  border-radius: 8px;
+}
+a {
+  text-decoration: none;
+}
+.image:hover img {
+  transform: scale(1.1);
+  transition: transform 0.1s ease-in-out;
+}
+.image :hover .name {
+  color: blue;
+}
+.list-view .v-card {
+  margin-bottom: 16px;
+}
+.list-view .image {
+  margin-right: 50px;
+  margin-left: 50px; 
+}
+.list-view .name {
+  font-size: 46px;
+  font-weight: bold;
+  margin-bottom: 0px;
+}
+.v-select {
+  max-width: 200px; 
+}
+.v-input__control {
+  min-width: 200px;
+  max-height: 46px;
+}
+.clear-input {
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+}
+.hover-color:hover {
+  color: #1867c0; 
+   cursor: pointer;
+}
+.sQuery{
+  margin-left: 17px;
+  background-color: white;
+  border: 1px solid black;
+  display: flex; 
+  align-items: center;
+   border-radius: 23px;
+}
+.sQuery:hover{
+  color: #1867c0;
+  cursor: pointer;
+}
+.box-wrapper {
+  position: inherit;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  border-radius: 8px;
+}
+.price-slider-container {
+  width: 100%;
+}
+/* Hide the arrows in input[type="number"] for Webkit-based browsers (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Hide the arrows in input[type="number"] for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+.price-input-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+.price-input {
+  position: relative;
+  width: 48%;
+  margin: 2px;
+}
+.price-input-field {
+  width: 100%;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+}
+.price-input-label {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  background: white;
+  padding: 0 4px;
+  font-size: 12px;
+  color: #555;
+}
+.price-slider {
+  margin: 17px !important;
+}
+.slider-track {
+  position: absolute;
+  height: 100%;
+  background-color: #1867c0;
+  z-index: 1;
+}
+.price-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 12px; 
+  font-size: 18px;
+  color: #333;
+  font-weight: bold;
+}
+@media (max-width: 768px) {
+  .viewIcon{
+      display: none;
+  }
+  .drawer {
+    position: absolute !important;
+    margin-top: 11vh !important;
+  }
+  .open {
+    display: none !important;
+  }
+  .drawer[style*="display: none"] {
+    display: none !important;
+  }
+  .box-content {
+    width: 100% !important; 
+  }
+}
+</style>
