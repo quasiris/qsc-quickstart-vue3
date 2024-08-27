@@ -122,6 +122,7 @@
                     :min="minPrice"
                     :step="1"
                     class="price-slider"
+                    :disabled="isSliderDisabled"
                     hide-details
                   ></v-range-slider>
                   <!-- Apply Filter Button -->
@@ -206,8 +207,8 @@
                   
                   </div> 
                   <v-col cols="12" class="col-auto">
-                    <v-row v-if="products.length === 0 && searchQuery!=''" class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
-                        <p class="font-weight-bold">No products found for "{{ searchQuery }}"</p>
+                    <v-row v-if="products.length === 0" class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
+                        <p class="font-weight-bold">No products found for "&nbsp;{{ searchQuery }}&nbsp;"</p>
                         <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> <!-- or any icon you prefer -->
                       </v-col>
                     </v-row>
@@ -366,6 +367,7 @@ export default {
       maxPrice: 10000,
       selectedMinPrice: 0,
       selectedMaxPrice: 0,
+      isSliderDisabled: false,
     };
   },
   props: {
@@ -432,6 +434,9 @@ export default {
       this.clearFilters();
       this.currentPage=1;
     },
+    minPrice() {
+      this.checkPriceRange();
+    },
     selectedFilters() {
       this.currentPage= 1;
       this.fetchProducts();
@@ -442,6 +447,13 @@ export default {
   },
 
   methods: {
+    checkPriceRange() {
+      if (this.minPrice === this.maxPrice) {
+        this.isSliderDisabled = true;
+      } else {
+        this.isSliderDisabled = false;
+      }
+    },
     handlePriceChange(filter) {
       if(this.selectedMinPrice && this.selectedMaxPrice){
         if (this.selectedMinPrice > this.selectedMaxPrice) {
