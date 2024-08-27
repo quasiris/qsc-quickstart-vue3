@@ -207,7 +207,7 @@
                   
                   </div> 
                   <v-col cols="12" class="col-auto">
-                    <v-row v-if="products.length === 0" class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
+                    <v-row v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) " class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
                         <p class="font-weight-bold">No products found for "&nbsp;{{ searchQuery }}&nbsp;"</p>
                         <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> <!-- or any icon you prefer -->
                       </v-col>
@@ -285,7 +285,7 @@
                                 >
                                   <div class="flex-grow-1 my-3">
                                     <h6
-                                      class="mb-0 text-grey-darken-2"
+                                      class="mb-0 text-grey-darken-2 text-center"
                                       style="font-size: 12px;"
                                     >
                                       {{ product.document[config.document.name] }}
