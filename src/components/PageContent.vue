@@ -82,16 +82,18 @@
           >
           </div>
           <v-navigation-drawer v-if="facets && facets.length > 0" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
-            <v-list-item  title=""><h3 class="pt-3 d-flex align-center justify-center flex-column">
+            <v-list-item  title="">
+              <h3 class="pt-3 d-flex align-center justify-center flex-column">
                 Our Products Range
-              </h3></v-list-item>
+              </h3>
+            </v-list-item>
             <v-list-item v-for="facet in facets" :key="facet.id">
               <v-divider  v-if="products.length != 0" class="mt-3"></v-divider>
-              <div v-if="facet.id == 'price' && facet.count !=0">
-                <h4 class="pt-3 d-flex align-center justify-center flex-column">
+              <div v-if="(facet.type === 'slider' || facet.type === 'histogram') && facet.count !=0">
+                <h4 class="pt-3 pb-3 d-flex align-center justify-center flex-column">
                   {{ facet.name }}
                 </h4>
-                <div class="price-slider-container mt-3">
+                <div v-if="facet.type == 'slider'" class="price-slider-container mt-3">
                   <!-- Input Fields for Min and Max Values -->
                   <div class="price-input-wrapper">
                     <div class="price-input">
@@ -133,13 +135,30 @@
                     </v-btn>
                   </div>
                 </div>
+                <div v-if="facet.type == 'histogram'" class="slider-chart-container">
+                  <span class="slider-price-range">€&nbsp;{{ sliderValues[0] }} - €&nbsp;{{ sliderValues[1] }}</span>
+                  <!-- D3 Chart Background -->
+                  <div id="chart" class="chart"></div>
+                  <div class="slider-wrapper">
+                    <v-range-slider
+                    v-model="sliderValues"
+                    :max="maxPrice"
+                    :min="minPrice"
+                    :step="1"
+                    class="price-slider-h"
+                    :disabled="isSliderDisabled"
+                    hide-details
+                    @mouseup="handlePriceChange(facet.filterName)"
+                  ></v-range-slider>
+                  </div>
+                </div>
               </div>
-              <h4 v-if="facet.id != 'price'"
+              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram')"
                 class="pt-3 d-flex align-center justify-center flex-column"
               >
                 {{ facet.name }}
               </h4>
-              <div v-if="facet.id != 'price'">
+              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram')">
                 <div 
                 v-for="value in facet.values"
                 :key="value.value"
@@ -343,6 +362,7 @@
 <script>
 
 import config from "@/../config.json";
+import * as d3 from 'd3';
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 import { mapGetters } from "vuex";
@@ -447,6 +467,83 @@ export default {
   },
 
   methods: {
+    initializeFacetData(facet) {
+      facet.sliderValues = [
+        facet.values[0].value,
+        facet.values[facet.values.length - 1].value
+      ];
+      this.minPrice= facet.minPrice = facet.values[0].value;
+      this.maxPrice= facet.maxPrice = facet.values[facet.values.length - 1].value;
+      this.sliderValues=[this.minPrice,this.minPrice]
+      facet.isSliderDisabled = false;
+      // Create the bar chart after data is initialized
+      this.$nextTick(() => {
+        this.createBarChart(facet);
+      });
+    },
+   createBarChart(facet) {
+      const data = facet.values;
+      // Ensure the chart element exists
+      const chartElement = document.getElementById("chart");
+      if (!chartElement) {
+        console.error("Chart element not found");
+        return;
+      }
+      // Set up margins and dimensions
+      const margin = { top: 20, right: 20, bottom: 0, left: 25 }; // Removed bottom margin
+      const width = chartElement.offsetWidth - margin.left - margin.right;
+      const height = chartElement.offsetHeight - margin.top - margin.bottom;
+
+      // Remove any existing SVG
+      d3.select("#chart").selectAll("*").remove();
+
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // Scales
+      const x = d3
+        .scaleBand()
+        .domain(data.map(d => d.value))
+        .range([0, width])
+        .padding(0.1);
+
+      const y = d3
+        .scaleLinear()
+        .domain([0, d3.max(data, d => d.count)])
+        .nice()
+        .range([height, 0]);
+
+      // Bars with rounded top corners
+      svg.selectAll(".bar")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", d => x(d.value))
+        .attr("y", height)  // Start the bars from the bottom
+        .attr("width", x.bandwidth())
+        .attr("height", 0)  // Start with height 0 for animation
+        .attr("fill", "#b6b6b6")  // Bar color set to grey
+        .attr("rx", 1)  // Set the x-axis radius for rounded corners
+        .attr("ry", 1)  // Set the y-axis radius for rounded corners
+        .transition()
+        .duration(500)
+        .attr("y", d => y(d.count))
+        .attr("height", d => height - y(d.count));  // Height based on 'count'
+
+      // Y-axis label
+      svg.append("text")
+        .attr("x", 2)
+        .attr("y", -margin.top + 10)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .style("font-size", "10px")
+    },
     checkPriceRange() {
       if (this.minPrice === this.maxPrice) {
         this.isSliderDisabled = true;
@@ -503,8 +600,11 @@ export default {
           this.totalproducts = response.data.result[this.config.product].total;
 
           this.facets = response.data.result[this.config.product].facets;
-          const priceFacet = this.facets.find(facet => facet.id === 'price');
+          const priceFacet = this.facets.find(facet => (facet.type === 'slider' || facet.type === 'histogram'));
           if (priceFacet) {
+            if (priceFacet.type === 'histogram') {
+              this.initializeFacetData(priceFacet);
+            }
             // Assign minRange and maxRange to this.minPrice and this.maxPrice
             if(priceFacet.minValue && priceFacet.maxValue){
               this.selectedMinPrice = priceFacet.minValue;
@@ -653,6 +753,36 @@ a {
   width: 100%;
   border-radius: 8px;
 }
+.slider-chart-container {
+  position: relative;
+  height: 170px; 
+  margin: 8px;
+}
+.chart {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  bottom: 18px; 
+  z-index: 1; 
+}
+.slider-price-range{
+  font-size: 12px;
+}
+.slider-wrapper {
+  position: absolute;
+  left: 0;
+  right: 18px;
+  bottom: 0;
+  padding: 0 10px; 
+  z-index: 2; 
+}
+.price-slider-h {
+  position: absolute;
+  bottom: 0;
+  width: 95%;
+  z-index: 2; /* Above the chart */
+}
 .price-slider-container {
   width: 100%;
 }
@@ -693,12 +823,6 @@ input[type="number"] {
 }
 .price-slider {
   margin: 17px !important;
-}
-.slider-track {
-  position: absolute;
-  height: 100%;
-  background-color: #1867c0;
-  z-index: 1;
 }
 .price-display {
   display: flex;

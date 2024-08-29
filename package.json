@@ -11,6 +11,7 @@
     "@mdi/font": "5.9.55",
     "axios": "^1.7.4",
     "core-js": "^3.8.3",
+    "d3": "^7.9.0",
     "roboto-fontface": "*",
     "sass": "^1.77.8",
     "sass-loader": "^16.0.1",

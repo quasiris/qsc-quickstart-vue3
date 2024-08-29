@@ -11,5 +11,18 @@
       "sku": "website_url",
       "image": "image"
     }
+  },
+  {
+    "id": "nam",
+    "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware-histogram-test",
+    "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/trendware?q=",
+    "product": "trendware-histogram-test",
+    "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
+    "document": {
+      "name": "title",
+      "url": "url",
+      "sku": "website_url",
+      "image": "image"
+    }
   }
 ]
