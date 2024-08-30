@@ -104,7 +104,7 @@
                         v-model="selectedMinPrice"
                         :placeholder="minPrice"
                       />
-                      <label for="min-price-input" class="price-input-label">Min (€)</label>
+                      <label for="min-price-input" class="price-input-label">Min <span v-if="facet.unit">({{facet.unit}})</span></label>
                     </div>
 
                     <div class="price-input">
@@ -115,7 +115,7 @@
                         v-model="selectedMaxPrice"
                         :placeholder="maxPrice"
                       />
-                      <label for="max-price-input" class="price-input-label">Max (€)</label>
+                      <label for="max-price-input" class="price-input-label">Max <span v-if="facet.unit">({{facet.unit}})</span></label>
                     </div>
                   </div>
                   <v-range-slider
@@ -136,7 +136,7 @@
                   </div>
                 </div>
                 <div v-if="facet.type == 'histogram'" class="slider-chart-container">
-                  <span class="slider-price-range">€&nbsp;{{ sliderValues[0] }} - €&nbsp;{{ sliderValues[1] }}</span>
+                  <span class="slider-price-range">{{ sliderValues[0] }}&nbsp;<span v-if="facet.unit">{{facet.unit}}</span> - {{ sliderValues[1] }}&nbsp;<span v-if="facet.unit">{{facet.unit}}</span></span>
                   <!-- D3 Chart Background -->
                   <div id="chart" class="chart"></div>
                   <div class="slider-wrapper">
