@@ -517,7 +517,8 @@ export default {
         .domain([0, d3.max(data, d => d.count)])
         .nice()
         .range([height, 0]);
-
+      // Maximum bar width
+      const maxBarWidth = 15; 
       // Bars with rounded top corners
       svg.selectAll(".bar")
         .data(data)
@@ -526,7 +527,7 @@ export default {
         .attr("class", "bar")
         .attr("x", d => x(d.value))
         .attr("y", height)  // Start the bars from the bottom
-        .attr("width", x.bandwidth())
+        .attr("width", Math.min(x.bandwidth(), maxBarWidth))
         .attr("height", 0)  // Start with height 0 for animation
         .attr("fill", "#b6b6b6")  // Bar color set to grey
         .attr("rx", 1)  // Set the x-axis radius for rounded corners
