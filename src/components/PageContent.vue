@@ -82,15 +82,9 @@
           >
           </div>
           <v-navigation-drawer v-if="facets && facets.length > 0" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
-            <v-list-item  title="">
-              <h3 class="pt-3 d-flex align-center justify-center flex-column">
-                Our Products Range
-              </h3>
-            </v-list-item>
             <v-list-item v-for="facet in facets" :key="facet.id">
-              <v-divider  v-if="products.length != 0" class="mt-3"></v-divider>
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram') && facet.count !=0">
-                <h4 class="pt-3 pb-3 d-flex align-center justify-center flex-column">
+                <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
                   {{ facet.name }}
                 </h4>
                 <div v-if="facet.type == 'slider'" class="price-slider-container mt-3">
@@ -154,7 +148,7 @@
                 </div>
               </div>
               <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram')"
-                class="pt-3 d-flex align-center justify-center flex-column"
+                class="pt-3 d-flex align-start justify-center flex-column"
               >
                 {{ facet.name }}
               </h4>
@@ -191,8 +185,8 @@
                   </v-checkbox>
                 </div>
               </div>
+              <v-divider  v-if="products.length != 0" class="mt-3"></v-divider>
             </v-list-item>
-            <v-divider class="mt-3"></v-divider>
             <v-list-item class="d-flex justify-center mt-3"> 
               <v-btn
                 color="primary"
@@ -494,7 +488,7 @@ export default {
         .nice()
         .range([height, 0]);
       // Maximum bar width
-      const maxBarWidth = 15; 
+      const maxBarWidth = 5; 
       // Bars with rounded top corners
       svg.selectAll(".bar")
         .data(data)
@@ -625,6 +619,8 @@ export default {
   min-height: 65vh;
   position: relative !important;
   transform: translateX(-8px) !important;
+  border-top-width: thin !important;
+  border-top-right-radius: 5px;
 }
 .image {
   display: flex;
