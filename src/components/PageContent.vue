@@ -101,8 +101,8 @@
                         id="min-price-input"
                         class="price-input-field"
                         type="number"
-                        v-model="selectedMinPrice"
-                        :placeholder="minPrice"
+                        v-model="facet.sliderValues[0]"
+                        :placeholder="facet.minPrice"
                       />
                       <label for="min-price-input" class="price-input-label">Min <span v-if="facet.unit">({{facet.unit}})</span></label>
                     </div>
@@ -112,43 +112,43 @@
                         id="max-price-input"
                         class="price-input-field"
                         type="number"
-                        v-model="selectedMaxPrice"
-                        :placeholder="maxPrice"
+                        v-model="facet.sliderValues[1]"
+                        :placeholder="facet.maxPrice"
                       />
                       <label for="max-price-input" class="price-input-label">Max <span v-if="facet.unit">({{facet.unit}})</span></label>
                     </div>
                   </div>
                   <v-range-slider
-                    v-model="sliderValues"
-                    :max="maxPrice"
-                    :min="minPrice"
+                    v-model="facet.sliderValues"
+                    :max="facet.maxPrice"
+                    :min="facet.minPrice"
                     :step="1"
                     class="price-slider"
-                    :disabled="isSliderDisabled"
+                    :disabled="facet.isSliderDisabled"
                     hide-details
                   ></v-range-slider>
                   <!-- Apply Filter Button -->
                   <div class="d-flex align-center justify-center">
-                    <v-btn @click="handlePriceChange(facet.filterName)" color="primary"
+                    <v-btn @click="handlePriceChange(facet)" color="primary"
                       class="text-capitalize search-bar-dropdown px-4 font-600" >
                       Apply Filter
                     </v-btn>
                   </div>
                 </div>
                 <div v-if="facet.type == 'histogram'" class="slider-chart-container">
-                  <span class="slider-price-range">{{ sliderValues[0] }}&nbsp;<span v-if="facet.unit">{{facet.unit}}</span> - {{ sliderValues[1] }}&nbsp;<span v-if="facet.unit">{{facet.unit}}</span></span>
+                  <span class="slider-price-range">{{ facet.sliderValues[0] }}&nbsp;<span v-if="facet.unit">{{facet.unit}}</span> - {{ facet.sliderValues[1] }}&nbsp;<span v-if="facet.unit">{{facet.unit}}</span></span>
                   <!-- D3 Chart Background -->
-                  <div id="chart" class="chart"></div>
+                  <div :id="'chart-' + facet.id" class="chart"></div>
                   <div class="slider-wrapper">
                     <v-range-slider
-                    v-model="sliderValues"
-                    :max="maxPrice"
-                    :min="minPrice"
+                    v-model="facet.sliderValues"
+                    :max="facet.maxPrice"
+                    :min="facet.minPrice"
                     :step="1"
                     class="price-slider-h"
-                    :disabled="isSliderDisabled"
+                    :disabled="facet.isSliderDisabled"
                     hide-details
-                    @mouseup="handlePriceChange(facet.filterName)"
+                    @mouseup="handlePriceChange(facet)"
                   ></v-range-slider>
                   </div>
                 </div>
@@ -383,11 +383,6 @@ export default {
       config: config[0],
       viewMode: "grid",
       totalPages: "",
-      minPrice: 0,
-      maxPrice: 10000,
-      selectedMinPrice: 0,
-      selectedMaxPrice: 0,
-      isSliderDisabled: false,
     };
   },
   props: {
@@ -398,35 +393,9 @@ export default {
     return { display }
   },
   computed: {
-    computedMinPrice: {
-      get() {
-        return this.selectedMinPrice === '' ? this.minPrice : this.selectedMinPrice;
-      },
-      set(value) {
-        this.selectedMinPrice = value;
-      }
-    },
-    computedMaxPrice: {
-      get() {
-        return this.selectedMaxPrice === '' ? this.maxPrice : this.selectedMaxPrice;
-      },
-      set(value) {
-        this.selectedMaxPrice = value;
-      }
-    },
-    sliderValues: {
-      get() {
-        return [this.computedMinPrice, this.computedMaxPrice];
-      },
-      set(values) {
-        this.computedMinPrice = values[0];
-        this.computedMaxPrice = values[1];
-      }
-    },
     cardHeight() {
       return (this.viewMode === 'list' ? '270px' : '300px');
     },
-
     ...mapGetters(["getProducts"])
   },
   created() {
@@ -454,9 +423,6 @@ export default {
       this.clearFilters();
       this.currentPage=1;
     },
-    minPrice() {
-      this.checkPriceRange();
-    },
     selectedFilters() {
       this.currentPage= 1;
       this.fetchProducts();
@@ -468,23 +434,35 @@ export default {
 
   methods: {
     initializeFacetData(facet) {
-      facet.sliderValues = [
-        facet.values[0].value,
-        facet.values[facet.values.length - 1].value
-      ];
-      this.minPrice= facet.minPrice = facet.values[0].value;
-      this.maxPrice= facet.maxPrice = facet.values[facet.values.length - 1].value;
-      this.sliderValues=[this.minPrice,this.minPrice]
-      facet.isSliderDisabled = false;
+      if(facet.minValue && facet.maxValue){
+        facet.sliderValues = [
+          facet.minValue,
+          facet.maxValue
+        ];
+      }else{
+        facet.sliderValues = [
+          facet.minRange,
+          facet.maxRange
+        ];
+      }
+      facet.minPrice  = facet.minRange;
+      facet.maxPrice  = facet.maxRange;
+      if(facet.minPrice===facet.maxPrice)
+          facet.isSliderDisabled = true;
+        else
+          facet.isSliderDisabled = false;
+      if (facet.type === 'histogram') {
       // Create the bar chart after data is initialized
-      this.$nextTick(() => {
-        this.createBarChart(facet);
-      });
+        this.$nextTick(async () => {
+          await this.createBarChart(facet);
+        });
+      }
     },
-   createBarChart(facet) {
+   async createBarChart(facet) {
       const data = facet.values;
+      const chartId = `chart-${facet.id}`;
       // Ensure the chart element exists
-      const chartElement = document.getElementById("chart");
+      const chartElement = document.getElementById(chartId);
       if (!chartElement) {
         console.error("Chart element not found");
         return;
@@ -493,18 +471,16 @@ export default {
       const margin = { top: 20, right: 20, bottom: 0, left: 25 }; // Removed bottom margin
       const width = chartElement.offsetWidth - margin.left - margin.right;
       const height = chartElement.offsetHeight - margin.top - margin.bottom;
-
-      // Remove any existing SVG
-      d3.select("#chart").selectAll("*").remove();
+      // Remove any existing chart ID SVG
+      d3.select(`#${chartId}`).selectAll("*").remove();
 
       const svg = d3
-        .select("#chart")
+        .select(`#${chartId}`)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
-
       // Scales
       const x = d3
         .scaleBand()
@@ -545,25 +521,14 @@ export default {
         .attr("text-anchor", "start")
         .style("font-size", "10px")
     },
-    checkPriceRange() {
-      if (this.minPrice === this.maxPrice) {
-        this.isSliderDisabled = true;
-      } else {
-        this.isSliderDisabled = false;
-      }
-    },
     handlePriceChange(filter) {
-      if(this.selectedMinPrice && this.selectedMaxPrice){
-        if (this.selectedMinPrice > this.selectedMaxPrice) {
-          this.selectedMinPrice = this.selectedMaxPrice;
-          return;
-        }
-        let filterValue=filter+'.range='+this.selectedMinPrice+','+this.selectedMaxPrice
-        this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter + '.range='));
+      if(filter.sliderValues[0] && filter.sliderValues[1]){
+        let filterValue=filter.filterName+'.range='+filter.sliderValues[0]+','+filter.sliderValues[1]
+        this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filterName + '.range='));
         this.selectedFilters.push(filterValue)
       }else{
-        this.selectedMinPrice=this.minPrice;
-        this.selectedMaxPrice=this.maxPrice;
+        filter.sliderValues[0]=filter.minPrice;
+        filter.sliderValues[1]=filter.maxPrice;
       }
     },
     fetchProducts() {
@@ -591,32 +556,19 @@ export default {
 
       const queryString = queryParameters.join("&");
       const apiUrlWithQuery = `${apiUrl}?${queryString}`;
-
       axios
         .get(apiUrlWithQuery)
         .then(response => {
           const products = response.data.result[this.config.product].documents;
           this.products = products;
-
           this.totalproducts = response.data.result[this.config.product].total;
-
-          this.facets = response.data.result[this.config.product].facets;
-          const priceFacet = this.facets.find(facet => (facet.type === 'slider' || facet.type === 'histogram'));
-          if (priceFacet) {
-            if (priceFacet.type === 'histogram') {
-              this.initializeFacetData(priceFacet);
+          this.facets = response.data.result[this.config.product].facets;          
+          this.facets = response.data.result[this.config.product].facets.map((facet) => {
+            if (facet.type === 'slider' || facet.type === 'histogram') {
+              this.initializeFacetData(facet);
             }
-            // Assign minRange and maxRange to this.minPrice and this.maxPrice
-            if(priceFacet.minValue && priceFacet.maxValue){
-              this.selectedMinPrice = priceFacet.minValue;
-              this.selectedMaxPrice = priceFacet.maxValue;
-              this.minPrice = priceFacet.minRange;
-              this.maxPrice =  priceFacet.maxRange;
-            }else{
-              this.minPrice = this.selectedMinPrice = priceFacet.minRange;
-              this.maxPrice = this.selectedMaxPrice = priceFacet.maxRange;
-            }
-          }
+            return facet;
+          });
           this.sorts = response.data.result[this.config.product].sort.sort;
           //this.selectedSort = this.sorts.length > 0 ? this.sorts[0].id : '';
           this.totalPages=response.data.result[this.config.product].paging.pageCount;
@@ -654,11 +606,7 @@ export default {
       });
     },
     clearFilters() {
-      this.selectedFilters = [];
-      this.selectedMinPrice= 0;
-      this.selectedMaxPrice= 0;
-
-    
+      this.selectedFilters = [];  
       window.scrollTo({
         top: 0,
         behavior: "smooth"
