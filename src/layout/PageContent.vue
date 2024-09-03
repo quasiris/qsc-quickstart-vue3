@@ -261,8 +261,7 @@
                             >
                               <a
                                 v-bind:href="
-                                  [config.document.url] +
-                                    product.document[config.document.sku]
+                                    product.document[config.document.url]
                                 "
                               >
                                 <div class="image">
@@ -289,7 +288,7 @@
                                       class="mb-0 text-grey-darken-2 text-center"
                                       style="font-size: 12px;"
                                     >
-                                      {{ product.document[config.document.name] }}
+                                      {{ product.document.name }}
                                     </h6>
                                   </div>
                                 </v-card-text>
@@ -432,6 +431,22 @@ export default {
           facet.isSliderDisabled = true;
         else
           facet.isSliderDisabled = false;
+    },
+    replacePlaceholders(pattern, replacements) {
+      const regexp = /\$\{([a-zA-Z0-9@?!#*%_.-]+)}/g;
+      let matchesArray = [...pattern.matchAll(regexp)];
+
+      for (let i = 0; i < matchesArray.length; i++) {
+        let placeholder = matchesArray[i][0];
+        let key = matchesArray[i][1];
+
+         // Only replace if the key exists in the replacements
+         if (Object.prototype.hasOwnProperty.call(replacements, key)) {
+          pattern = pattern.replaceAll(placeholder, replacements[key]);
+        }
+      }
+
+      return pattern;
     },    
     handlePriceChange(filter) {
       if(filter.sliderValues[0] && filter.sliderValues[1]){
@@ -472,7 +487,25 @@ export default {
         .get(apiUrlWithQuery)
         .then(response => {
           const products = response.data.result[this.config.product].documents;
-          this.products = products;
+          this.products = products.map(product => {
+            let updatedDocument = {};
+            // Replace placeholders for each key in the config.document
+            Object.keys(this.config.document).forEach(key => {
+              let pattern = this.config.document[key];
+
+              // Check if the pattern is a placeholder or a direct key
+              if (pattern.includes('${')) {
+                // placeholders ${}
+                updatedDocument[key] = this.replacePlaceholders(pattern, product.document);
+              } else {
+                // directly map the key
+                updatedDocument[key] = product.document[pattern];
+              }
+            });
+            // Assign the updated document back to the product
+            product.document = updatedDocument;
+            return product;
+          });
           this.totalproducts = response.data.result[this.config.product].total;
           this.facets = response.data.result[this.config.product].facets;          
           this.facets = response.data.result[this.config.product].facets.map((facet) => {
