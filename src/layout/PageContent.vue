@@ -140,7 +140,14 @@
               >
                 {{ facet.name }}
               </h4>
-              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram')">
+              <div v-if="facet.type==='colorPicker'">
+                <color-picker
+                  :facet="facet"
+                  :selectedColors="selectedFilters"
+                  @colorSelected="handleColorSelection"
+                />
+              </div>
+              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker')">
                 <div 
                 v-for="value in facet.values"
                 :key="value.value"
@@ -344,11 +351,12 @@
 
 import config from "@/../config.json";
 import HistogramSlider from "@/components/HistogramSlider.vue";
+import ColorPicker from "@/components/ColorPicker.vue";
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
-  components: {HistogramSlider},
+  components: {HistogramSlider,ColorPicker},
   data() {
     return {
       localSearchQuery: this.searchQuery,
@@ -413,6 +421,14 @@ export default {
   },
 
   methods: {
+    handleColorSelection(color) {
+      const filter = color.filter;
+      const filterIndex = this.selectedFilters.indexOf(filter);
+      this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter));
+      if (filterIndex === -1) {
+          this.selectedFilters.push(filter);
+      }
+    },
     initializeFacetData(facet) {
       if(facet.minValue && facet.maxValue){
         facet.sliderValues = [
