@@ -39,6 +39,7 @@
         handler(newFacet) {
                 this.localSliderValues = [...newFacet.sliderValues];
                 this.localSliderFacet = {...newFacet};
+                this.createBarChart(this.localSliderFacet);
             },
             deep: true,
         },
@@ -88,7 +89,7 @@
                 return;
             }
             // Set up margins and dimensions
-            const margin = { top: 20, right: 20, bottom: 0, left: 25 }; // Removed bottom margin
+            const margin = { top: 20, right: 23, bottom: 0, left: 28 }; // Removed bottom margin
             const width = chartElement.offsetWidth - margin.left - margin.right;
             const height = chartElement.offsetHeight - margin.top - margin.bottom;
             // Remove any existing chart ID SVG
@@ -120,6 +121,7 @@
                 .range([height, 0]);
             // Maximum bar width
             const maxBarWidth = 5; 
+            const [minSelected, maxSelected] = this.localSliderValues;
             // Bars with rounded top corners
             svg.selectAll(".bar")
                 .data(data)
@@ -130,7 +132,13 @@
                 .attr("y", height)  // Start the bars from the bottom
                 .attr("width", Math.min(x.bandwidth(), maxBarWidth))
                 .attr("height", 0)  // Start with height 0 for animation
-                .attr("fill", "#b6b6b6")  // Bar color set to grey
+                .attr("fill", d => {
+                    // Highlight bars within the selected range
+                    if (d.value >= minSelected && d.value <= maxSelected) {
+                        return "#475772"; // Highlight color 
+                    }
+                    return "#b6b6b6"; // Default bar color (grey)
+                    })
                 .attr("rx", 1)  // Set the x-axis radius for rounded corners
                 .attr("ry", 1)  // Set the y-axis radius for rounded corners
                 .on("mouseover", (event, d) => this.showTooltip(event, d))
@@ -167,6 +175,7 @@
         },
         handlePriceChange() {
             this.localSliderFacet.sliderValues=this.localSliderValues
+            this.createBarChart(this.localSliderFacet); // Recreate the chart with updated range
             this.$emit('price-change', this.localSliderFacet);
         },
     },
@@ -204,6 +213,5 @@
   padding: 0 10px; 
   z-index: 2; 
 }
-
 </style>
   

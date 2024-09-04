@@ -670,7 +670,6 @@ a {
   width: 100%;
   border-radius: 8px;
 }
-
 .chart-tooltip {
   position: absolute;
   background-color: #475772;
@@ -683,7 +682,6 @@ a {
   max-width: 200px;
   text-align: center;
 }
-
 .price-slider-container {
   width: 100%;
 }
