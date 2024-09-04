@@ -436,16 +436,21 @@ export default {
       const regexp = /\$\{([a-zA-Z0-9@?!#*%_.-]+)}/g;
       let matchesArray = [...pattern.matchAll(regexp)];
 
-      for (let i = 0; i < matchesArray.length; i++) {
-        let placeholder = matchesArray[i][0];
-        let key = matchesArray[i][1];
-
+      for (const element of matchesArray) {
+        let placeholder = element[0];
+        let key = element[1];
          // Only replace if the key exists in the replacements
-         if (Object.prototype.hasOwnProperty.call(replacements, key)) {
-          pattern = pattern.replaceAll(placeholder, replacements[key]);
+        if (Object.hasOwn(replacements, key)) {
+          // if replacements is an array use whitespace space as a separator with join
+          if (Array.isArray(replacements[key])) {
+            pattern = pattern.replaceAll(placeholder, replacements[key].join(" ")); // or another format
+          } else {
+            pattern = pattern.replaceAll(placeholder, replacements[key]);
+          }
+        }else{
+          pattern = pattern.replaceAll(placeholder, ' ')
         }
       }
-
       return pattern;
     },    
     handlePriceChange(filter) {

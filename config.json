@@ -6,7 +6,7 @@
     "product": "trendware",
     "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
     "document": {
-      "name": "${sku}:${title}",
+      "name": "${title}:${price}:${nam}:${material}",
       "url": "url",
       "image": "image"
     }
