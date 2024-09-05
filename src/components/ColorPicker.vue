@@ -16,6 +16,14 @@
           style="cursor: pointer"
         >
           <v-avatar
+            v-if="color.properties.color === 'bunt'"
+            size="35"
+            :style="buntColor"
+            class="mx-auto mb-2"
+          >
+          </v-avatar>
+          <v-avatar
+            v-else
             size="35"
             :color="color.properties.color"
             class="mx-auto mb-2"
@@ -44,6 +52,10 @@
     data() {
         return {
             hoveredColor: null,
+            buntColor:{
+              background: 'linear-gradient(90deg, #c4393a, orange, yellow, green, blue, indigo, violet)',
+              color: 'transparent' 
+            }
         };
     },
     methods: {

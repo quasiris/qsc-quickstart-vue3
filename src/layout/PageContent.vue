@@ -507,7 +507,7 @@ export default {
       axios
         .get(apiUrlWithQuery)
         .then(response => {
-          const products = response.data.result[this.config.product].documents;
+          const products = response.data.result[this.config.resultSetId].documents;
           this.products = products.map(product => {
             let updatedDocument = {};
             // Replace placeholders for each key in the config.document
@@ -527,17 +527,17 @@ export default {
             product.document = updatedDocument;
             return product;
           });
-          this.totalproducts = response.data.result[this.config.product].total;
-          this.facets = response.data.result[this.config.product].facets;          
-          this.facets = response.data.result[this.config.product].facets.map((facet) => {
+          this.totalproducts = response.data.result[this.config.resultSetId].total;
+          this.facets = response.data.result[this.config.resultSetId].facets;          
+          this.facets = response.data.result[this.config.resultSetId].facets.map((facet) => {
             if (facet.type === 'slider' || facet.type === 'histogram') {
               this.initializeFacetData(facet);
             }
             return facet;
           });
-          this.sorts = response.data.result[this.config.product].sort.sort;
+          this.sorts = response.data.result[this.config.resultSetId].sort.sort;
           //this.selectedSort = this.sorts.length > 0 ? this.sorts[0].id : '';
-          this.totalPages=response.data.result[this.config.product].paging.pageCount;
+          this.totalPages=response.data.result[this.config.resultSetId].paging.pageCount;
         })
         .catch(error => {
           console.log(error);
