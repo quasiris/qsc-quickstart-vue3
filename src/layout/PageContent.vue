@@ -87,48 +87,11 @@
                 <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
                   {{ facet.name }}
                 </h4>
-                <div v-if="facet.type == 'slider'" class="price-slider-container mt-3">
-                  <!-- Input Fields for Min and Max Values -->
-                  <div class="price-input-wrapper">
-                    <div class="price-input">
-                      <input
-                        id="min-price-input"
-                        class="price-input-field"
-                        type="number"
-                        v-model="facet.sliderValues[0]"
-                        :placeholder="facet.minPrice"
-                      />
-                      <label for="min-price-input" class="price-input-label">Min <span v-if="facet.unit">({{facet.unit}})</span></label>
-                    </div>
-
-                    <div class="price-input">
-                      <input
-                        id="max-price-input"
-                        class="price-input-field"
-                        type="number"
-                        v-model="facet.sliderValues[1]"
-                        :placeholder="facet.maxPrice"
-                      />
-                      <label for="max-price-input" class="price-input-label">Max <span v-if="facet.unit">({{facet.unit}})</span></label>
-                    </div>
-                  </div>
-                  <v-range-slider
-                    v-model="facet.sliderValues"
-                    :max="facet.maxPrice"
-                    :min="facet.minPrice"
-                    :step="1"
-                    class="price-slider"
-                    :disabled="facet.isSliderDisabled"
-                    hide-details
-                  ></v-range-slider>
-                  <!-- Apply Filter Button -->
-                  <div class="d-flex align-center justify-center">
-                    <v-btn @click="handlePriceChange(facet)" color="primary"
-                      class="text-capitalize search-bar-dropdown px-4 font-600" >
-                      Apply Filter
-                    </v-btn>
-                  </div>
-                </div>
+                <PriceSlider
+                  v-if="facet.type == 'slider'"
+                  :facet="facet"
+                  @price-change="handlePriceChange"
+                /> 
                 <HistogramSlider
                   v-if="facet.type == 'histogram'"
                   :facet="facet"
@@ -351,12 +314,13 @@
 
 import config from "@/../config.json";
 import HistogramSlider from "@/components/HistogramSlider.vue";
+import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
-  components: {HistogramSlider,ColorPicker},
+  components: {HistogramSlider,ColorPicker,PriceSlider},
   data() {
     return {
       localSearchQuery: this.searchQuery,
@@ -721,7 +685,7 @@ input[type="number"] {
   color: #555;
 }
 .price-slider {
-  margin: 17px !important;
+  padding: 12px !important;
 }
 .price-display {
   display: flex;
