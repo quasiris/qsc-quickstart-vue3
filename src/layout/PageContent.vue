@@ -123,6 +123,7 @@
                     :value="value.filter"
                     v-model="selectedFilters"
                     :id="'filter-' + value.filter"
+                    @change="chipsControle(facet,value)"
                   >
                     <template #label>
                       <label
@@ -166,17 +167,46 @@
               </div>
               <div class="box-container">
                 <v-row>
-                  <div class="sQuery" v-show="localSearchQuery"  @click="clearSearchQuery" >
-                    &nbsp;  "{{ localSearchQuery }}" &nbsp;
+                  <div class="sQuery mb-1" v-show="localSearchQuery"  @click="clearSearchQuery" >
+                    <span class="chip-text">{{ localSearchQuery }}</span>
+                    <v-tooltip
+                      v-if="localSearchQuery" 
+                      activator="parent"
+                      location="top"
+                      > Query: {{ localSearchQuery }}
+                    </v-tooltip>
                     <div 
                       v-if="localSearchQuery"
                       class="clear-input justify-center "
                       @click="clearSearchQuery"
                     >
-                      &times;&nbsp;
+                      &times;
                     </div> 
-                  
                   </div> 
+                  <div class="sQuery mb-1" v-for="(chip,index) in chipsValues" :key="index" >
+                    <span class="chip-text">{{ chip[Object.keys(chip)[0]] }}</span>
+                    <v-tooltip
+                      activator="parent"
+                      location="top"
+                      >{{ Object.keys(chip)[0] }} : {{ chip[Object.keys(chip)[0]] }}
+                    </v-tooltip>
+                    <div 
+                      v-if="chip"
+                      class="clear-input justify-center"
+                      @click.stop="deleteChip(chip)"
+                    >
+                      &times;
+                    </div> 
+                  </div>
+                  <v-btn
+                    v-if="chipsValues.length !=0 "
+                    color="primary"
+                    variant="text"
+                    size="x-small"
+                    class="text-capitalize mt-3 ml-2 justify-center"
+                    @click="clearFilters()"
+                    >Reset all</v-btn
+                  > 
                   <v-col cols="12" class="col-auto">
                     <v-row v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) " class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
                         <p class="font-weight-bold">No products found for "&nbsp;{{ searchQuery }}&nbsp;"</p>
@@ -330,6 +360,7 @@ export default {
       facets: [],
       sorts: [],
       selectedSort: "",
+      chipsValues:[],
       currentPage: 1,
       isSidebar: false,
       config: config[0],
@@ -385,12 +416,55 @@ export default {
   },
 
   methods: {
-    handleColorSelection(color) {
+    chipsControle(facet, value) {
+      const chipIndex = this.chipsValues.findIndex(chip => 
+        chip[facet.name] === value.value
+      );
+      if (chipIndex !== -1) {
+        // Remove the chip if it exists
+        this.chipsValues.splice(chipIndex, 1);
+        // Remove the corresponding filter from selectedFilters
+        const filterIndex = this.selectedFilters.indexOf(value.filter);
+        if (filterIndex !== -1) {
+          this.selectedFilters = [
+            ...this.selectedFilters.slice(0, filterIndex), 
+            ...this.selectedFilters.slice(filterIndex + 1)
+          ];
+        }
+      } else {
+        // Add a new chip if it doesn't exist
+        this.chipsValues.push({ 
+            [facet.name]: value.value, 
+            filter: value.filter 
+          });
+      }
+    },
+    deleteChip(chip) {
+      const chipIndex = this.chipsValues.findIndex(ch => 
+        ch.filter === chip.filter
+      );
+      // If chip exists, remove it
+      if (chipIndex !== -1) {
+        this.selectedFilters = this.selectedFilters.filter(item => {
+          // Filter out both range-based filters and exact matches
+          return !item.startsWith(chip.filter + '.range=') && item !== chip.filter;
+        });
+        this.chipsValues.splice(chipIndex, 1);
+      }
+    },
+    handleColorSelection(color, name) {
       const filter = color.filter;
-      const filterIndex = this.selectedFilters.indexOf(filter);
+      // Remove existing filters in selectedFilters that start with the same filter
       this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter));
-      if (filterIndex === -1) {
-          this.selectedFilters.push(filter);
+      // Find the chip with the same filter in chipsValues
+      const chipIndex = this.chipsValues.findIndex(chip => chip.filter === filter);
+      // If the filter doesn't exist, add it to both selectedFilters and chipsValues
+      if (chipIndex === -1) {
+        this.selectedFilters.push(filter);
+        this.chipsValues.push({ [name]: color.value, filter: color.filter });
+      } else {
+        // If the filter exists, remove the chip from chipsValues
+        this.chipsValues.splice(chipIndex, 1);
       }
     },
     initializeFacetData(facet) {
@@ -423,7 +497,7 @@ export default {
         if (Object.hasOwn(replacements, key)) {
           // if replacements is an array use whitespace space as a separator with join
           if (Array.isArray(replacements[key])) {
-            pattern = pattern.replaceAll(placeholder, replacements[key].join(" ")); // or another format
+            pattern = pattern.replaceAll(placeholder, replacements[key].join(" "));
           } else {
             pattern = pattern.replaceAll(placeholder, replacements[key]);
           }
@@ -436,8 +510,19 @@ export default {
     handlePriceChange(filter) {
       if(filter.sliderValues[0] && filter.sliderValues[1]){
         let filterValue=filter.filterName+'.range='+filter.sliderValues[0]+','+filter.sliderValues[1]
+        let chipValue=filter.sliderValues[0]+' - '+filter.sliderValues[1]+' '+filter.unit
         this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filterName + '.range='));
         this.selectedFilters.push(filterValue)
+        // Check if the key (filter.name) already exists in chipsValues
+        const existingChipIndex = this.chipsValues.findIndex(chip => Object.hasOwn(chip, filter.name));
+        if (existingChipIndex !== -1) {
+          // If the key already exists, update the value
+          this.chipsValues[existingChipIndex][filter.name] = chipValue;
+          this.chipsValues[existingChipIndex].filter= filter.filterName;
+        } else {
+          // If the key doesn't exist, push a new object
+          this.chipsValues.push({ [filter.name]: chipValue, filter: filter.filterName });
+        }
       }else{
         filter.sliderValues[0]=filter.minPrice;
         filter.sliderValues[1]=filter.maxPrice;
@@ -507,9 +592,6 @@ export default {
           console.log(error);
         });
     },
-    selectmyFilters(filter) {
-      this.selectedFilters = filter;
-    },
     selectSort(sort) {
       this.selectedSort = sort;
     },
@@ -537,6 +619,7 @@ export default {
     },
     clearFilters() {
       this.selectedFilters = [];  
+      this.chipsValues = [];  
       window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -607,21 +690,37 @@ a {
   max-height: 46px;
 }
 .clear-input {
-  font-size: 20px;
+  font-size: 19px;
   cursor: pointer;
   position: relative;
+  margin: 3px;
+  padding-right: 3px;
+}
+.clear-input:hover {
+  font-size: 20px;
 }
 .hover-color:hover {
   color: #1867c0; 
    cursor: pointer;
 }
 .sQuery{
-  margin-left: 17px;
+  margin-left: 10px;
   background-color: white;
-  border: 1px solid black;
-  display: flex; 
+  border: 1px solid rgb(227, 227, 227);
+  display: flex;
   align-items: center;
-   border-radius: 23px;
+  border-radius: 5px;
+  color: #575757;
+  font-size: 15px;
+  min-width: 45px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
+              0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.chip-text {
+  flex-grow: 1;
+  padding-right: 3px;
+  padding-left: 5px; 
 }
 .sQuery:hover{
   color: #1867c0;

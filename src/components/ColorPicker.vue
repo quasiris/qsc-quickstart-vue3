@@ -6,7 +6,7 @@
           :key="color.filter"
           cols="3" 
           class="text-center"
-          @click="selectColor(color)"
+          @click="selectColor(color,facet.name)"
           @mouseover="hoveredColor = color.filter"
           @mouseleave="hoveredColor = null"
           :class="{
@@ -59,8 +59,8 @@
         };
     },
     methods: {
-      selectColor(color) {
-        this.$emit("colorSelected", color);
+      selectColor(color,name) {
+        this.$emit("colorSelected", color,name);
       },
     },
   };
