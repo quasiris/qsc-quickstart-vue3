@@ -6,11 +6,12 @@
     "resultSetId": "trendware",
     "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
     "document": {
-      "name": "${title}:${price}:${nam}:${material}",
+      "name": "${title}",
       "url": "url",
-      "image": "image"
+      "image": "image",
+      "template": "<v-card>\n  <a href=\"${url}\">\n   <v-card-text class=\"d-flex justify-content-between align-end\">\n <div class=\"flex-grow-1 my-3\">\n        <h6 class=\"mb-0 text-center\" style=\"color:blue;font-size: 10px;\">\n          ${name}\n        </h6>\n      </div>\n    </v-card-text>\n <div class=\"image\">\n      <img class=\"rounded-t-lg\" src=\"${image}\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" />\n    </div>\n  </a>\n</v-card>\n"
     }
-  },
+    },
   {
     "id": "nam",
     "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware-histogram-test",

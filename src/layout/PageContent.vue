@@ -255,45 +255,12 @@
                                 : 3
                             "
                           >
-                            <v-card
-                              :style="{ height: cardHeight }"
-                              :class="{ 'list-view': viewMode === 'list' }"
-                            >
-                              <a
-                                v-bind:href="
-                                    product.document[config.document.url]
-                                "
-                              >
-                                <div class="image">
-                                  <img
-                                    class="rounded-t-lg"
-                                    v-if="
-                                      product.document &&
-                                        product.document[config.document.image]
-                                    "
-                                    :src="
-                                      product.document[
-                                        config.document.image
-                                      ].replace(/^.*?format=auto\//, '')
-                                    "
-                                    style="max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;"
-                                  />
-                                </div>
-
-                                <v-card-text
-                                  class="d-flex justify-content-between align-end"
-                                >
-                                  <div class="flex-grow-1 my-3">
-                                    <h6
-                                      class="mb-0 text-grey-darken-2 text-center"
-                                      style="font-size: 12px;"
-                                    >
-                                      {{ product.document.name }}
-                                    </h6>
-                                  </div>
-                                </v-card-text>
-                              </a>
-                            </v-card>
+                            <ProductCard
+                              :product="product"
+                              :config="config"
+                              :cardHeight="cardHeight"
+                              :viewMode="viewMode"
+                            />
                           </v-col>
                         </v-row>
                       <!--  Here I have Code of Pagination-->
@@ -343,14 +310,16 @@
 <script>
 
 import config from "@/../config.json";
+import { replacePlaceholders } from '@/utils'; 
 import HistogramSlider from "@/components/HistogramSlider.vue";
+import ProductCard from "@/components/ProductCard.vue";
 import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
-  components: {HistogramSlider,ColorPicker,PriceSlider},
+  components: {HistogramSlider,ColorPicker,PriceSlider,ProductCard},
   data() {
     return {
       localSearchQuery: this.searchQuery,
@@ -485,28 +454,7 @@ export default {
           facet.isSliderDisabled = true;
         else
           facet.isSliderDisabled = false;
-    },
-    replacePlaceholders(pattern, replacements) {
-      const regexp = /\$\{([a-zA-Z0-9@?!#*%_.-]+)}/g;
-      let matchesArray = [...pattern.matchAll(regexp)];
-
-      for (const element of matchesArray) {
-        let placeholder = element[0];
-        let key = element[1];
-         // Only replace if the key exists in the replacements
-        if (Object.hasOwn(replacements, key)) {
-          // if replacements is an array use whitespace space as a separator with join
-          if (Array.isArray(replacements[key])) {
-            pattern = pattern.replaceAll(placeholder, replacements[key].join(" "));
-          } else {
-            pattern = pattern.replaceAll(placeholder, replacements[key]);
-          }
-        }else{
-          pattern = pattern.replaceAll(placeholder, ' ')
-        }
-      }
-      return pattern;
-    },    
+    },  
     handlePriceChange(filter) {
       if(filter.sliderValues[0] && filter.sliderValues[1]){
         let filterValue=filter.filterName+'.range='+filter.sliderValues[0]+','+filter.sliderValues[1]
@@ -566,7 +514,7 @@ export default {
               // Check if the pattern is a placeholder or a direct key
               if (pattern.includes('${')) {
                 // placeholders ${}
-                updatedDocument[key] = this.replacePlaceholders(pattern, product.document);
+                updatedDocument[key] = replacePlaceholders(pattern, product.document);
               } else {
                 // directly map the key
                 updatedDocument[key] = product.document[pattern];
