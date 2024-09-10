@@ -16,7 +16,8 @@
             </a>
           </div>
         </v-toolbar-title>
-        <v-col cols="12" md="7">
+        <v-col cols="12" md="7" class="d-flex align-center">
+          <sortiment-navigation />
           <div class="search-bar d-flex align-center p-relative">
             <v-text-field
               type="text"
@@ -95,9 +96,11 @@
 
 <script>
 import config from "@/../config.json";
+import SortimentNavigation from './SortimentNavigation.vue';
 import axios from "axios";
 import { useDisplay } from 'vuetify'
 export default {
+  components: {SortimentNavigation},
   name: "AppBar",
 
   data() {
@@ -263,6 +266,9 @@ $md: 959px;
   flex-grow: 1;
   margin-right: 0;
 }
+.search-bar {
+  width: 85%;
+}
 .search-bar-dropdown {
   height: 40px;
   border-radius: 22px;
@@ -295,16 +301,17 @@ $md: 959px;
   left: 0;
   right: 0;
   z-index: 1000;
-  animation: showAppBar 0.5s ease; /* Adjust the animation duration */
+  animation: showAppBar 0.5s ease; 
 }
 .top-priority {
   position: fixed;
   z-index: 2000;
   width: auto;
   background-color: white;
-  margin-left: 5px;
+  margin-left: 130px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
   border-radius: 10px;
+  top: 11vh;
   ul {
     list-style: none; 
   }
