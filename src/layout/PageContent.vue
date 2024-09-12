@@ -506,6 +506,7 @@ export default {
         .then(response => {
           const products = response.data.result[this.config.resultSetId].documents;
           this.products = products.map(product => {
+            const originalDocument = { ...product.document };
             let updatedDocument = {};
             // Replace placeholders for each key in the config.document
             Object.keys(this.config.document).forEach(key => {
@@ -521,6 +522,7 @@ export default {
               }
             });
             // Assign the updated document back to the product
+            product.origin = originalDocument;
             product.document = updatedDocument;
             return product;
           });

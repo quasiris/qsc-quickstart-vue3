@@ -78,7 +78,7 @@
         this.dropdown = this.dropdown === id ? null : id;
       },
       goToCategory(category) {
-        // apply filter or navigate
+        console.log(category)
       }
     },
     mounted() {

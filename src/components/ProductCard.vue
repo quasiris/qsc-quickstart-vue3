@@ -1,5 +1,10 @@
 <template>
-    <div v-if="templateExists" v-html="renderTemplate()"></div>
+    <DynamicTemplate
+        v-if="templateExists"
+        :product="product.origin || {}"
+        :document="product.document || {}"
+        :template="HtmlTemplate"
+      />
     <v-card v-else
       :style="{ height: cardHeight }"
       :class="{ 'list-view': viewMode === 'list' }"
@@ -31,9 +36,17 @@
   </template>
   
   <script>
-  import { replacePlaceholders } from '@/utils';
+  import DynamicTemplate from "@/components/DynamicTemplate.vue";
+
   export default {
     name: "ProductCard",
+    components: {DynamicTemplate},
+
+  data() {
+    return {
+     HtmlTemplate:'',
+    };
+  },
     props: {
       product: {
         type: Object,
@@ -57,17 +70,17 @@
         return this.config && this.config.document.template;
         }
     },
+    async mounted() {
+        if(this.templateExists)
+            this.HtmlTemplate = await this.convertJsonToHtml();
+    },
     methods: {
         // Replace placeholders in the template with actual product data
-        renderTemplate() {
-            const d = this.product.document;
-            // Prepare the replacements object from product.document
-            const replacements = {
-                ...d,  
-            };
-            let template = replacePlaceholders(this.config.document.template, replacements);
-            return template;
-        }
+        async  convertJsonToHtml() {
+            let template = this.config.document.template
+            // Convert escaped newlines to actual newlines
+            return template.replace(/\\n/g, '\n');
+            },
     },
   };
   </script>
