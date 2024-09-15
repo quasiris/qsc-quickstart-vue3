@@ -83,10 +83,15 @@
           </div>
           <v-navigation-drawer v-if="facets && facets.length > 0" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item v-for="facet in facets" :key="facet.id">
-              <div v-if="(facet.type === 'slider' || facet.type === 'histogram') && facet.count !=0">
+              <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
                   {{ facet.name }}
                 </h4>
+                <RangeInput
+                  v-if="facet.type == 'rangeInput'"
+                  :facet="facet"
+                  @price-change="handlePriceRangeChange"
+                /> 
                 <PriceSlider
                   v-if="facet.type == 'slider'"
                   :facet="facet"
@@ -98,7 +103,7 @@
                   @price-change="handlePriceChange"
                 />
               </div>
-              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram')"
+              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'rangeInput')"
                 class="pt-3 d-flex align-start justify-center flex-column"
               >
                 {{ facet.name }}
@@ -315,11 +320,12 @@ import HistogramSlider from "@/components/HistogramSlider.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
+import RangeInput from "@/components/RangeInput.vue";
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
-  components: {HistogramSlider,ColorPicker,PriceSlider,ProductCard},
+  components: {HistogramSlider,ColorPicker,PriceSlider,ProductCard,RangeInput},
   data() {
     return {
       localSearchQuery: this.searchQuery,
@@ -474,6 +480,21 @@ export default {
       }else{
         filter.sliderValues[0]=filter.minPrice;
         filter.sliderValues[1]=filter.maxPrice;
+      }
+    }, 
+    handlePriceRangeChange(filter) {
+      if(filter.MinRange && filter.MaxRange){
+        let filterValue=filter.filterName+'.range='+filter.MinRange+','+filter.MaxRange
+        let chipValue=filter.MinRange+' - '+filter.MaxRange+' '+filter.unit
+        this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filterName + '.range='));
+        this.selectedFilters.push(filterValue)
+        const existingChipIndex = this.chipsValues.findIndex(chip => Object.hasOwn(chip, filter.name));
+        if (existingChipIndex !== -1) {
+          this.chipsValues[existingChipIndex][filter.name] = chipValue;
+          this.chipsValues[existingChipIndex].filter= filter.filterName;
+        } else {
+          this.chipsValues.push({ [filter.name]: chipValue, filter: filter.filterName });
+        }
       }
     },
     fetchProducts() {

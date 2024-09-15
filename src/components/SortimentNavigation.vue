@@ -38,7 +38,7 @@
       const showCategories = ref(false);
       const openCategories = ref({});
       let hideTimeout = null;
-  
+        
       const fetchCategories = async () => {
         try {
           const response = await fetch('https://qsc-dev.quasiris.de/api/v1/category/demo/navigation-random');
