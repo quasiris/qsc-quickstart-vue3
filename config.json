@@ -6,10 +6,10 @@
     "resultSetId": "trendware",
     "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
     "document": {
-      "name": "${title}",
+      "name": "${title} : ${price}",
       "url": "url",
       "image": "image",
-      "template": "<div class=\"card\">\n  <a :href=\"document.url\">\n    <div class=\"d-flex justify-content-between align-end\">\n      <div class=\"flex-grow-1 my-3\">\n        <h6 class=\"mb-0 text-center\" style=\"color:blue;font-size: 10px;\">\n          {{product.title}}\n        </h6>\n      </div>\n    </div>\n    <div class=\"image\"> <img v-if=\"document.image && product.image\" :src=\"document.image\" class=\"rounded\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" /> </div>\n <div v-if=\"product.available\" class=\"flex-grow-1 my-3\" ><h5 class=\"mb-0 text-center\" style=\"color:black;font-size: 12px;\">{{product.price}}</h5> </div></a>\n</div>"
+      "template": "<div class=\"card\">\n  <a :href=\"document.url\">\n    <div class=\"d-flex justify-content-between align-end\">\n      <div class=\"flex-grow-1 my-3\">\n        <h6 class=\"mb-0 text-center\" style=\"color:blue;font-size: 10px;\">\n          {{document.name}}\n        </h6>\n      </div>\n    </div>\n    <div class=\"image\"> <img v-if=\"document.image && product.image\" :src=\"document.image\" class=\"rounded\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" /> </div>\n <div v-if=\"product.available\" class=\"flex-grow-1 my-3\" ><h5 class=\"mb-0 text-center\" style=\"color:black;font-size: 12px;\">{{product.price}}</h5> </div></a>\n</div>"
     }
   },
   {

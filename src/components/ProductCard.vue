@@ -75,7 +75,6 @@
             this.HtmlTemplate = await this.convertJsonToHtml();
     },
     methods: {
-        // Replace placeholders in the template with actual product data
         async  convertJsonToHtml() {
             let template = this.config.document.template
             // Convert escaped newlines to actual newlines
