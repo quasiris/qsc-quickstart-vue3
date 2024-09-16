@@ -15,8 +15,8 @@
         <div class="image">
           <img
             class="rounded-t-lg"
-            v-if="product.document && product.document[config.document.image]"
-            :src="product.document[config.document.image].replace(/^.*?format=auto\//, '')"
+            v-if="product.document && config.document.image"
+            :src="product.document.image.replace(/^.*?format=auto\//, '')"
             style="max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;"
           />
         </div>

@@ -23,5 +23,17 @@
       "url": "url",
       "image": "image"
     }
+  },
+  {
+    "id": "docs",
+    "baseurl": "https://qsc.quasiris.de/api/v1/search/quasiris/qsc-documentation?q=*",
+    "suggestionUrl": "https://qsc.quasiris.de/api/v1/search/quasiris/qsc-documentation?q=",
+    "resultSetId": "qsc-documentation",
+    "logo": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png",
+    "document": {
+      "name": "${title}",
+      "url": "url",
+      "image": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png"
+    }
   }
 ]

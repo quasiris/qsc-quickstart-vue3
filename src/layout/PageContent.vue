@@ -81,7 +81,7 @@
             @click="isSidebar = !isSidebar"
           >
           </div>
-          <v-navigation-drawer v-if="facets && facets.length > 0" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+          <v-navigation-drawer v-if="facets" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item v-for="facet in facets" :key="facet.id">
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
@@ -151,7 +151,7 @@
               </div>
               <v-divider  v-if="products.length != 0" class="mt-3"></v-divider>
             </v-list-item>
-            <v-list-item class="d-flex justify-center mt-3"> 
+            <v-list-item v-if="facets.length > 0" class="d-flex justify-center mt-3"> 
               <v-btn
                 color="primary"
                 class="text-capitalize search-bar-dropdown px-10 font-600"
@@ -532,14 +532,13 @@ export default {
             // Replace placeholders for each key in the config.document
             Object.keys(this.config.document).forEach(key => {
               let pattern = this.config.document[key];
-
               // Check if the pattern is a placeholder or a direct key
               if (pattern.includes('${')) {
                 // placeholders ${}
                 updatedDocument[key] = replacePlaceholders(pattern, product.document);
               } else {
                 // directly map the key
-                updatedDocument[key] = product.document[pattern];
+                updatedDocument[key] = product.document[pattern] ? product.document[pattern] : pattern;
               }
             });
             // Assign the updated document back to the product
@@ -606,7 +605,7 @@ export default {
 <style >
 
 .drawer {
-  min-height: 65vh;
+  min-height: 85vh;
   position: relative !important;
   transform: translateX(-8px) !important;
   border-top-width: thin !important;
