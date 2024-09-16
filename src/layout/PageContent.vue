@@ -215,7 +215,7 @@
                   <v-col cols="12" class="col-auto">
                     <v-row v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) " class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
                         <p class="font-weight-bold">No products found for "&nbsp;{{ searchQuery }}&nbsp;"</p>
-                        <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> <!-- or any icon you prefer -->
+                        <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> 
                       </v-col>
                     </v-row>
                     <v-data-iterator :items="products" hide-default-footer>
@@ -323,7 +323,7 @@ import ColorPicker from "@/components/ColorPicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
 import { useDisplay } from 'vuetify'
 import axios from "axios";
-import { mapGetters } from "vuex";
+//import { mapGetters } from "vuex";
 export default {
   components: {HistogramSlider,ColorPicker,PriceSlider,ProductCard,RangeInput},
   data() {
@@ -335,6 +335,7 @@ export default {
       facets: [],
       sorts: [],
       selectedSort: "",
+      requestId: "",
       chipsValues:[],
       currentPage: 1,
       isSidebar: false,
@@ -354,7 +355,7 @@ export default {
     cardHeight() {
       return (this.viewMode === 'list' ? '270px' : '300px');
     },
-    ...mapGetters(["getProducts"])
+    //...mapGetters(["getProducts"])
   },
   created() {
     window.addEventListener("scroll", this.handleScroll);
@@ -385,8 +386,9 @@ export default {
       this.currentPage= 1;
       this.fetchProducts();
     },
-    selectedSort() {
-      this.fetchProducts();
+    selectedSort(newVal) {
+      if(newVal != this.sorts[0].name && this.sorts.length > 0)
+        this.fetchProducts();
     },
   },
 
@@ -512,7 +514,7 @@ export default {
         queryParameters.push(selectedFilters);
       }
 
-      if (selectedSort) {
+      if (selectedSort && this.sorts.length > 0 && selectedSort !== this.sorts[0]?.name) {
         queryParameters.push(`sort=${selectedSort}`);
       }
 
@@ -555,8 +557,12 @@ export default {
             return facet;
           });
           this.sorts = response.data.result[this.config.resultSetId].sort.sort;
+          if(!this.selectedSort && this.sorts.length > 0)
+            this.selectedSort=this.sorts[0].name
           //this.selectedSort = this.sorts.length > 0 ? this.sorts[0].id : '';
           this.totalPages=response.data.result[this.config.resultSetId].paging.pageCount;
+          if(!this.requestId)
+            this.requestId=response.data.requestId;
         })
         .catch(error => {
           console.log(error);

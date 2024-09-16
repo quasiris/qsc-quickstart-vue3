@@ -86,8 +86,48 @@
             </ul>
           </div>
         </v-col>
-        <div class="">
-          <div class="d-md-block d-none"></div>
+        <div class="d-flex align-center">
+          <v-menu
+            v-model:menu="menu"
+            activator="parent"
+            offset-y
+            :close-on-click="false"
+          >
+            <template v-slot:activator="{props }">
+              <v-icon 
+                v-bind="props" 
+                size="large" 
+                color="grey"
+                class="icon-pointer"
+              >
+                mdi-cog
+              </v-icon>
+            </template>
+            <v-card class="pa-2">
+              <v-card-text>
+                <v-form>
+                  <template v-if="!email">
+                    <v-text-field 
+                      v-model="emailInput"
+                      label="Enter your email"
+                      type="email"
+                      :rules="rules"
+                      @click.stop
+                    ></v-text-field>
+                    <v-btn :disabled="!isEmailValid" size="small" class="float-left mt-1" color="primary" @click="saveEmail">
+                      Save
+                    </v-btn>
+                  </template>
+                  <template v-else>
+                    <p class="float-start text-subtitle-2"> {{ email }}</p><br/>
+                  </template>
+                  <v-btn size="small" class="float-right mt-1" color="secondary" @click="clearSession">
+                    Clear Session
+                  </v-btn>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </v-menu>
         </div>
       </div>
     </v-container>
@@ -97,6 +137,7 @@
 <script>
 import config from "@/../config.json";
 import SortimentNavigation from './SortimentNavigation.vue';
+import { mapState, mapActions } from 'vuex';
 import axios from "axios";
 import { useDisplay } from 'vuetify'
 export default {
@@ -112,7 +153,17 @@ export default {
       prevScrollPos: 0,
       selectedSuggestion: "",
       selectedIndex: -1,
-      isMouseOver: false
+      isMouseOver: false,
+      menu: false, 
+      emailInput: '',
+      rules: [
+        value => !!value || 'Required.',
+        value => (value || '').length <= 100 || 'Max 100 characters',
+        value => {
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          return pattern.test(value) || 'Invalid e-mail.'
+        },
+      ],
     };
   },
   props: {
@@ -139,6 +190,10 @@ export default {
     }
   },
   computed: {
+    ...mapState(['email']),
+    isEmailValid() {
+      return this.rules.every(rule => rule(this.emailInput) === true);
+    },
     searchQueryComputed: {
       get() {
         return this.localSearchQuery;
@@ -171,6 +226,7 @@ export default {
     window.removeEventListener("click", this.handleWindowClick);
   },
   methods: {
+    ...mapActions(['clearSession', 'setUserEmail']),
     fetchSuggestions() {
       const suggestUrl = this.config.suggestionUrl;
       if (this.selectedSuggestion === this.localSearchQuery) {
@@ -197,7 +253,12 @@ export default {
       this.$emit("onSearch", this.localSearchQuery);
       this.suggests = [];
     },
-
+    saveEmail() {
+      if (this.emailInput && this.isEmailValid) {
+        this.setUserEmail(this.emailInput);
+        this.menu = false; // Close the menu after saving
+      }
+    },
     selectSuggestion(suggestion) {
       this.localSearchQuery = suggestion;
       this.selectedSuggestion = suggestion;
@@ -323,6 +384,9 @@ $md: 959px;
 }
 .selected {
   background-color: #1867c0;
+}
+.icon-pointer {
+  cursor: pointer;
 }
 .white-font {
   color: white;

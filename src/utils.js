@@ -18,4 +18,12 @@ export function replacePlaceholders(pattern, replacements) {
       }
     }
     return pattern;
-  }  
+  }
+  export function generateUniqueId() {
+    // generate a unique ID
+    return 'xxxx-xxxx-4xxx-yxxx-xxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+    
