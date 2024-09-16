@@ -64,7 +64,6 @@
       handlePriceChange() {
         this.localInputFacet.MinRange=this.MinRange
         this.localInputFacet.MaxRange=this.MaxRange
-        console.log(this.localInputFacet)
         this.$emit('price-change', this.localInputFacet);
       },
       validateAndSyncMinPrice() {

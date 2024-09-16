@@ -23,8 +23,8 @@ export default {
       const compiledRender = compile(this.template);
       return compiledRender({
         ...this.$data,
-        document: this.document,
-        product: this.product,
+        config: this.document,
+        document: this.product,
       });
     }
     catch (e) {
