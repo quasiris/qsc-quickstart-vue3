@@ -26,8 +26,8 @@
   },
   {
     "id": "docs",
-    "baseurl": "https://qsc.quasiris.de/api/v1/search/quasiris/qsc-documentation?q=*",
-    "suggestionUrl": "https://qsc.quasiris.de/api/v1/search/quasiris/qsc-documentation?q=",
+    "baseurl": "https://qsc.quasiris.de/api/v1/search/quasiris/qsc-documentation",
+    "suggestionUrl": "https://qsc.quasiris.de/api/v1/search/suggest/quasiris/qsc-documentation?q=",
     "resultSetId": "qsc-documentation",
     "logo": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png",
     "document": {
