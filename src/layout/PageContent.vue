@@ -115,7 +115,12 @@
                   @colorSelected="handleColorSelection"
                 />
               </div>
-              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker')">
+              <div v-if="facet.type==='navigation'">
+                <v-expansion-panels multiple>
+                  <SideBarNavigation :item="facet" />
+                </v-expansion-panels>
+              </div>
+              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation')">
                 <div 
                 v-for="value in facet.values"
                 :key="value.value"
@@ -317,6 +322,7 @@
 import config from "@/../config.json";
 import { replacePlaceholders } from '@/utils'; 
 import HistogramSlider from "@/components/HistogramSlider.vue";
+import SideBarNavigation from "@/components/SideBarNavigation.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
@@ -327,7 +333,7 @@ import { useDisplay } from 'vuetify'
 import axios from "axios";
 //import { mapGetters } from "vuex";
 export default {
-  components: {HistogramSlider,ColorPicker,PriceSlider,ProductCard,RangeInput},
+  components: {HistogramSlider,ColorPicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
   data() {
     return {
       localSearchQuery: this.searchQuery,
