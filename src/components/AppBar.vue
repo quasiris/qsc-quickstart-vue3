@@ -106,7 +106,6 @@
             <v-card class="pb-2">
               <v-card-text>
                 <v-form>
-                  <template v-if="!email">
                     <v-text-field 
                       v-model="emailInput"
                       label="Email address"
@@ -116,14 +115,10 @@
                       :rules="rules"
                       @click.stop
                     ></v-text-field>
-                    <v-btn :disabled="!isEmailValid" size="x-small" class="float-left" color="primary" @click="saveEmail">
-                      Save
-                    </v-btn>
-                  </template>
-                  <template v-else>
-                    <p class="text-center text-subtitle-2"> {{ email }}</p><br/>
-                  </template>
-                  <v-btn size="x-small" class="float-right" color="secondary" @click="clearSession">
+                  <v-btn :disabled="!isEmailValid" size="x-small" class="float-left" color="primary" @click="saveEmail">
+                    Save
+                  </v-btn>
+                  <v-btn size="x-small" class="float-right" color="secondary" @click="handleclearSession">
                     Clear Session
                   </v-btn>
                 </v-form>
@@ -181,7 +176,7 @@ export default {
         this.localSearchQuery = newVal; // Sync local data with prop
       }
       this.selectedIndex = -1;
-      if (this.localSearchQuery.trim() === "") {
+      if (this.localSearchQuery?.trim() === "") {
         this.searchProducts();
       } else {
         this.fetchSuggestions();
@@ -192,9 +187,9 @@ export default {
     }
   },
   computed: {
-    ...mapState(['email']),
+    ...mapState(['requestId','userId','sessionId','email']),
     isEmailValid() {
-      return this.rules.every(rule => rule(this.emailInput) === true);
+      return ((this.rules.every(rule => rule(this.emailInput) === true)) && (this.email != this.emailInput));
     },
     searchQueryComputed: {
       get() {
@@ -229,6 +224,10 @@ export default {
   },
   methods: {
     ...mapActions(['clearSession', 'setUserEmail']),
+    handleclearSession(){
+      this.clearSession();
+      this.$store.dispatch('initializeSession');
+    },
     fetchSuggestions() {
       const suggestUrl = this.config.suggestionUrl;
       if (this.selectedSuggestion === this.localSearchQuery) {
@@ -242,8 +241,23 @@ export default {
         return;
       }
       const encodedSearchQuery = encodeURIComponent(this.localSearchQuery);
+      const queryParameters = [];
+      queryParameters.push(encodedSearchQuery);
+      if(this.userId)
+      {
+        queryParameters.push(`userId=${this.userId}`);
+      }
+      if(this.sessionId)
+      {
+        queryParameters.push(`sessionId=${this.sessionId}`);
+      }
+      if(this.requestId)
+      {
+        queryParameters.push(`requestId=${this.requestId}`);
+      }
+      const queryString = queryParameters.join("&");
       axios
-     .get(`${suggestUrl}${encodedSearchQuery}`)
+     .get(`${suggestUrl}${queryString}`)
         .then(response => {
           this.suggests = response.data;
         })
