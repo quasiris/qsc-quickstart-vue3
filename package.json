@@ -16,6 +16,7 @@
     "roboto-fontface": "*",
     "sass": "^1.77.8",
     "sass-loader": "^16.0.1",
+    "uuid": "^10.0.0",
     "vue": "^3.2.13",
     "vue-cookies": "^1.8.4",
     "vue-router": "^4.4.3",

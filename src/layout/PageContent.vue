@@ -103,7 +103,7 @@
                   @price-change="handlePriceChange"
                 />
               </div>
-              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'rangeInput')"
+              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'rangeInput'|| facet.type === 'search'|| facet.type === 'datePicker')"
                 class="pt-3 d-flex align-start justify-center flex-column"
               >
                 {{ facet.name }}
@@ -115,7 +115,7 @@
                   @colorSelected="handleColorSelection"
                 />
               </div>
-              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker')">
+              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker')">
                 <div 
                 v-for="value in facet.values"
                 :key="value.value"
@@ -321,6 +321,8 @@ import ProductCard from "@/components/ProductCard.vue";
 import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
+import { mapState, mapActions } from 'vuex';
+
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 //import { mapGetters } from "vuex";
@@ -335,7 +337,6 @@ export default {
       facets: [],
       sorts: [],
       selectedSort: "",
-      requestId: "",
       chipsValues:[],
       currentPage: 1,
       isSidebar: false,
@@ -352,6 +353,7 @@ export default {
     return { display }
   },
   computed: {
+    ...mapState(['requestId','userId','sessionId']),
     cardHeight() {
       return (this.viewMode === 'list' ? '270px' : '300px');
     },
@@ -393,6 +395,7 @@ export default {
   },
 
   methods: {
+    ...mapActions(['setRequestId']),
     chipsControle(facet, value) {
       const chipIndex = this.chipsValues.findIndex(chip => 
         chip[facet.name] === value.value
@@ -509,7 +512,18 @@ export default {
       if (this.localSearchQuery) {
         queryParameters.push(`q=${this.localSearchQuery}`);
       }
-
+      if(this.userId)
+      {
+        queryParameters.push(`userId=${this.userId}`);
+      }
+      if(this.sessionId)
+      {
+        queryParameters.push(`sessionId=${this.sessionId}`);
+      }
+      if(this.requestId)
+      {
+        queryParameters.push(`requestId=${this.requestId}`);
+      }
       if (selectedFilters) {
         queryParameters.push(selectedFilters);
       }
@@ -562,7 +576,7 @@ export default {
           //this.selectedSort = this.sorts.length > 0 ? this.sorts[0].id : '';
           this.totalPages=response.data.result[this.config.resultSetId].paging.pageCount;
           if(!this.requestId)
-            this.requestId=response.data.requestId;
+            this.setRequestId(response.data.requestId);
         })
         .catch(error => {
           console.log(error);

@@ -1,13 +1,14 @@
 import { createStore } from 'vuex';
 import VueCookies from 'vue-cookies';
 import CryptoJS from 'crypto-js'; 
-import { generateUniqueId } from '@/utils';
+import { v4 as uuidv4 } from 'uuid';
 
 export default createStore({
   state: {
     sessionId: null,
     email: null,
     userId: null,
+    requestId: null,
   },
   mutations: {
     setSessionId(state, sessionId) {
@@ -17,9 +18,11 @@ export default createStore({
     },
     clearSession(state) {
       state.sessionId = null;
+      state.requestId = null;
       state.email = null;
-      state.userID = null;
+      state.userId = null;
       VueCookies.remove('sessionId');
+      VueCookies.remove('requestId'); 
       VueCookies.remove('userId');  // Remove cookies
     },
     setUserEmail(state, email) {
@@ -30,6 +33,11 @@ export default createStore({
       VueCookies.remove('userId'); 
       VueCookies.set('userId', formattedHash);
     },
+    setRequestId(state, id) {
+      state.requestId = id;
+      VueCookies.remove('requestId'); 
+      VueCookies.set('requestId', id);
+    },
   },
   actions: {
     initializeSession({ commit }) {
@@ -38,7 +46,7 @@ export default createStore({
         commit('setSessionId', sessionId);
       } else {
         // Generate a new session ID if not present
-        const newSessionId = generateUniqueId(); 
+        const newSessionId = uuidv4(); 
         commit('setSessionId', newSessionId);
       }
     },
@@ -47,6 +55,9 @@ export default createStore({
     },
     setUserEmail({ commit }, email) {
       commit('setUserEmail', email);
+    },
+    setRequestId({ commit }, id) {
+      commit('setRequestId', id);
     },
   },
 });

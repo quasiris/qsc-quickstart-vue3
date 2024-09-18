@@ -103,25 +103,27 @@
                 mdi-cog
               </v-icon>
             </template>
-            <v-card class="pa-2">
+            <v-card class="pb-2">
               <v-card-text>
                 <v-form>
                   <template v-if="!email">
                     <v-text-field 
                       v-model="emailInput"
-                      label="Enter your email"
+                      label="Email address"
+                      placeholder="qsc.user@gmail.com"
                       type="email"
+                      variant="underlined"
                       :rules="rules"
                       @click.stop
                     ></v-text-field>
-                    <v-btn :disabled="!isEmailValid" size="small" class="float-left mt-1" color="primary" @click="saveEmail">
+                    <v-btn :disabled="!isEmailValid" size="x-small" class="float-left" color="primary" @click="saveEmail">
                       Save
                     </v-btn>
                   </template>
                   <template v-else>
-                    <p class="float-start text-subtitle-2"> {{ email }}</p><br/>
+                    <p class="text-center text-subtitle-2"> {{ email }}</p><br/>
                   </template>
-                  <v-btn size="small" class="float-right mt-1" color="secondary" @click="clearSession">
+                  <v-btn size="x-small" class="float-right" color="secondary" @click="clearSession">
                     Clear Session
                   </v-btn>
                 </v-form>
