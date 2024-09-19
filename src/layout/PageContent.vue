@@ -117,7 +117,7 @@
               </div>
               <div v-if="facet.type==='navigation'">
                 <v-expansion-panels multiple>
-                  <SideBarNavigation :item="facet" />
+                  <SideBarNavigation @onFilter="handleNavigationSelection" :item="facet" :parentName="facet.name" />
                 </v-expansion-panels>
               </div>
               <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation')">
@@ -448,6 +448,25 @@ export default {
       if (chipIndex === -1) {
         this.selectedFilters.push(filter);
         this.chipsValues.push({ [name]: color.value, filter: color.filter });
+      } else {
+        // If the filter exists, remove the chip from chipsValues
+        this.chipsValues.splice(chipIndex, 1);
+      }
+    },
+    handleNavigationSelection(filter,name) {
+      //console.log(`Parent received filter: ${filter.filter}, name: ${name}`);
+      // Remove existing filters in selectedFilters that start with the same filter
+      this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filter));
+      // Find the chip with the same filter in chipsValues
+      const chipIndex = this.chipsValues.findIndex(chip => chip.filter === filter.filter);
+      /*const chipNavIndex = this.chipsValues.findIndex(chip => 
+          Object.keys(chip).some(key => key === name || key.includes(name))
+      ); 
+      console.log(chipNavIndex) */    
+      // If the filter doesn't exist, add it to both selectedFilters and chipsValues
+      if (chipIndex === -1) {
+        this.selectedFilters.push(filter.filter);
+        this.chipsValues.push({ [name]: filter.value, filter: filter.filter });
       } else {
         // If the filter exists, remove the chip from chipsValues
         this.chipsValues.splice(chipIndex, 1);
