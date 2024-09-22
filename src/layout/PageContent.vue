@@ -319,7 +319,6 @@
 </template>
 <script>
 
-import config from "@/../config.json";
 import { replacePlaceholders } from '@/utils'; 
 import HistogramSlider from "@/components/HistogramSlider.vue";
 import SideBarNavigation from "@/components/SideBarNavigation.vue";
@@ -346,13 +345,13 @@ export default {
       chipsValues:[],
       currentPage: 1,
       isSidebar: false,
-      config: config[0],
       viewMode: "grid",
       totalPages: "",
     };
   },
   props: {
-    searchQuery: { type: String, default: "" }
+    searchQuery: { type: String, default: "" },
+    config: { type: Object, required: true }
   },
   setup() {
     const display = useDisplay()
@@ -372,19 +371,16 @@ export default {
   unmounted() {
     window.removeEventListener("scroll", this.handleScroll);
   },
-  mounted() {
-    const url = window.location.href;
-    for (const configItem of config) {
-     
-      if (url.includes(configItem.id)) {
-        this.config = configItem;
-       
-        break; // Exit the loop once a match is found
-      }
-    }
-    this.fetchProducts();
+  mounted() {    
+    const url = new URL(window.location.href);
+    const searchQuery = url.searchParams.get('q');
+    if(this.searchQuery === '' && !searchQuery)  
+      this.fetchProducts();
   },
   watch: {
+    localSearchQuery(newVal) {
+      this.$emit("onSearch", newVal);
+    },
     searchQuery(newVal) {
       this.localSearchQuery=newVal
       this.clearFilters();
@@ -642,6 +638,10 @@ export default {
     },
     clearSearchQuery() {
       this.localSearchQuery = "";
+      const url = new URL(window.location.href);
+      url.searchParams.delete('q');
+      // Use the history API to update the URL without reloading the page
+      window.history.pushState({}, '', url);
       this.$emit("onSearch", this.localSearchQuery);
     }
   }

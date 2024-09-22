@@ -172,7 +172,7 @@ export default {
   },
   watch: {
     localSearchQuery(newVal) {
-      if (newVal !== this.localSearchQuery) {
+      if (newVal !== this.localSearchQuery ) {
         this.localSearchQuery = newVal; // Sync local data with prop
       }
       this.selectedIndex = -1;
@@ -190,15 +190,6 @@ export default {
     ...mapState(['requestId','userId','sessionId','email']),
     isEmailValid() {
       return ((this.rules.every(rule => rule(this.emailInput) === true)) && (this.email != this.emailInput));
-    },
-    searchQueryComputed: {
-      get() {
-        return this.localSearchQuery;
-      },
-      set(value) {
-        this.localSearchQuery = value;
-        this.$emit('update:searchQuery', value); // Notify parent of changes
-      }
     }
   },
   async mounted() {
@@ -332,6 +323,10 @@ export default {
     },
     clearSearchQuery() {
       this.localSearchQuery = "";
+      const url = new URL(window.location.href);
+      url.searchParams.delete('q');
+      // Use the history API to update the URL without reloading the page
+      window.history.pushState({}, '', url);
       this.$emit("onSearch", this.localSearchQuery);
     },
   }
