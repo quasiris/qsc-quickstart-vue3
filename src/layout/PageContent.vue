@@ -509,7 +509,7 @@ export default {
       }
     }, 
     handlePriceRangeChange(filter) {
-      if(filter.MinRange && filter.MaxRange){
+      if (filter.MinRange != null && filter.MaxRange != null){
         let filterValue=filter.filterName+'.range='+filter.MinRange+','+filter.MaxRange
         let chipValue=filter.MinRange+' - '+filter.MaxRange+' '+filter.unit
         this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filterName + '.range='));

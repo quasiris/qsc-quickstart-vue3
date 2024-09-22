@@ -8,8 +8,9 @@
             type="number"
             v-model.number="MinRange"
             :placeholder="MinRange"
-            @blur="validateAndSyncMinPrice"
-            @keyup.enter="validateAndSyncMinPrice"
+            @input="sanitizePrice('min')"
+            @blur="validateAndSyncPrice('min')"
+            @keyup.enter="validateAndSyncPrice('min')"
           />
           <label for="min-price-input" class="price-input-label">
             Min <span v-if="facet.unit">({{ facet.unit }})</span>
@@ -23,8 +24,9 @@
             type="number"
             v-model.number="MaxRange"
             :placeholder="MaxRange"
-            @blur="validateAndSyncMaxPrice"
-            @keyup.enter="validateAndSyncMaxPrice"
+            @input="sanitizePrice('max')"
+            @blur="validateAndSyncPrice('max')"
+            @keyup.enter="validateAndSyncPrice('max')"
           />
           <label for="max-price-input" class="price-input-label">
             Max <span v-if="facet.unit">({{ facet.unit }})</span>
@@ -66,23 +68,28 @@
         this.localInputFacet.MaxRange=this.MaxRange
         this.$emit('price-change', this.localInputFacet);
       },
-      validateAndSyncMinPrice() {
-        if (isNaN(this.MinRange)) {
+      validateAndSyncPrice(type) {
+        if (type === 'min') {
+          if (isNaN(this.MinRange)) 
             this.MinRange = 0;
-        }
-        if (this.MinRange > this.MaxRange) {
-            this.MinRange = this.MaxRange;
+          
+        }else if (type === 'max') {
+          if (isNaN(this.MaxRange)) 
+            this.MaxRange = 1000;
         }
         this.handlePriceChange();
       },
-      validateAndSyncMaxPrice() {
-        if (isNaN(this.MaxRange)) {
-            this.MaxRange = 1000;
+      sanitizeInput(value) {
+        const sanitizedValue = String(value).replace(/[^\d.]/g, '');
+        // Return the sanitized value as a number or 0 if empty
+        return sanitizedValue ? parseFloat(sanitizedValue) : 0;
+      },
+      sanitizePrice(type) {
+        if (type === 'min') {
+          this.MinRange = this.sanitizeInput(this.MinRange);
+        } else if (type === 'max') {
+          this.MaxRange = this.sanitizeInput(this.MaxRange);
         }
-        if (this.MaxRange < this.MinRange) {
-            this.MaxRange = this.MinRange;
-        }
-        this.handlePriceChange();
       },
     },
   };
