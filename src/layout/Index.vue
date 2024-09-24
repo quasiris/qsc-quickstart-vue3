@@ -27,7 +27,7 @@
         config: config[0],
       };
     },
-    mounted() {
+    created() {
     const url = new URL(window.location.href);
     const path = url.pathname; // Get the path (/config)
     const searchQuery = url.searchParams.get('q');

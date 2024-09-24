@@ -116,9 +116,12 @@
                 />
               </div>
               <div v-if="facet.type==='navigation'">
-                <v-expansion-panels multiple>
-                  <SideBarNavigation @onFilter="handleNavigationSelection" :item="facet" :parentName="facet.name" />
-                </v-expansion-panels>
+                  <SideBarNavigation 
+                  :item="facet" 
+                  :parentName="facet.name"
+                  :expanded-panels="expandedPanels" 
+                  @onFilter="handleNavigationSelection" 
+                  @update-expanded-panels="updateExpandedPanels"  />
               </div>
               <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation')">
                 <div 
@@ -341,6 +344,7 @@ export default {
       selectedFilters: [],
       facets: [],
       sorts: [],
+      expandedPanels: [],
       selectedSort: "",
       chipsValues:[],
       currentPage: 1,
@@ -372,9 +376,6 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   mounted() {    
-    const url = new URL(window.location.href);
-    const searchQuery = url.searchParams.get('q');
-    if(this.searchQuery === '' && !searchQuery)  
       this.fetchProducts();
   },
   watch: {
@@ -392,6 +393,10 @@ export default {
     },
     selectedSort(newVal) {
       if(newVal != this.sorts[0].name && this.sorts.length > 0)
+        this.fetchProducts();
+    },
+    config(newVal) {
+      if(newVal)
         this.fetchProducts();
     },
   },
@@ -431,8 +436,18 @@ export default {
           // Filter out both range-based filters and exact matches
           return !item.startsWith(chip.filter + '.range=') && item !== chip.filter;
         });
+        const expandedPanelIndex = this.expandedPanels.findIndex(panel => panel.filter === chip.filter);        // If we find a matching key in expandedPanels, remove it
+        if (expandedPanelIndex !== -1) {
+          const newExpandedPanels = [...this.expandedPanels];
+          newExpandedPanels.splice(expandedPanelIndex, 1);
+            // Remove the panel
+          this.expandedPanels =newExpandedPanels;  // Update the expandedPanels
+        }
         this.chipsValues.splice(chipIndex, 1);
       }
+    },
+    updateExpandedPanels(newExpandedPanels) {
+      this.expandedPanels = newExpandedPanels;
     },
     handleColorSelection(color, name) {
       const filter = color.filter;
@@ -450,16 +465,9 @@ export default {
       }
     },
     handleNavigationSelection(filter,name) {
-      //console.log(`Parent received filter: ${filter.filter}, name: ${name}`);
-      // Remove existing filters in selectedFilters that start with the same filter
       this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filter));
       // Find the chip with the same filter in chipsValues
       const chipIndex = this.chipsValues.findIndex(chip => chip.filter === filter.filter);
-      /*const chipNavIndex = this.chipsValues.findIndex(chip => 
-          Object.keys(chip).some(key => key === name || key.includes(name))
-      ); 
-      console.log(chipNavIndex) */    
-      // If the filter doesn't exist, add it to both selectedFilters and chipsValues
       if (chipIndex === -1) {
         this.selectedFilters.push(filter.filter);
         this.chipsValues.push({ [name]: filter.value, filter: filter.filter });
@@ -631,6 +639,7 @@ export default {
     clearFilters() {
       this.selectedFilters = [];  
       this.chipsValues = [];  
+      this.expandedPanels = [];  
       window.scrollTo({
         top: 0,
         behavior: "smooth"
