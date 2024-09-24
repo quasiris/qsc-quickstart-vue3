@@ -10,7 +10,12 @@
       "url": "url",
       "image": "image",
       "template": "<div class=\"card\">\n  <a :href=\"config.url\">\n    <div class=\"d-flex justify-content-between align-end\">\n      <div class=\"flex-grow-1 my-3\">\n        <h6 class=\"mb-0 text-center\" style=\"color:blue;font-size: 10px;\">\n          {{config.name}}\n        </h6>\n      </div>\n    </div>\n    <div class=\"image\"> <img v-if=\"config.image && document.image\" :src=\"config.image\" class=\"rounded\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" /> </div>\n <div v-if=\"document.available\" class=\"flex-grow-1 my-3\" ><h5 class=\"mb-0 text-center\" style=\"color:black;font-size: 12px;\">{{document.price}}</h5> </div></a>\n</div>"
-    }
+    },
+    "rows": [
+      { "id": 24, "name": "24 records" },
+      { "id": 48, "name": "48 records" },
+      { "id": 72, "name": "72 records" }
+    ]
   },
   {
     "id": "nam",

@@ -24,7 +24,6 @@
               :items="sorts"
               label="Sort by"
               v-model="selectedSort"
-              @change="selectSort"
               item-title="name"
               item-value="id"
               variant="outlined"
@@ -280,7 +279,15 @@
                       <template v-slot:footer>
                         <v-row  v-if="products.length != 0" class="my-5 me-1" align="center" justify="center">
                           <v-spacer></v-spacer>
-
+                          <v-select
+                            class="d-flex align-end mr-4"
+                            v-model="records"
+                            :items="showedRows"
+                            label="records"
+                            variant="outlined"
+                            item-title="name"
+                            item-value="id"
+                          ></v-select>
                           <span class="mr-4 grey--text" >
                             Page {{ currentPage }} of {{ totalPages }}
                           </span>
@@ -345,7 +352,15 @@ export default {
       facets: [],
       sorts: [],
       expandedPanels: [],
+      showedRows : [
+        {id:24,name:'24 records'},
+        {id:48,name:'48 records'},
+        {id:72,name:'72 records'},
+        {id:96,name:'96 records'},
+      ],
+      records: '24',
       selectedSort: "",
+      selectedRow: "",
       chipsValues:[],
       currentPage: 1,
       isSidebar: false,
@@ -376,7 +391,11 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   mounted() {    
-      this.fetchProducts();
+    if(this.config.rows){
+      this.showedRows=this.config.rows;
+      this.selectedRow=this.config.rows[0].id;
+    }
+    this.fetchProducts();
   },
   watch: {
     localSearchQuery(newVal) {
@@ -394,6 +413,16 @@ export default {
     selectedSort(newVal) {
       if(newVal != this.sorts[0].name && this.sorts.length > 0)
         this.fetchProducts();
+    },
+    records(newVal) {
+      if(newVal && newVal != this.selectedRow){
+        this.selectedRow=newVal
+        this.fetchProducts();}
+    },
+    selectedRow(newVal) {
+      if(newVal){
+        this.records=newVal
+      }
     },
     config(newVal) {
       if(newVal)
@@ -534,6 +563,7 @@ export default {
     fetchProducts() {
       const selectedFilters = this.selectedFilters.join("&");
       const selectedSort = this.selectedSort;
+      const selectedRow = this.selectedRow;
       const apiUrl = this.config.baseurl;
 
       const queryParameters = [];
@@ -561,6 +591,9 @@ export default {
         queryParameters.push(`sort=${selectedSort}`);
       }
 
+      if (selectedRow) {
+        queryParameters.push(`rows=${selectedRow}`);
+      }
       if (this.currentPage) {
         queryParameters.push(`page=${this.currentPage}`);
       }
@@ -604,15 +637,13 @@ export default {
             this.selectedSort=this.sorts[0].name
           //this.selectedSort = this.sorts.length > 0 ? this.sorts[0].id : '';
           this.totalPages=response.data.result[this.config.resultSetId].paging.pageCount;
+          this.selectedRow=response.data.result[this.config.resultSetId].paging.rows;
           if(!this.requestId)
             this.setRequestId(response.data.requestId);
         })
         .catch(error => {
           console.log(error);
         });
-    },
-    selectSort(sort) {
-      this.selectedSort = sort;
     },
     nextPage() {
       if (this.currentPage + 1 <= this.totalPages) this.currentPage += 1;

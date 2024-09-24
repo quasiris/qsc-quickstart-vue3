@@ -1,5 +1,5 @@
 <template>
-    <v-footer color="primary" :height="100" padless>  
+    <v-footer color="primary">  
       <div class="px-4 py-2 w-100 d-flex align-center">
         <img src="/brand/logo.png" alt="Logo" style="max-width: 200px;" class="img-fluid"/>
         <v-spacer></v-spacer>
