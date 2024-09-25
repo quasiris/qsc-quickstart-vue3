@@ -113,7 +113,6 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
-    margin-right: 25px;
   }
   
   .category-list {

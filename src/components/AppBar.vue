@@ -16,7 +16,7 @@
             </a>
           </div>
         </v-toolbar-title>
-        <v-col cols="12" md="7" class="d-flex align-center">
+        <v-col lg="8" sm="7" class="d-flex align-center justify-space-around">
           <sortiment-navigation />
           <div class="search-bar d-flex align-center p-relative">
             <v-text-field
@@ -86,7 +86,8 @@
             </ul>
           </div>
         </v-col>
-        <div class="d-flex align-center">
+        <v-col cols="1">
+          <div class="float-right">
           <v-menu
             v-model:menu="menu"
             activator="parent"
@@ -126,6 +127,7 @@
             </v-card>
           </v-menu>
         </div>
+        </v-col>
       </div>
     </v-container>
   </v-card>
@@ -379,11 +381,12 @@ $md: 959px;
   position: fixed;
   z-index: 2000;
   width: auto;
+  min-width: 43vw;
   background-color: white;
-  margin-left: 130px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
   border-radius: 10px;
   top: 70px;
+  
   ul {
     list-style: none; 
   }

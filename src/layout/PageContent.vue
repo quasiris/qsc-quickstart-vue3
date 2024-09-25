@@ -275,46 +275,54 @@
                             />
                           </v-col>
                         </v-row>
-                      <!--  Here I have Code of Pagination-->
-                      <template v-slot:footer>
-                        <v-row  v-if="products.length != 0" class="my-5 me-1" align="center" justify="center">
-                          <v-spacer></v-spacer>
-                          <v-select
-                            class="d-flex align-end mr-4"
-                            v-model="records"
-                            :items="showedRows"
-                            label="records"
-                            variant="outlined"
-                            item-title="name"
-                            item-value="id"
-                          ></v-select>
-                          <span class="mr-4 grey--text" >
-                            Page {{ currentPage }} of {{ totalPages }}
-                          </span>
-                          <v-btn
-                            fab
-                            :disabled="currentPage == 1"
-                            v-model="currentPage"
-                            @click="handleClick"
-                            small
-                            color="primary"
-                            class="mr-1"
+                        <template v-slot:footer>
+                          <v-row
+                            v-if="products.length != 0"
+                            class="my-5 mx-1"
+                            justify="center"
                           >
-                            <v-icon>mdi-chevron-left</v-icon>
-                          </v-btn>
-                          <v-btn
-                            fab
-                            :disabled="currentPage == totalPages"
-                            v-model="currentPage"
-                            @click="myhandleClick"
-                            small
-                            color="primary"
-                            class="ml-1"
-                          >
-                            <v-icon>mdi-chevron-right</v-icon>
-                          </v-btn>
-                        </v-row>
-                      </template>
+                            <v-spacer></v-spacer>
+                            <v-col cols="12" md="auto" class="d-flex justify-md-end justify-center">
+                              <v-select
+                                v-model="records"
+                                :items="showedRows"
+                                label="Records"
+                                variant="outlined"
+                                item-title="name"
+                                item-value="id"
+                                class="mx-auto" 
+                                style="width: 100%;"
+                              ></v-select>
+                            </v-col>
+                            <v-col cols="12" md="auto" class="d-flex justify-md-end justify-center align-center">
+                              <span class="mr-md-4 mr-2 grey--text">
+                                Page {{ currentPage }} of {{ totalPages }}
+                              </span>
+
+                              <v-btn
+                                fab
+                                :disabled="currentPage == 1"
+                                @click="handleClick"
+                                small
+                                color="primary"
+                                class="mr-1"
+                              >
+                                <v-icon>mdi-chevron-left</v-icon>
+                              </v-btn>
+
+                              <v-btn
+                                fab
+                                :disabled="currentPage == totalPages"
+                                @click="myhandleClick"
+                                small
+                                color="primary"
+                                class="ml-1"
+                              >
+                                <v-icon>mdi-chevron-right</v-icon>
+                              </v-btn>
+                            </v-col>
+                          </v-row>
+                        </template>
                     </v-data-iterator>
                   </v-col>
                 </v-row>
