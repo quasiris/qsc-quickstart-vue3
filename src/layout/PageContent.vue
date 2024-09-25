@@ -70,7 +70,7 @@
             </v-btn>
           </div>
         </v-card-text>
-        <v-divider class="mx-6 my-1 "></v-divider>
+        <v-divider class="my-1 w-100"></v-divider>
       </v-col>
       <v-col cols="12">
         <div class="box-wrapper">
@@ -102,11 +102,18 @@
                   @price-change="handlePriceChange"
                 />
               </div>
-              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'rangeInput'|| facet.type === 'search'|| facet.type === 'datePicker')"
+              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'rangeInput'|| facet.type === 'search')"
                 class="pt-3 d-flex align-start justify-center flex-column"
               >
                 {{ facet.name }}
               </h4>
+              <div v-if="facet.type==='datePicker'">
+                <date-picker
+                  :facet="facet"
+                  @updateDateRange="handleDateRangeUpdate"
+                  class="mb-7"
+                />
+              </div>
               <div v-if="facet.type==='colorPicker'">
                 <color-picker
                   :facet="facet"
@@ -343,6 +350,7 @@ import SideBarNavigation from "@/components/SideBarNavigation.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
+import DatePicker from "@/components/DatePicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
 import { mapState, mapActions } from 'vuex';
 
@@ -350,7 +358,7 @@ import { useDisplay } from 'vuetify'
 import axios from "axios";
 //import { mapGetters } from "vuex";
 export default {
-  components: {HistogramSlider,ColorPicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
+  components: {HistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
   data() {
     return {
       localSearchQuery: this.searchQuery,
@@ -485,6 +493,19 @@ export default {
     },
     updateExpandedPanels(newExpandedPanels) {
       this.expandedPanels = newExpandedPanels;
+    },
+    handleDateRangeUpdate(dateRange,filter) {
+      console.log("Selected Date Range: ", dateRange);
+      console.log("Selected Date Range Filter: ", filter);
+       /*this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter));
+      const chipIndex = this.chipsValues.findIndex(chip => chip.filter === filter);
+     if (chipIndex === -1) {
+        this.selectedFilters.push(filter);
+        this.chipsValues.push({ [name]: color.value, filter: color.filter });
+      } else {
+        // If the filter exists, remove the chip from chipsValues
+        this.chipsValues.splice(chipIndex, 1);
+      }*/
     },
     handleColorSelection(color, name) {
       const filter = color.filter;
