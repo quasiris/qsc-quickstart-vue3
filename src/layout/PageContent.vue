@@ -89,6 +89,7 @@
                 <RangeInput
                   v-if="facet.type == 'rangeInput'"
                   :facet="facet"
+                  :resetAll="resetAll"
                   @price-change="handlePriceRangeChange"
                 /> 
                 <PriceSlider
@@ -110,6 +111,7 @@
               <div v-if="facet.type==='datePicker'">
                 <date-picker
                   :facet="facet"
+                  :resetAll="resetAll"
                   @updateDateRange="handleDateRangeUpdate"
                   class="mb-7"
                 />
@@ -367,6 +369,7 @@ export default {
       selectedFilters: [],
       facets: [],
       sorts: [],
+      resetAll: false,
       expandedPanels: [],
       showedRows : [
         {id:24,name:'24 records'},
@@ -479,7 +482,7 @@ export default {
       if (chipIndex !== -1) {
         this.selectedFilters = this.selectedFilters.filter(item => {
           // Filter out both range-based filters and exact matches
-          return !item.startsWith(chip.filter + '.range=') && item !== chip.filter;
+          return !item.startsWith(chip.filter + '.range=') && !item.startsWith(chip.filter + '=') && item !== chip.filter;
         });
         const expandedPanelIndex = this.expandedPanels.findIndex(panel => panel.filter === chip.filter);        // If we find a matching key in expandedPanels, remove it
         if (expandedPanelIndex !== -1) {
@@ -494,18 +497,16 @@ export default {
     updateExpandedPanels(newExpandedPanels) {
       this.expandedPanels = newExpandedPanels;
     },
-    handleDateRangeUpdate(dateRange,filter) {
-      console.log("Selected Date Range: ", dateRange);
-      console.log("Selected Date Range Filter: ", filter);
-       /*this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter));
-      const chipIndex = this.chipsValues.findIndex(chip => chip.filter === filter);
-     if (chipIndex === -1) {
-        this.selectedFilters.push(filter);
-        this.chipsValues.push({ [name]: color.value, filter: color.filter });
-      } else {
-        // If the filter exists, remove the chip from chipsValues
-        this.chipsValues.splice(chipIndex, 1);
-      }*/
+    handleDateRangeUpdate(filter,chip,facet) {
+      this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(facet.filterName));
+      this.selectedFilters.push(filter);
+      const existingChipIndex = this.chipsValues.findIndex(chip => Object.hasOwn(chip, facet.name));
+        if (existingChipIndex !== -1) {
+          this.chipsValues[existingChipIndex][facet.name] = chip;
+          this.chipsValues[existingChipIndex].filter= facet.filterName;
+        } else {
+          this.chipsValues.push({ [facet.name]: chip, filter: facet.filterName });
+        }
     },
     handleColorSelection(color, name) {
       const filter = color.filter;
@@ -698,12 +699,17 @@ export default {
     },
     clearFilters() {
       this.selectedFilters = [];  
+      this.resetAll = true;  
       this.chipsValues = [];  
       this.expandedPanels = [];  
       window.scrollTo({
         top: 0,
         behavior: "smooth"
       });
+      setTimeout(() => {
+        this.resetAll = false;  
+      }, "200");
+
     },
     clearSearchQuery() {
       this.localSearchQuery = "";

@@ -8,6 +8,7 @@
                 activator="parent"
                 offset-y
                 min-width="290px"
+                @update:modelValue="onMenuToggle('start')"
             >
                 <template v-slot:activator="{props }">
                 <v-text-field
@@ -20,8 +21,7 @@
                 </template>
                 <v-date-picker
                 v-model="dateRange.start"
-                @change="updateStartDate"
-                no-title
+                @update:modelValue="onMenuToggle('end')"
                 color="primary"
                 ></v-date-picker>
             </v-menu>
@@ -32,6 +32,7 @@
                 activator="parent"
                 offset-y
                 min-width="290px"
+                @update:modelValue="onMenuToggle('end')"
             >
                 <template v-slot:activator="{props }">
                 <v-text-field
@@ -44,8 +45,7 @@
                 </template>
                 <v-date-picker
                 v-model="dateRange.end"
-                @change="updateEndDate"
-                no-title
+                @update:modelValue="onMenuToggle('start')"
                 color="primary"
                 ></v-date-picker>
             </v-menu>
@@ -62,6 +62,19 @@
             type: Object,
             required: true,
         },
+        resetAll: {
+            type: Boolean,
+        },
+    },
+    watch: {
+      resetAll(newVal) {
+        if(newVal){
+          this.dateRange= {
+            start: null,
+            end: null,
+          }
+        }
+      }
     },
     data() {
       return {
@@ -86,15 +99,20 @@
       },
     },
     methods: {
-      updateStartDate() {
-        this.showStartPicker = false;
-      },
-      updateEndDate() {
-        this.showEndPicker = false;
-      },
       submitDateRange() {
-        this.$emit("updateDateRange", this.dateRange,this.facet.filterName);
+        let rangeDate={}
+        rangeDate.end=new Date(this.dateRange.end).toISOString()
+        rangeDate.start=new Date(this.dateRange.start).toISOString()
+        let filterValue=this.facet.filterName+'='+rangeDate.start+','+rangeDate.end
+        let chipValue=this.formattedStartDate+' - '+this.formattedEndDate
+        this.$emit("updateDateRange", filterValue,chipValue,this.facet);
       },
+      onMenuToggle(val) {
+        if (val === 'start') 
+          this.showEndPicker = false;
+        else
+          this.showStartPicker = false;
+      }
     },
   };
   </script>

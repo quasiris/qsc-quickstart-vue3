@@ -44,6 +44,9 @@
         type: Object,
         required: true,
       },
+      resetAll: {
+            type: Boolean,
+        },
     },
     watch: {
       facet: {
@@ -52,6 +55,12 @@
         },
         deep: true,
       },
+      resetAll(newVal) {
+        if(newVal){
+          this.MinRange = 0
+          this.MaxRange = 1000
+        }
+      }
     },
     data() {
       return {
