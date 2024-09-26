@@ -80,7 +80,7 @@
             @click="isSidebar = !isSidebar"
           >
           </div>
-          <v-navigation-drawer v-if="facets" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+          <v-navigation-drawer v-if="facets && !isFacetsLoading" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item v-for="facet in facets" :key="facet.id">
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
@@ -176,6 +176,15 @@
               >
             </v-list-item>            
           </v-navigation-drawer>
+          <v-navigation-drawer v-if="isFacetsLoading" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+            <v-list-item v-for="(skeleton, index) in skeletonProducts.slice(0, 8)" :key="index" class="d-flex justify-center mt-3"> 
+              <v-skeleton-loader
+                class="mx-auto border"
+                min-width="250"
+                type="text,paragraph,chip"
+              ></v-skeleton-loader>
+            </v-list-item>  
+          </v-navigation-drawer>
           <div class="box-content">
             <v-row>
               <v-col cols="12">
@@ -229,16 +238,17 @@
                     >Reset all</v-btn
                   > 
                   <v-col cols="12" class="col-auto">
-                    <v-row v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) " class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      <v-col cols="12" class="text-center">
+                    <v-row v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) && !isProductsLoading" class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      
+                      <v-col cols="12" class="text-center">
                         <p class="font-weight-bold">No products found for "&nbsp;{{ searchQuery }}&nbsp;"</p>
                         <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> 
                       </v-col>
                     </v-row>
-                    <v-data-iterator :items="products" hide-default-footer>
+                    <v-data-iterator :items="isProductsLoading ? skeletonProducts : products" hide-default-footer>
                       <!--  Here I have Products-->
                         <v-row >                          
                           <v-col
-                            v-for="(product, index) in products"
+                            v-for="(product, index) in (isProductsLoading ? skeletonProducts : products)"
                             :key="index"
                             :cols="
                               viewMode === 'list'
@@ -276,7 +286,14 @@
                                 : 3
                             "
                           >
+                            <v-skeleton-loader
+                              v-if="isProductsLoading"
+                              class="mx-auto border"
+                              max-width="300"
+                              type="image, article"
+                            ></v-skeleton-loader>
                             <ProductCard
+                              v-else
                               :product="product"
                               :config="config"
                               :cardHeight="cardHeight"
@@ -303,7 +320,7 @@
                                 style="width: 100%;"
                               ></v-select>
                             </v-col>
-                            <v-col cols="12" md="auto" class="d-flex justify-md-end justify-center align-center">
+                            <v-col cols="12" md="auto" class="d-flex justify-md-end justify-center align-start">
                               <span class="mr-md-4 mr-2 grey--text">
                                 Page {{ currentPage }} of {{ totalPages }}
                               </span>
@@ -354,11 +371,9 @@ import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
-import { mapState, mapActions } from 'vuex';
-
+import {mapGetters, mapState, mapActions } from 'vuex';
 import { useDisplay } from 'vuetify'
 import axios from "axios";
-//import { mapGetters } from "vuex";
 export default {
   components: {HistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
   data() {
@@ -371,6 +386,7 @@ export default {
       sorts: [],
       resetAll: false,
       expandedPanels: [],
+      skeletonProducts: Array(24).fill({}),
       showedRows : [
         {id:24,name:'24 records'},
         {id:48,name:'48 records'},
@@ -397,6 +413,7 @@ export default {
   },
   computed: {
     ...mapState(['requestId','userId','sessionId']),
+    ...mapGetters(['isProductsLoading','isFacetsLoading']),
     cardHeight() {
       return (this.viewMode === 'list' ? '270px' : '300px');
     },
@@ -426,15 +443,19 @@ export default {
       this.currentPage=1;
     },
     selectedFilters() {
+      this.scrollToTop();
       this.currentPage= 1;
+      this.startProductsLoading();
       this.fetchProducts();
     },
     selectedSort(newVal) {
-      if(newVal != this.sorts[0].name && this.sorts.length > 0)
-        this.fetchProducts();
+      if(newVal != this.sorts[0].name && this.sorts.length > 0){
+        this.startProductsLoading();
+        this.fetchProducts();}
     },
     records(newVal) {
       if(newVal && newVal != this.selectedRow){
+        this.startProductsLoading();
         this.selectedRow=newVal
         this.fetchProducts();}
     },
@@ -444,13 +465,14 @@ export default {
       }
     },
     config(newVal) {
-      if(newVal)
-        this.fetchProducts();
+      if(newVal){
+        this.startProductsLoading();
+        this.fetchProducts();}
     },
   },
 
   methods: {
-    ...mapActions(['setRequestId']),
+    ...mapActions(['setRequestId','startProductsLoading','startFacetsLoading','stopProductsLoading','stopFacetsLoading']),
     chipsControle(facet, value) {
       const chipIndex = this.chipsValues.findIndex(chip => 
         chip[facet.name] === value.value
@@ -673,10 +695,15 @@ export default {
         })
         .catch(error => {
           console.log(error);
+        })
+        .finally(() => {
+          this.stopProductsLoading(); // Stop loading
+          this.stopFacetsLoading(); 
         });
     },
     nextPage() {
       if (this.currentPage + 1 <= this.totalPages) this.currentPage += 1;
+      this.startProductsLoading();
       this.fetchProducts();
     },
     myhandleClick() {
@@ -689,6 +716,7 @@ export default {
     },
     formerPage() {
       if (this.currentPage - 1 >= 1) this.currentPage -= 1;
+      this.startProductsLoading();
       this.fetchProducts();
     },
     scrollToTop() {
@@ -698,20 +726,18 @@ export default {
       });
     },
     clearFilters() {
+      this.startFacetsLoading();
       this.selectedFilters = [];  
       this.resetAll = true;  
       this.chipsValues = [];  
       this.expandedPanels = [];  
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
       setTimeout(() => {
         this.resetAll = false;  
-      }, "200");
+      }, 200);
 
     },
     clearSearchQuery() {
+      this.startFacetsLoading();
       this.localSearchQuery = "";
       const url = new URL(window.location.href);
       url.searchParams.delete('q');

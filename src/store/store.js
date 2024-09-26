@@ -9,6 +9,8 @@ export default createStore({
     email: null,
     userId: null,
     requestId: null,
+    productsLoading: true, // Add loading state
+    facetsLoading: true, // Add loading state
   },
   mutations: {
     setSessionId(state, sessionId) {
@@ -38,6 +40,12 @@ export default createStore({
       VueCookies.remove('requestId'); 
       VueCookies.set('requestId', id);
     },
+    setProductsLoading(state, value) {
+      state.productsLoading = value; 
+    },
+    setFacetsLoading(state, value) {
+      state.facetsLoading = value; 
+    },
   },
   actions: {
     initializeSession({ commit }) {
@@ -58,6 +66,26 @@ export default createStore({
     },
     setRequestId({ commit }, id) {
       commit('setRequestId', id);
+    },
+    startProductsLoading({ commit }) {
+      commit('setProductsLoading', true); 
+    },
+    stopProductsLoading({ commit }) {
+      commit('setProductsLoading', false); 
+    },
+    startFacetsLoading({ commit }) {
+      commit('setFacetsLoading', true); 
+    },
+    stopFacetsLoading({ commit }) {
+      commit('setFacetsLoading', false); 
+    },
+  },
+  getters: {
+    isProductsLoading(state) {
+      return state.productsLoading; 
+    },
+    isFacetsLoading(state) {
+      return state.facetsLoading;
     },
   },
 });

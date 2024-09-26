@@ -216,7 +216,7 @@ export default {
     window.removeEventListener("click", this.handleWindowClick);
   },
   methods: {
-    ...mapActions(['clearSession', 'setUserEmail']),
+    ...mapActions(['clearSession', 'setUserEmail','startProductsLoading','startFacetsLoading']),
     handleclearSession(){
       this.clearSession();
       this.$store.dispatch('initializeSession');
@@ -259,6 +259,8 @@ export default {
         });
     },
     searchProducts() {
+      this.startFacetsLoading();
+      this.startProductsLoading();
       this.$emit("onSearch", this.localSearchQuery);
       this.suggests = [];
     },
@@ -329,6 +331,8 @@ export default {
       url.searchParams.delete('q');
       // Use the history API to update the URL without reloading the page
       window.history.pushState({}, '', url);
+      this.startFacetsLoading();
+      this.startProductsLoading();
       this.$emit("onSearch", this.localSearchQuery);
     },
   }
