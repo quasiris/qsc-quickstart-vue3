@@ -33,7 +33,7 @@
             >
               <template #append>
                 <span
-                  v-if="localSearchQuery && display.width._object.width >= 600"
+                  v-if="localSearchQuery.trim() && display.width._object.width >= 600"
                   class="clear-input"
                   @click="clearSearchQuery"
                 >
@@ -179,7 +179,9 @@ export default {
       }
       this.selectedIndex = -1;
       if (this.localSearchQuery?.trim() === "") {
-        this.searchProducts();
+        if (newVal === "" || newVal === this.searchQuery) {
+          this.searchProducts();
+        }
       } else {
         this.fetchSuggestions();
       }

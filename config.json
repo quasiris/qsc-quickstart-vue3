@@ -18,6 +18,24 @@
     ]
   },
   {
+    "id": "trendware-error-testing",
+    "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware-error-testing",
+    "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/trendware-error-testing?q=",
+    "resultSetId": "trendware-error-testing",
+    "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
+    "document": {
+      "name": "${title} : ${price}",
+      "url": "url",
+      "image": "image",
+      "template": "<div class=\"card\">\n  <a :href=\"config.url\">\n    <div class=\"d-flex justify-content-between align-end\">\n      <div class=\"flex-grow-1 my-3\">\n        <h6 class=\"mb-0 text-center\" style=\"color:blue;font-size: 10px;\">\n          {{config.name}}\n        </h6>\n      </div>\n    </div>\n    <div class=\"image\"> <img v-if=\"config.image && document.image\" :src=\"config.image\" class=\"rounded\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" /> </div>\n <div v-if=\"document.available\" class=\"flex-grow-1 my-3\" ><h5 class=\"mb-0 text-center\" style=\"color:black;font-size: 12px;\">{{document.price}}</h5> </div></a>\n</div>"
+    },
+    "rows": [
+      { "id": 24, "name": "24 records" },
+      { "id": 48, "name": "48 records" },
+      { "id": 72, "name": "72 records" }
+    ]
+  },
+  {
     "id": "nam",
     "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware-histogram-test",
     "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/trendware?q=",
