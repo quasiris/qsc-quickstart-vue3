@@ -16,7 +16,8 @@
                     v-model="formattedStartDate"
                     readonly
                     v-bind="props"
-                    prepend-icon="mdi-calendar"
+                    variant="outlined"
+                    append-inner-icon="mdi-calendar"
                 ></v-text-field>
                 </template>
                 <v-date-picker
@@ -40,7 +41,8 @@
                     v-model="formattedEndDate"
                     readonly
                     v-bind="props"
-                    prepend-icon="mdi-calendar"
+                    variant="outlined"
+                    append-inner-icon="mdi-calendar"
                 ></v-text-field>
                 </template>
                 <v-date-picker
@@ -50,7 +52,7 @@
                 ></v-date-picker>
             </v-menu>
         </div>
-        <v-btn class="float-right" color="primary" @click="submitDateRange">Apply</v-btn>
+        <v-btn class="float-right" density="compact" color="primary" @click="submitDateRange">Apply</v-btn>
     </v-container>
   </template>
   
@@ -89,23 +91,25 @@
     computed: {
       formattedStartDate() {
         return this.dateRange.start
-          ? new Date(this.dateRange.start).toLocaleDateString()
+          ? new Date(this.dateRange.start).toLocaleDateString('de-DE')
           : "";
       },
       formattedEndDate() {
         return this.dateRange.end
-          ? new Date(this.dateRange.end).toLocaleDateString()
+          ? new Date(this.dateRange.end).toLocaleDateString('de-DE')
           : "";
       },
     },
     methods: {
       submitDateRange() {
-        let rangeDate={}
-        rangeDate.end=new Date(this.dateRange.end).toISOString()
-        rangeDate.start=new Date(this.dateRange.start).toISOString()
-        let filterValue=this.facet.filterName+'='+rangeDate.start+','+rangeDate.end
-        let chipValue=this.formattedStartDate+' - '+this.formattedEndDate
-        this.$emit("updateDateRange", filterValue,chipValue,this.facet);
+        if(this.dateRange.end && this.dateRange.start){
+          let rangeDate={}
+          rangeDate.end=new Date(this.dateRange.end).toISOString()
+          rangeDate.start=new Date(this.dateRange.start).toISOString()
+          let filterValue=this.facet.filterName+'.daterange='+rangeDate.start+','+rangeDate.end
+          let chipValue=this.formattedStartDate+' - '+this.formattedEndDate
+          this.$emit("updateDateRange", filterValue,chipValue,this.facet);
+        }
       },
       onMenuToggle(val) {
         if (val === 'start') 

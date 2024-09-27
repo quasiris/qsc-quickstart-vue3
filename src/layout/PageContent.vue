@@ -504,7 +504,7 @@ export default {
       if (chipIndex !== -1) {
         this.selectedFilters = this.selectedFilters.filter(item => {
           // Filter out both range-based filters and exact matches
-          return !item.startsWith(chip.filter + '.range=') && !item.startsWith(chip.filter + '=') && item !== chip.filter;
+          return !item.startsWith(chip.filter + '.range=') && !item.startsWith(chip.filter + '.daterange=') && item !== chip.filter;
         });
         const expandedPanelIndex = this.expandedPanels.findIndex(panel => panel.filter === chip.filter);        // If we find a matching key in expandedPanels, remove it
         if (expandedPanelIndex !== -1) {
