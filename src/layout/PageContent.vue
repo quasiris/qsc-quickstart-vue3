@@ -472,7 +472,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['setRequestId','startProductsLoading','startFacetsLoading','stopProductsLoading','stopFacetsLoading']),
+    ...mapActions(['setRequestId','startProductsLoading','startFacetsLoading','stopProductsLoading','stopFacetsLoading','showGlobalSheet']),
     chipsControle(facet, value) {
       const chipIndex = this.chipsValues.findIndex(chip => 
         chip[facet.name] === value.value
@@ -695,6 +695,7 @@ export default {
         })
         .catch(error => {
           console.log(error);
+          this.showGlobalSheet();
         })
         .finally(() => {
           this.stopProductsLoading(); // Stop loading

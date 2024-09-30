@@ -29,6 +29,7 @@
               density="compact"
               prepend-inner-icon="mdi-magnify"
               class="search-input"
+              @input="sanitizeInput"
               :style="{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }"
             >
               <template #append>
@@ -180,6 +181,9 @@ export default {
       this.selectedIndex = -1;
       if (this.localSearchQuery?.trim() === "") {
         if (newVal === "" || newVal === this.searchQuery) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('q');
+          window.history.pushState({}, '', url);
           this.searchProducts();
         }
       } else {
@@ -271,6 +275,10 @@ export default {
         this.setUserEmail(this.emailInput);
         this.menu = false; // Close the menu after saving
       }
+    },
+    sanitizeInput(event) {
+      // Replace multiple spaces with a single space
+      this.localSearchQuery = event.target.value.replace(/^\s+/, '');
     },
     selectSuggestion(suggestion) {
       this.localSearchQuery = suggestion;
@@ -414,7 +422,7 @@ $md: 959px;
 .no-animation {
   transition: none !important;
 }
-.clear-input {
+.closeBtn {
   font-size:  1.2em;
   color: #1867c0;
   cursor: pointer;

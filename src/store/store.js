@@ -9,8 +9,9 @@ export default createStore({
     email: null,
     userId: null,
     requestId: null,
-    productsLoading: true, // Add loading state
-    facetsLoading: true, // Add loading state
+    productsLoading: true, // products loading state
+    facetsLoading: true, // facets loading state
+    globalSheet: false, //  errror state
   },
   mutations: {
     setSessionId(state, sessionId) {
@@ -23,6 +24,7 @@ export default createStore({
       state.requestId = null;
       state.email = null;
       state.userId = null;
+      state.globalSheet = false;
       VueCookies.remove('sessionId');
       VueCookies.remove('requestId'); 
       VueCookies.remove('userId');  // Remove cookies
@@ -45,6 +47,9 @@ export default createStore({
     },
     setFacetsLoading(state, value) {
       state.facetsLoading = value; 
+    },
+    setGlobalSheet(state, value) {
+      state.globalSheet = value; 
     },
   },
   actions: {
@@ -76,8 +81,14 @@ export default createStore({
     startFacetsLoading({ commit }) {
       commit('setFacetsLoading', true); 
     },
+    showGlobalSheet({ commit }) {
+      commit('setGlobalSheet', true); 
+    },
     stopFacetsLoading({ commit }) {
       commit('setFacetsLoading', false); 
+    }, 
+    hideGlobalSheet({ commit }) {
+      commit('setGlobalSheet', false); 
     },
   },
   getters: {
@@ -86,6 +97,9 @@ export default createStore({
     },
     isFacetsLoading(state) {
       return state.facetsLoading;
+    },
+    isGlobalSheet(state) {
+      return state.globalSheet;
     },
   },
 });
