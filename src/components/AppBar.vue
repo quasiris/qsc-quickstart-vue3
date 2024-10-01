@@ -17,7 +17,7 @@
           </div>
         </v-toolbar-title>
         <v-col lg="8" sm="7" class="d-flex align-center justify-space-around">
-          <sortiment-navigation />
+          <sortiment-navigation @handleFilter="haldleNavFilter($event)" v-if="display.width._object.width >= 960" />
           <div class="search-bar d-flex align-center p-relative">
             <v-text-field
               type="text"
@@ -269,6 +269,9 @@ export default {
       this.startProductsLoading();
       this.$emit("onSearch", this.localSearchQuery);
       this.suggests = [];
+    },
+    haldleNavFilter(filter) {
+      this.$emit("onFilter", filter);
     },
     saveEmail() {
       if (this.emailInput && this.isEmailValid) {

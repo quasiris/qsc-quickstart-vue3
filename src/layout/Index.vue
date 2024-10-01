@@ -1,8 +1,8 @@
 <template>
     <v-app>
       <v-main class="d-flex flex-column" >
-        <AppBar @onSearch="performSearch1" :searchQuery="searchQuery" />
-        <PageContent :config="config" :searchQuery="searchQuery" @onSearch="performSearch1"/>
+        <AppBar @onSearch="performSearch1" @onFilter="handleNavFilters" :searchQuery="searchQuery" />
+        <PageContent :filter="navFilter" :config="config" :searchQuery="searchQuery" @onSearch="performSearch1"/>
         <BottomSheet @onSearch="performSearch1" />
         <Footer />
       </v-main>
@@ -28,6 +28,7 @@
       return {
         searchQuery: "",
         config: config[0],
+        navFilter: {},
       };
     },
     created() {
@@ -51,6 +52,12 @@
           window.history.pushState({}, '', url);
         }
         this.searchQuery = keyword;
+      },
+      handleNavFilters(filter) {
+        if(filter){
+          this.navFilter=filter
+          this.navFilter={...this.navFilter}
+        }
       }
     }
   };

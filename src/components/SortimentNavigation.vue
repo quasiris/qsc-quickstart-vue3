@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref,getCurrentInstance } from 'vue';
 import CategoryItem from './CategoryItem.vue';
 
 export default {
@@ -52,6 +52,7 @@ export default {
   },
   setup() {
     const categories = ref([]);
+    const { proxy } = getCurrentInstance();
     const showCategories = ref(false);
     const openCategories = ref({}); // track open categories by depth
     let hideTimeout = null;
@@ -93,7 +94,8 @@ export default {
     };
 
     const goToCategory = (category) => {
-      console.log('Selected category:', category);
+      proxy.$emit("handleFilter", category);
+      startHideMainCategories();
     };
 
     const getSubcategories = (parentId) => {
@@ -153,6 +155,7 @@ export default {
   gap: 20px;
   position: fixed;
   left:20%;
+  top: 70px;
   z-index: 2000;
   background-color: white;
   border-radius: 10px;
@@ -167,15 +170,34 @@ export default {
   background-color: white;
   max-height: 400px;
   overflow-y: auto;
-  width: 150px;
+  width: 160px;
+  scrollbar-width: thin; 
+  scrollbar-color: #888 #f1f1f1; 
+}
+
+.category-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.category-list::-webkit-scrollbar-thumb {
+  background-color: #888; 
+  border-radius: 10px; 
+  border: 3px solid #f1f1f1; 
+}
+
+.category-list::-webkit-scrollbar-thumb:hover {
+  background-color: #555; 
+}
+.category-list:hover {
+  scrollbar-color: #555 #f1f1f1; 
 }
 
 .main-category-list {
-  width: 150px;
+  width: 160px;
 }
 
 .subcategory-list {
-  width: 150px;
+  width: 160px;
 }
 
 .category-item {

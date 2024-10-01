@@ -3,8 +3,9 @@
     class="category-item"
     :class="{ active: isActive }"
     @mouseenter="handleMouseEnter"
+    @click="handleClick"
   >
-    <div class="category-link" @click="handleClick">
+    <div class="category-link">
       {{ category.name }}
     </div>
   </li>
