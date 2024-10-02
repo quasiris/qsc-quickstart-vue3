@@ -21,7 +21,7 @@ export default {
   setup(props, { emit }) {
     const handleMouseEnter = () => {
       if (props.category.children && props.category.children.length > 0) {
-        emit('show-subcategories', props.category.id, props.depth);
+        emit('show-subcategories', props.category.filter, props.depth);
       }
     };
 

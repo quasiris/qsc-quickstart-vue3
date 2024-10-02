@@ -22,6 +22,7 @@
     "id": "trendware-error-testing",
     "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware-error-testing",
     "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/trendware-error-testing?q=",
+    "sortimentUrl": "https://qsc-dev.quasiris.de/api/v1/category/demo/navigation-random",
     "resultSetId": "trendware-error-testing",
     "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
     "document": {

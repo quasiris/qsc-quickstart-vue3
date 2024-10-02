@@ -1,5 +1,5 @@
 <template>
-  <nav class="navigation">
+  <nav class="navigation" @mouseleave="startHideMainCategories">
     <ul class="nav-list">
       <li>
         <v-btn variant="text" size="small" class="sortiment-btn" @mouseenter="showMainCategories">Sortiment</v-btn>
@@ -17,7 +17,7 @@
           :key="category.id"
           :category="category"
           :depth="0"
-          :is-active="isActiveCategory(0, category.id)"
+          :is-active="isActiveCategory(0, category.filter)"
           @show-subcategories="addOpenCategory"
           @go-to-category="goToCategory"
         />
@@ -32,7 +32,7 @@
           :key="subcategory.id"
           :category="subcategory"
           :depth="parseInt(parentId[0]) + 1"
-          :is-active="isActiveCategory(parseInt(parentId[0]) + 1, subcategory.id)"
+          :is-active="isActiveCategory(parseInt(parentId[0]) + 1, subcategory.filter)"
           @show-subcategories="addOpenCategory"
           @go-to-category="goToCategory"
         />
@@ -42,15 +42,19 @@
 </template>
 
 <script>
-import { ref,getCurrentInstance } from 'vue';
+import { watch,ref,getCurrentInstance } from 'vue';
 import CategoryItem from './CategoryItem.vue';
-
+import { useStore } from 'vuex';
 export default {
   name: "SortimentNavigation",
   components: {
     CategoryItem,
   },
-  setup() {
+  props: {
+    url: String,
+  },
+  setup(props) {
+    const store = useStore();
     const categories = ref([]);
     const { proxy } = getCurrentInstance();
     const showCategories = ref(false);
@@ -59,14 +63,23 @@ export default {
 
     const fetchCategories = async () => {
       try {
-        const response = await fetch('https://qsc-dev.quasiris.de/api/v1/category/demo/navigation-random');
+        const response = await fetch(props.url);
         const data = await response.json();
         categories.value = data.category.children;
       } catch (error) {
         console.error('Failed to fetch categories', error);
+        store.dispatch('showGlobalSheet');
       }
     };
-
+    watch(
+      () => props.url,
+      (newUrl, oldUrl) => {
+        if (newUrl !== oldUrl) {
+          fetchCategories(); // Fetch categories when URL changes
+        }
+      },
+      { deep: true }
+    );
     const showMainCategories = () => {
       showCategories.value = true;
     };
@@ -82,8 +95,8 @@ export default {
       if (hideTimeout) clearTimeout(hideTimeout);
     };
 
-    const addOpenCategory = (id, depth) => {
-      openCategories.value = { ...openCategories.value, [depth]: id };
+    const addOpenCategory = (filter, depth) => {
+      openCategories.value = { ...openCategories.value, [depth]: filter };
 
       // Remove deeper levels when selecting a shallower category
       Object.keys(openCategories.value).forEach((key) => {
@@ -100,23 +113,23 @@ export default {
 
     const getSubcategories = (parentId) => {
       // Recursive function to find subcategories
-      const findCategoryById = (categories, id) => {
+      const findCategoryById = (categories, filter) => {
         for (const category of categories) {
-          if (category.id === id) return category;
+          if (category.filter === filter){
+          return category}
           if (category.children && category.children.length) {
-            const found = findCategoryById(category.children, id);
+            const found = findCategoryById(category.children, filter);
             if (found) return found;
           }
         }
         return null;
       };
-
       const category = findCategoryById(categories.value, parentId);
       return category ? category.children || [] : [];
     };
 
-    const isActiveCategory = (depth, id) => {
-      return openCategories.value[depth] === id;
+    const isActiveCategory = (depth, filter) => {
+      return openCategories.value[depth] === filter;
     };
 
     fetchCategories();

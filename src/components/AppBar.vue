@@ -17,7 +17,7 @@
           </div>
         </v-toolbar-title>
         <v-col lg="8" sm="7" class="d-flex align-center justify-space-around">
-          <sortiment-navigation @handleFilter="haldleNavFilter($event)" v-if="display.width._object.width >= 960" />
+          <sortiment-navigation :url="config.sortimentUrl" @handleFilter="haldleNavFilter($event)" v-if="(config.sortimentUrl && (display.width._object.width >= 960))" />
           <div class="search-bar d-flex align-center p-relative">
             <v-text-field
               type="text"
