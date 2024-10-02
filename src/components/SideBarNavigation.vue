@@ -2,7 +2,6 @@
     <v-expansion-panels
       v-model="activePanels"
       class="pa-2"
-      multiple
     >
       <template v-for="(child, index) in item.values" :key="index">
         <v-list-item
@@ -24,8 +23,6 @@
               <SideBarNavigation
                 :item="child.children"
                 :parentName="buildFullParentName(child.value)"
-                :expanded-panels="expandedPanels"
-                @update-expanded-panels="$emit('update-expanded-panels', $event)"
                 @onFilter="$emit('onFilter', $event, buildFullParentName(child.value))"
               />
             </v-list>
@@ -48,38 +45,28 @@ export default defineComponent({
     parentName: {
       type: String,
       required: true,
-    },
-    expandedPanels: {
-      type: Array,
-      default: () => [], 
-    },
+    }
   },
   setup(props, { emit }) {
     const activePanels = ref([]);
     watch(
-      () => props.expandedPanels,
+      () => props.item,
       (newVal) => {
-        if (Array.isArray(newVal) && newVal ) {
-          let item = newVal.map(panel => panel.filter); 
-          activePanels.value=item;
+        if (newVal && typeof newVal === 'object' && Array.isArray(newVal.values)) {
+          // Map through item.values and filter for children with selected === true
+          const selectedPanels = newVal.values
+            .filter(child => child?.selected === true) 
+            .map(child => child.filter); 
+
+          // Assign the selected panel filters to activePanels
+          activePanels.value = selectedPanels;
         }
       },
       { immediate: true, deep: true }
     );
-    const handleClick = (child, fullParentName) => {
-      const expandedPanelIndex = props.expandedPanels.findIndex(panel => panel.filter === child.filter);        // If we find a matching key in expandedPanels, remove it
-
+    const handleClick = (child) => {
       if (child.filter) {
         emit('onFilter', child, props.parentName);
-        if (expandedPanelIndex !== -1) {         
-            const newExpandedPanels = [...props.expandedPanels];
-            newExpandedPanels.splice(expandedPanelIndex, 1);
-            emit('update-expanded-panels', newExpandedPanels);
-        } else {
-          const newExpandedPanels = [...props.expandedPanels];
-          newExpandedPanels.push({ name: fullParentName, filter: child.filter });
-          emit('update-expanded-panels', newExpandedPanels);
-        }
       }
     };
 

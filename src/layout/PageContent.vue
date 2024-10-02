@@ -127,9 +127,8 @@
                   <SideBarNavigation 
                   :item="facet" 
                   :parentName="facet.name"
-                  :expanded-panels="expandedPanels" 
                   @onFilter="handleNavigationSelection" 
-                  @update-expanded-panels="updateExpandedPanels"  />
+                    />
               </div>
               <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation')">
                 <div 
@@ -553,9 +552,6 @@ export default {
         }
         this.chipsValues.splice(chipIndex, 1);
       }
-    },
-    updateExpandedPanels(newExpandedPanels) {
-      this.expandedPanels = newExpandedPanels;
     },
     handleDateRangeUpdate(filter,chip,facet) {
       this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(facet.filterName));
