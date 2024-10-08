@@ -1,7 +1,7 @@
 <template>
     <v-footer color="primary">  
       <div class="px-4 py-2 w-100 d-flex align-center">
-        <img src="/brand/logo.png" alt="Logo" style="max-width: 200px;" class="img-fluid"/>
+        <img src="/brand/cloud-v5.png" alt="Logo" style="max-width: 250px;" class="img-fluid"/>
         <v-spacer></v-spacer>
         <div class="text-white ms-2">
           <p class="CopyRight">Copy right reserved © 2024 Quasiris GmbH</p>
