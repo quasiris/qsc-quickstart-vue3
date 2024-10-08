@@ -36,6 +36,7 @@
                 <span
                   v-if="localSearchQuery.trim() && display.width._object.width >= 600"
                   class="clear-input"
+                  style="right: 100px;"
                   @click="clearSearchQuery"
                 >
                   &times;
@@ -146,7 +147,7 @@ export default {
 
   data() {
     return {
-      localSearchQuery: this.searchQuery,
+      localSearchQuery: "",
       suggests: [],
       config: config[0],
       isFixedAppBar: false,
@@ -166,28 +167,20 @@ export default {
       ],
     };
   },
-  props: {
-    searchQuery: { type: String, default: "" }
-  },
   setup() {
     const display = useDisplay()
     return { display }
   },
   watch: {
     localSearchQuery(newVal) {
-      if (newVal !== this.localSearchQuery ) {
+      if (newVal !== this.searchQuery ) {
         this.localSearchQuery = newVal; // Sync local data with prop
       }
       this.selectedIndex = -1;
-      if (this.localSearchQuery?.trim() === "") {
-        if (newVal === "" || newVal === this.searchQuery) {
-          const url = new URL(window.location.href);
-          url.searchParams.delete('q');
-          window.history.pushState({}, '', url);
+      if (newVal.trim() === "") {
           this.searchProducts();
-        }
-      } else {
-        this.fetchSuggestions();
+      } else  if (newVal !== this.searchQuery ) {
+          this.fetchSuggestions();
       }
     },
     searchQuery(newVal) {
@@ -195,7 +188,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['requestId','userId','sessionId','email']),
+    ...mapState(['requestId','userId','sessionId','email','searchQuery']),
     isEmailValid() {
       return ((this.rules.every(rule => rule(this.emailInput) === true)) && (this.email != this.emailInput));
     }
@@ -205,7 +198,7 @@ export default {
     document.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("click", this.handleWindowClick);
     window.addEventListener("scroll", this.handleScroll);
-    this.searchProducts();
+    this.localSearchQuery=this.searchQuery
 
     const url = window.location.href;
     for (const configItem of config) {
@@ -222,7 +215,7 @@ export default {
     window.removeEventListener("click", this.handleWindowClick);
   },
   methods: {
-    ...mapActions(['clearSession', 'setUserEmail','startProductsLoading','startFacetsLoading']),
+    ...mapActions(['clearSession', 'setSearchQuery','setUserEmail','startProductsLoading','startFacetsLoading']),
     handleclearSession(){
       this.clearSession();
       this.$store.dispatch('initializeSession');
@@ -267,7 +260,10 @@ export default {
     searchProducts() {
       this.startFacetsLoading();
       this.startProductsLoading();
-      this.$emit("onSearch", this.localSearchQuery);
+      if(this.localSearchQuery === this.searchQuery)
+        this.$emit("onSearch");
+      else
+        this.setSearchQuery(this.localSearchQuery);
       this.suggests = [];
     },
     haldleNavFilter(filter) {
@@ -339,14 +335,10 @@ export default {
       }
     },
     clearSearchQuery() {
-      this.localSearchQuery = "";
-      const url = new URL(window.location.href);
-      url.searchParams.delete('q');
-      // Use the history API to update the URL without reloading the page
-      window.history.pushState({}, '', url);
+      
       this.startFacetsLoading();
       this.startProductsLoading();
-      this.$emit("onSearch", this.localSearchQuery);
+      this.localSearchQuery=""
     },
   }
 };

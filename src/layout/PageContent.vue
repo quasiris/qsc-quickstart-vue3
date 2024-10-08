@@ -196,16 +196,16 @@
               </div>
               <div class="box-container">
                 <v-row>
-                  <div class="sQuery mb-1" v-show="localSearchQuery"  @click="clearSearchQuery" >
-                    <span class="chip-text">{{ localSearchQuery }}</span>
+                  <div class="sQuery mb-1" v-show="searchQuery"  @click="clearSearchQuery" >
+                    <span class="chip-text">{{ searchQuery }}</span>
                     <v-tooltip
-                      v-if="localSearchQuery" 
+                      v-if="searchQuery" 
                       activator="parent"
                       location="top"
-                      > Query: {{ localSearchQuery }}
+                      > Query: {{ searchQuery }}
                     </v-tooltip>
                     <div 
-                      v-if="localSearchQuery"
+                      v-if="searchQuery"
                       class="clear-input justify-center "
                       @click="clearSearchQuery"
                     >
@@ -377,7 +377,7 @@ export default {
   components: {HistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
   data() {
     return {
-      localSearchQuery: this.searchQuery,
+      localSearchQuery: "",
       products: [],
       totalproducts: "",
       selectedFilters: [],
@@ -403,16 +403,19 @@ export default {
     };
   },
   props: {
-    searchQuery: { type: String, default: "" },
     config: { type: Object, required: true },
     filter: { type: Object},
+    triggerSearch: {
+      type: Boolean,
+      required: true, 
+    },
   },
   setup() {
     const display = useDisplay()
     return { display }
   },
   computed: {
-    ...mapState(['requestId','userId','sessionId']),
+    ...mapState(['requestId','userId','sessionId','searchQuery']),
     ...mapGetters(['isProductsLoading','isFacetsLoading']),
     cardHeight() {
       return (this.viewMode === 'list' ? '270px' : '300px');
@@ -431,6 +434,7 @@ export default {
       this.showedRows=this.config.rows;
       this.selectedRow=this.config.rows[0].id;
     }
+    this.localSearchQuery=this.searchQuery
     this.fetchProducts();
   },
   watch: {
@@ -471,13 +475,19 @@ export default {
       deep: true, 
       immediate: true
     },
-    localSearchQuery(newVal) {
-      this.$emit("onSearch", newVal);
-    },
     searchQuery(newVal) {
-      this.localSearchQuery=newVal
-      this.clearFilters();
-      this.currentPage=1;
+      if(this.localSearchQuery != newVal){
+        this.localSearchQuery = newVal;
+        this.clearFilters();
+        this.currentPage=1;
+      }
+    },
+    triggerSearch() {
+        this.fetchProducts();
+    },
+    localSearchQuery(newVal) {
+      if(newVal && newVal != this.searchQuery)
+        this.setSearchQuery(newVal); 
     },
     selectedFilters() {
       this.scrollToTop();
@@ -488,7 +498,8 @@ export default {
     selectedSort(newVal) {
       if(newVal != this.sorts[0].name && this.sorts.length > 0){
         this.startProductsLoading();
-        this.fetchProducts();}
+        this.fetchProducts();
+      }
     },
     records(newVal) {
       if(newVal && newVal != this.selectedRow){
@@ -509,7 +520,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['setRequestId','startProductsLoading','startFacetsLoading','stopProductsLoading','stopFacetsLoading','showGlobalSheet']),
+    ...mapActions(['setRequestId','startProductsLoading','startFacetsLoading','stopProductsLoading','stopFacetsLoading','showGlobalSheet','setSearchQuery']),
     chipsControle(facet, value) {
       const chipIndex = this.chipsValues.findIndex(chip => 
         chip[facet.name] === value.value
@@ -654,8 +665,8 @@ export default {
 
       const queryParameters = [];
 
-      if (this.localSearchQuery) {
-        queryParameters.push(`q=${this.localSearchQuery}`);
+      if (this.searchQuery) {
+        queryParameters.push(`q=${this.searchQuery}`);
       }
       if(this.userId)
       {
@@ -773,11 +784,7 @@ export default {
     clearSearchQuery() {
       this.startFacetsLoading();
       this.localSearchQuery = "";
-      const url = new URL(window.location.href);
-      url.searchParams.delete('q');
-      // Use the history API to update the URL without reloading the page
-      window.history.pushState({}, '', url);
-      this.$emit("onSearch", this.localSearchQuery);
+      this.setSearchQuery(this.localSearchQuery);
     }
   }
 };

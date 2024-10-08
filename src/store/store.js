@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export default createStore({
   state: {
+    searchQuery: "", // Search Query
     sessionId: null,
     email: null,
     userId: null,
@@ -14,6 +15,18 @@ export default createStore({
     globalSheet: false, //  errror state
   },
   mutations: {
+    setSearchQuery(state, q) {
+      if(q.trim() != ''){
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', q); 
+        window.history.pushState({}, '', url);
+      }else{
+        const url = new URL(window.location.href);
+        url.searchParams.delete('q');
+        window.history.pushState({}, '', url);
+      }
+      state.searchQuery = q; 
+    },
     setSessionId(state, sessionId) {
       state.sessionId = sessionId;
       VueCookies.set('sessionId', sessionId); // Set cookie
@@ -66,6 +79,9 @@ export default createStore({
     clearSession({ commit }) {
       commit('clearSession');
     },
+    setSearchQuery({ commit }, q) {
+      commit('setSearchQuery', q);
+    },
     setUserEmail({ commit }, email) {
       commit('setUserEmail', email);
     },
@@ -100,6 +116,9 @@ export default createStore({
     },
     isGlobalSheet(state) {
       return state.globalSheet;
+    },
+    SearchQuery(state) {
+      return state.searchQuery;
     },
   },
 });
