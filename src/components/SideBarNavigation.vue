@@ -6,9 +6,11 @@
       <template v-for="(child, index) in item.values" :key="index">
         <v-list-item
           v-if="!child.children || child.children.values.length === 0"
+          class="item-title"
+          :class="{ active: child?.selected }"
           @click="handleClick(child, buildFullParentName(child.value))"
         >
-          <v-list-item-title class="pa-1">{{ child.value }} ({{ child.count }})</v-list-item-title>
+          <v-list-item-title class="pa-1 ">{{ child.value }} ({{ child.count }})</v-list-item-title>
         </v-list-item>
 
         <v-expansion-panel
@@ -33,7 +35,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch, computed } from 'vue';
 
 export default defineComponent({
   name: 'SideBarNavigation',
@@ -69,12 +71,11 @@ export default defineComponent({
         emit('onFilter', child, props.parentName);
       }
     };
-
-    const buildFullParentName = (childValue) => {
-      return props.parentName ? `${props.parentName} : ${childValue}` : childValue;
-    };
-
-   
+    const buildFullParentName = computed(() => {
+      return (childValue) => {
+        return `${props.parentName} : ${childValue}`;
+      };
+    });   
 
     return {
       handleClick,
@@ -86,6 +87,21 @@ export default defineComponent({
 </script>
 
 <style>
+.item-title {
+  width: 100%;
+  padding-inline: 6px !important;
+  background-color: white;
+  box-shadow: 
+    0px -2px 3px -2px rgba(0, 0, 0, 0.2),    
+    0px 3px 3px -2px rgba(0, 0, 0, 0.2),
+    -2px 0px 3px -2px rgba(0, 0, 0, 0.2),  
+    2px 0px 3px -2px rgba(0, 0, 0, 0.2);    
+}
+.item-title.active {
+  background-color: rgb(238, 238, 238); 
+  font-weight: bold !important; 
+  color: #007bff; 
+}
 .v-list-item {
   padding-left: 16px;
   cursor: pointer;
