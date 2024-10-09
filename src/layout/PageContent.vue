@@ -420,7 +420,6 @@ export default {
     cardHeight() {
       return (this.viewMode === 'list' ? '270px' : '300px');
     },
-    //...mapGetters(["getProducts"])
   },
   created() {
     window.addEventListener("scroll", this.handleScroll);
@@ -444,7 +443,6 @@ export default {
           const newFilter = newVal.filter; 
           const filterPrefix = newFilter.split('=')[0];
           const existingIndex = this.selectedFilters.findIndex(f => f.startsWith(filterPrefix));
-
           if (existingIndex !== -1) {
             const chipIndex = this.chipsValues.findIndex(chip => 
               chip.Sortiment === newVal.name
@@ -564,6 +562,39 @@ export default {
         this.chipsValues.splice(chipIndex, 1);
       }
     },
+    markTempSelected(node) {
+      // Create a copy of the node to avoid modifying the original object
+      const newNode = { ...node };
+      let hasSelectedChild = false;
+      // Check root-level values
+      if (newNode.values && newNode.values.length > 0) {
+        newNode.values = newNode.values.map(child => {
+          const childNewNode = this.markTempSelected(child);
+          // Check if any child has the tempSelected flag or the selected property
+          if (childNewNode.tempSelected || ('selected' in childNewNode && childNewNode.selected)) {
+            hasSelectedChild = true;
+          }
+          return childNewNode;
+        });
+      }
+      // Check if the node has children and handle them
+      if (newNode.children && newNode.children.values && newNode.children.values.length > 0) {
+        newNode.children.values = newNode.children.values.map(child => {
+          const childNewNode = this.markTempSelected(child);
+          // Check if any child has the tempSelected flag or the selected property
+          if (childNewNode.tempSelected || ('selected' in childNewNode && childNewNode.selected)) {
+            hasSelectedChild = true;
+          }
+          return childNewNode;
+        });
+      }
+      // Assign tempSelected to the parent node if any child is selected
+      if (hasSelectedChild && !newNode.selected) {
+        newNode.tempSelected = true;  
+      }
+      // Return the new facet object
+      return newNode;
+    },
     handleDateRangeUpdate(filter,chip,facet) {
       this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(facet.filterName));
       this.selectedFilters.push(filter);
@@ -591,16 +622,28 @@ export default {
       }
     },
     handleNavigationSelection(filter,name) {
-      this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filter));
-      // Find the chip with the same filter in chipsValues
-      const chipIndex = this.chipsValues.findIndex(chip => chip.filter === filter.filter);
-      if (chipIndex === -1) {
-        this.selectedFilters.push(filter.filter);
-        this.chipsValues.push({ [name]: filter.value, filter: filter.filter });
+      const newFilter = filter.filter;
+      const filterPrefix = newFilter.split('=')[0];
+      const existingIndex = this.selectedFilters.findIndex(f => f.startsWith(filterPrefix));
+      const chipIndex = this.chipsValues.findIndex(chip => chip.filter.startsWith(filterPrefix));
+      if (existingIndex !== -1) {
+        if (this.selectedFilters[existingIndex] === newFilter) {
+          this.selectedFilters.splice(existingIndex, 1);
+          this.chipsValues.splice(chipIndex, 1);
+        } else {
+          this.selectedFilters.splice(existingIndex, 1, newFilter);
+          let newChip={ 
+            [name]: filter.value, 
+            filter: newFilter
+          };
+          this.selectedFilters.splice(existingIndex, 1, newFilter);
+          this.chipsValues.splice(chipIndex, 1, newChip);
+        }
       } else {
-        // If the filter exists, remove the chip from chipsValues
-        this.chipsValues.splice(chipIndex, 1);
+        this.selectedFilters.push(newFilter);
+        this.chipsValues.push({ [name]: filter.value, filter: filter.filter });
       }
+      this.selectedFilters = [...this.selectedFilters];
     },
     initializeFacetData(facet) {
       if(facet.minValue && facet.maxValue){
@@ -726,6 +769,9 @@ export default {
           this.facets = response.data.result[this.config.resultSetId].facets.map((facet) => {
             if (facet.type === 'slider' || facet.type === 'histogram') {
               this.initializeFacetData(facet);
+            }
+            if (facet.type ==='navigation'){
+              return this.markTempSelected(facet)
             }
             return facet;
           });

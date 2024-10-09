@@ -55,7 +55,7 @@ export default defineComponent({
         if (newVal && typeof newVal === 'object' && Array.isArray(newVal.values)) {
           // Map through item.values and filter for children with selected === true
           const selectedPanels = newVal.values
-            .filter(child => child?.selected === true) 
+            .filter(child => ((child?.selected === true) || (child?.tempSelected === true))) 
             .map(child => child.filter); 
 
           // Assign the selected panel filters to activePanels

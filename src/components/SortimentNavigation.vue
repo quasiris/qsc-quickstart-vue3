@@ -204,20 +204,20 @@ export default {
 }
 
 .category-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #fff;
 }
 
 .category-list::-webkit-scrollbar-thumb {
   background-color: #888; 
   border-radius: 10px; 
-  border: 3px solid #f1f1f1; 
+  border: 3px solid #fff; 
 }
 
 .category-list::-webkit-scrollbar-thumb:hover {
   background-color: #555; 
 }
 .category-list:hover {
-  scrollbar-color: #555 #f1f1f1; 
+  scrollbar-color: #555 #fff; 
 }
 
 .main-category-list {
