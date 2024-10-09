@@ -39,7 +39,7 @@ export default {
 
 <style scoped>
 .category-item {
-  padding: 10px;
+  padding: 8px;
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.2s ease;
@@ -49,7 +49,7 @@ export default {
   background-color: #ececec;
 }
 .category-item.active {
-  background-color: #f0f0f0; 
+  background-color: #fff; 
   font-weight: bold; 
   color: #007bff; 
 }

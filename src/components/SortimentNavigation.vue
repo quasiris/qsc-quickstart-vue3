@@ -1,5 +1,5 @@
 <template>
-  <nav class="navigation" @mouseleave="startHideMainCategories">
+  <nav class="navigation" ref="navigation" @mouseleave="startHideMainCategories">
     <ul class="nav-list">
       <li>
         <v-btn variant="text" size="small" class="sortiment-btn" @mouseenter="showMainCategories">Sortiment</v-btn>
@@ -8,6 +8,7 @@
     <div 
       v-if="showCategories" 
       class="category-container" 
+      :style="{ left: `${categoryLeft.value}px` }"
       @mouseleave="startHideMainCategories"
       @mouseenter="cancelHideMainCategories"
     >
@@ -42,7 +43,7 @@
 </template>
 
 <script>
-import { watch,ref,getCurrentInstance } from 'vue';
+import { watch,ref,getCurrentInstance,onMounted, onBeforeUnmount } from 'vue';
 import CategoryItem from './CategoryItem.vue';
 import { useStore } from 'vuex';
 export default {
@@ -58,6 +59,8 @@ export default {
     const categories = ref([]);
     const { proxy } = getCurrentInstance();
     const showCategories = ref(false);
+    const categoryLeft = ref(50);
+    const navigation = ref(null);
     const openCategories = ref({}); // track open categories by depth
     let hideTimeout = null;
 
@@ -94,7 +97,12 @@ export default {
     const cancelHideMainCategories = () => {
       if (hideTimeout) clearTimeout(hideTimeout);
     };
-
+    const calculateCategoryPosition = () => {
+      if (navigation.value) {
+        const navRect = navigation.value.getBoundingClientRect();
+        categoryLeft.value = navRect.left;
+      }
+    };
     const addOpenCategory = (filter, depth) => {
       openCategories.value = { ...openCategories.value, [depth]: filter };
 
@@ -133,9 +141,17 @@ export default {
     };
 
     fetchCategories();
+    onMounted(() => {
+      calculateCategoryPosition();
+      window.addEventListener('resize', calculateCategoryPosition);
+    });
 
+    onBeforeUnmount(() => {
+      window.removeEventListener('resize', calculateCategoryPosition);
+    });
     return {
       categories,
+      categoryLeft,
       showCategories,
       openCategories,
       showMainCategories,
@@ -167,10 +183,9 @@ export default {
   display: flex;
   gap: 20px;
   position: fixed;
-  left:20%;
   top: 70px;
   z-index: 2000;
-  background-color: white;
+  background-color: rgb(238, 238, 238);
   border-radius: 10px;
   padding: 10px;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -180,7 +195,7 @@ export default {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  background-color: white;
+  background-color: rgb(238, 238, 238);
   max-height: 400px;
   overflow-y: auto;
   width: 160px;
@@ -221,6 +236,6 @@ export default {
 }
 
 .category-item:hover {
-  background-color: #ececec;
+  background-color: #fff;
 }
 </style>
