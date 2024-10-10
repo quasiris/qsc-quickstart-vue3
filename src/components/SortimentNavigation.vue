@@ -20,6 +20,7 @@
           :depth="0"
           :is-active="isActiveCategory(0, category.filter)"
           @show-subcategories="addOpenCategory"
+          @hide-subcategories="closeCategory"
           @go-to-category="goToCategory"
         />
       </ul>
@@ -35,6 +36,7 @@
           :depth="parseInt(parentId[0]) + 1"
           :is-active="isActiveCategory(parseInt(parentId[0]) + 1, subcategory.filter)"
           @show-subcategories="addOpenCategory"
+          @hide-subcategories="closeCategory"
           @go-to-category="goToCategory"
         />
       </ul>
@@ -113,6 +115,14 @@ export default {
         }
       });
     };
+    const closeCategory = (depth) => {
+      // Remove deeper levels when selecting a shallower category
+      Object.keys(openCategories.value).forEach((key) => {
+        if (parseInt(key) == depth) {
+          delete openCategories.value[key];
+        }
+      });
+    };
 
     const goToCategory = (category) => {
       proxy.$emit("handleFilter", category);
@@ -158,6 +168,7 @@ export default {
       startHideMainCategories,
       cancelHideMainCategories,
       addOpenCategory,
+      closeCategory,
       goToCategory,
       getSubcategories,
       isActiveCategory,
