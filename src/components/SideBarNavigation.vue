@@ -8,7 +8,7 @@
           v-if="!child.children || child.children.values.length === 0"
           class="item-title"
           :class="{ active: child?.selected }"
-          @click="handleClick(child, buildFullParentName(child.value))"
+          @click="handleClick(child, parentName)"
         >
           <v-list-item-title class="pa-1 ">{{ child.value }} ({{ child.count }})</v-list-item-title>
         </v-list-item>
@@ -17,15 +17,15 @@
           v-else
           :value="child.filter"
         >
-          <v-expansion-panel-title @click="handleClick(child,  buildFullParentName(child.value))">
+          <v-expansion-panel-title @click="handleClick(child,parentName)">
             {{ child.value }} ({{ child.count }})
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-list v-if="child.children && child.children.values.length > 0">
               <SideBarNavigation
                 :item="child.children"
-                :parentName="buildFullParentName(child.value)"
-                @onFilter="$emit('onFilter', $event, buildFullParentName(child.value))"
+                :parentName="buildFullParentName(parentName,child.value)"
+                @onFilter="$emit('onFilter', $event)"
               />
             </v-list>
           </v-expansion-panel-text>
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, watch, computed } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
   name: 'SideBarNavigation',
@@ -66,16 +66,15 @@ export default defineComponent({
       },
       { immediate: true, deep: true }
     );
-    const handleClick = (child) => {
+    const handleClick = (child,name) => {
       if (child.filter) {
-        emit('onFilter', child, props.parentName);
+        child.fullPath=name;
+        emit('onFilter', child);
       }
     };
-    const buildFullParentName = computed(() => {
-      return (childValue) => {
-        return `${props.parentName} : ${childValue}`;
-      };
-    });   
+    const buildFullParentName = (name,childValue) => {
+      return name ? `${name} : ${childValue}` : childValue;
+    };
 
     return {
       handleClick,

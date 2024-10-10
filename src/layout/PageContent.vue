@@ -621,8 +621,8 @@ export default {
         this.chipsValues.splice(chipIndex, 1);
       }
     },
-    handleNavigationSelection(filter,name) {
-      const newFilter = filter.filter;
+    handleNavigationSelection(event) {
+      const newFilter = event.filter;
       const filterPrefix = newFilter.split('=')[0];
       const existingIndex = this.selectedFilters.findIndex(f => f.startsWith(filterPrefix));
       const chipIndex = this.chipsValues.findIndex(chip => chip.filter.startsWith(filterPrefix));
@@ -633,7 +633,7 @@ export default {
         } else {
           this.selectedFilters.splice(existingIndex, 1, newFilter);
           let newChip={ 
-            [name]: filter.value, 
+            [event.fullPath]: event.value, 
             filter: newFilter
           };
           this.selectedFilters.splice(existingIndex, 1, newFilter);
@@ -641,7 +641,7 @@ export default {
         }
       } else {
         this.selectedFilters.push(newFilter);
-        this.chipsValues.push({ [name]: filter.value, filter: filter.filter });
+        this.chipsValues.push({ [event.fullPath]: event.value, filter: event.filter });
       }
       this.selectedFilters = [...this.selectedFilters];
     },
