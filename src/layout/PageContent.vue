@@ -80,7 +80,7 @@
             @click="isSidebar = !isSidebar"
           >
           </div>
-          <v-navigation-drawer v-if="facets && !isFacetsLoading" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+          <v-navigation-drawer v-if="facets && !isFacetsLoading" :width="325"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item v-for="facet in facets" :key="facet.id">
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
@@ -175,7 +175,7 @@
               >
             </v-list-item>            
           </v-navigation-drawer>
-          <v-navigation-drawer v-if="isFacetsLoading" :width="300"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+          <v-navigation-drawer v-if="isFacetsLoading" :width="325"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item v-for="(skeleton, index) in skeletonProducts.slice(0, 8)" :key="index" class="d-flex justify-center mt-3"> 
               <v-skeleton-loader
                 class="mx-auto border"
