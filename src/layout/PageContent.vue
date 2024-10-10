@@ -441,33 +441,15 @@ export default {
       handler(newVal) {
         if(newVal.filter){
           const newFilter = newVal.filter; 
-          const filterPrefix = newFilter.split('=')[0];
-          const existingIndex = this.selectedFilters.findIndex(f => f.startsWith(filterPrefix));
-          if (existingIndex !== -1) {
-            const chipIndex = this.chipsValues.findIndex(chip => 
-              chip.Sortiment === newVal.name
-            );
-            // If the filter is the same, remove it
-            if (this.selectedFilters[existingIndex] === newFilter) {
-              this.selectedFilters.splice(existingIndex, 1);
-              this.chipsValues.splice(chipIndex, 1);
-            } else {
-              // Otherwise, replace it with the new one
-              let newChip={ 
-                Sortiment: newVal.name, 
-                filter: newFilter 
-              };
-              this.selectedFilters.splice(existingIndex, 1, newFilter);
-              this.chipsValues.splice(chipIndex, 1, newChip);
-            }
-          } else {
+          const existingIndex = this.selectedFilters.findIndex(f => (f === newFilter));
+          this.clearFilters();
+          if (existingIndex === -1) {
             this.chipsValues.push({ 
               Sortiment: newVal.name, 
               filter: newFilter 
             });
             this.selectedFilters.push(newFilter);
           }
-          this.selectedFilters = [...this.selectedFilters];
         }
       },
       deep: true, 

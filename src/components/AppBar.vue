@@ -151,6 +151,7 @@ export default {
       suggests: [],
       config: config[0],
       isFixedAppBar: false,
+      navFilter: false,
       prevScrollPos: 0,
       selectedSuggestion: "",
       selectedIndex: -1,
@@ -177,7 +178,7 @@ export default {
         this.localSearchQuery = newVal; // Sync local data with prop
       }
       this.selectedIndex = -1;
-      if (newVal.trim() === "") {
+      if (newVal.trim() === "" && !this.navFilter) {
           this.searchProducts();
       } else  if (newVal !== this.searchQuery ) {
           this.fetchSuggestions();
@@ -258,6 +259,7 @@ export default {
         });
     },
     searchProducts() {
+      this.navFilter=false;
       this.startFacetsLoading();
       this.startProductsLoading();
       if(this.localSearchQuery === this.searchQuery)
@@ -267,6 +269,7 @@ export default {
       this.suggests = [];
     },
     haldleNavFilter(filter) {
+      this.navFilter=true;
       this.$emit("onFilter", filter);
     },
     saveEmail() {

@@ -57,6 +57,7 @@
       },
       handleNavFilters(filter) {
         if(filter){
+          this.setSearchQuery("");
           this.navFilter=filter
           this.navFilter={...this.navFilter}
         }
