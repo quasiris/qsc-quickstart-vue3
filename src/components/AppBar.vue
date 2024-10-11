@@ -178,7 +178,7 @@ export default {
         this.localSearchQuery = newVal; // Sync local data with prop
       }
       this.selectedIndex = -1;
-      if (newVal.trim() === "" && !this.navFilter) {
+      if (newVal.trim() === "" && !this.navFilter && !this.bottomSheet) {
           this.searchProducts();
       } else  if (newVal !== this.searchQuery ) {
           this.fetchSuggestions();
@@ -189,7 +189,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['requestId','userId','sessionId','email','searchQuery']),
+    ...mapState(['requestId','userId','sessionId','email','searchQuery','bottomSheet']),
     isEmailValid() {
       return ((this.rules.every(rule => rule(this.emailInput) === true)) && (this.email != this.emailInput));
     }
@@ -216,7 +216,7 @@ export default {
     window.removeEventListener("click", this.handleWindowClick);
   },
   methods: {
-    ...mapActions(['clearSession', 'setSearchQuery','setUserEmail','startProductsLoading','startFacetsLoading']),
+    ...mapActions(['clearSession', 'setSearchQuery','stopBottomSheet','setUserEmail','startProductsLoading','startFacetsLoading']),
     handleclearSession(){
       this.clearSession();
       this.$store.dispatch('initializeSession');
@@ -260,6 +260,7 @@ export default {
     },
     searchProducts() {
       this.navFilter=false;
+      this.stopBottomSheet();
       this.startFacetsLoading();
       this.startProductsLoading();
       if(this.localSearchQuery === this.searchQuery)

@@ -7,6 +7,7 @@ export default createStore({
   state: {
     searchQuery: "", // Search Query
     sessionId: null,
+    bottomSheet: false,
     email: null,
     userId: null,
     requestId: null,
@@ -63,6 +64,10 @@ export default createStore({
     },
     setGlobalSheet(state, value) {
       state.globalSheet = value; 
+      state.bottomSheet = true; 
+    }, 
+    stopBottomSheet(state, value) {
+      state.bottomSheet = value; 
     },
   },
   actions: {
@@ -82,6 +87,9 @@ export default createStore({
     setSearchQuery({ commit }, q) {
       commit('setSearchQuery', q);
     },
+    stopBottomSheet({ commit }) {
+      commit('stopBottomSheet', false);
+    },
     setUserEmail({ commit }, email) {
       commit('setUserEmail', email);
     },
@@ -98,6 +106,8 @@ export default createStore({
       commit('setFacetsLoading', true); 
     },
     showGlobalSheet({ commit }) {
+      commit('setProductsLoading', true); 
+      commit('setFacetsLoading', true); 
       commit('setGlobalSheet', true); 
     },
     stopFacetsLoading({ commit }) {

@@ -43,11 +43,11 @@
     }
     },
     methods:{
-        ...mapActions(['clearSession','showGlobalSheet','hideGlobalSheet']),
+        ...mapActions(['initializeSession','setSearchQuery','clearSession','showGlobalSheet','hideGlobalSheet']),
         reloadSession() {
             this.clearSession();
-            this.$store.dispatch('initializeSession');
-            this.$emit('onSearch', '');
+            this.initializeSession();
+            this.setSearchQuery('');
         }
     },
   }

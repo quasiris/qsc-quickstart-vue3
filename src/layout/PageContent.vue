@@ -8,14 +8,22 @@
         >
           <div class="my-2" v-if="!localSearchQuery">
             <h3 class="">All Products</h3>
-            <p class="gray--text text--darken-1 mb-0">
+            <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
               {{ totalproducts }} results found
+            </p>
+            <p v-else class="gray--text text--darken-1 mb-0">
+              <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
+              results found
             </p>
           </div>
           <div class="my-2" v-else>
             <h3>Hits for "{{ localSearchQuery }}"</h3>
-            <p class="gray--text text--darken-1 mb-0">
+            <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
               {{ totalproducts }} results found
+            </p>
+            <p v-else class="gray--text text--darken-1 mb-0">
+              <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
+              results found
             </p>
           </div>
           <div class="d-flex align-center flex-wrap">
@@ -765,14 +773,13 @@ export default {
           this.selectedRow=response.data.result[this.config.resultSetId].paging.rows;
           if(!this.requestId)
             this.setRequestId(response.data.requestId);
+
+          this.stopProductsLoading(); // Stop loading
+          this.stopFacetsLoading(); 
         })
         .catch(() => {
           this.showGlobalSheet();
         })
-        .finally(() => {
-          this.stopProductsLoading(); // Stop loading
-          this.stopFacetsLoading(); 
-        });
     },
     nextPage() {
       if (this.currentPage + 1 <= this.totalPages) this.currentPage += 1;
