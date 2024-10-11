@@ -9,7 +9,7 @@
           <div class="my-2" v-if="!localSearchQuery">
             <h3 class="">All Products</h3>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
-              {{ totalproducts }} results found
+              {{ totalproducts }} results found ({{ responseTime }} seconds)
             </p>
             <p v-else class="gray--text text--darken-1 mb-0">
               <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
@@ -19,7 +19,7 @@
           <div class="my-2" v-else>
             <h3>Hits for "{{ localSearchQuery }}"</h3>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
-              {{ totalproducts }} results found
+              {{ totalproducts }} results found ({{ responseTime }} seconds) 
             </p>
             <p v-else class="gray--text text--darken-1 mb-0">
               <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
@@ -388,6 +388,7 @@ export default {
       localSearchQuery: "",
       products: [],
       totalproducts: "",
+      responseTime: "",
       selectedFilters: [],
       facets: [],
       sorts: [],
@@ -755,6 +756,7 @@ export default {
             return product;
           });
           this.totalproducts = response.data.result[this.config.resultSetId].total;
+          this.responseTime = (response.data.result[this.config.resultSetId].time / 1000).toFixed(2);
           this.facets = response.data.result[this.config.resultSetId].facets;          
           this.facets = response.data.result[this.config.resultSetId].facets.map((facet) => {
             if (facet.type === 'slider' || facet.type === 'histogram') {
