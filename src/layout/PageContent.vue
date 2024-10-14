@@ -414,6 +414,7 @@ export default {
   props: {
     config: { type: Object, required: true },
     filter: { type: Object},
+    bottomFilter: { type: Boolean},
     triggerSearch: {
       type: Boolean,
       required: true, 
@@ -473,6 +474,15 @@ export default {
     },
     triggerSearch() {
         this.fetchProducts();
+    }, 
+    bottomFilter(newVal) {
+        if(newVal){
+          if(this.selectedFilters.length > 0)
+            this.clearFilters();
+          this.currentPage= 1;
+          this.selectedSort= "";
+          this.$emit("onFilter");
+        }
     },
     localSearchQuery(newVal) {
       if(newVal && newVal != this.searchQuery)
@@ -485,7 +495,7 @@ export default {
       this.fetchProducts();
     },
     selectedSort(newVal) {
-      if(newVal != this.sorts[0].name && this.sorts.length > 0){
+      if(newVal != this.sorts[0].name && this.sorts.length > 0) {
         this.startProductsLoading();
         this.fetchProducts();
       }

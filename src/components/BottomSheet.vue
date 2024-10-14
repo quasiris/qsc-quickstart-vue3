@@ -48,6 +48,7 @@
             this.clearSession();
             this.initializeSession();
             this.setSearchQuery('');
+            this.$emit("onFilter");
         }
     },
   }

@@ -2,8 +2,8 @@
     <v-app>
       <v-main class="d-flex flex-column" >
         <AppBar @onSearch="performSearch1" @onFilter="handleNavFilters"  />
-        <PageContent :filter="navFilter" :config="config" :triggerSearch="triggerSearch"/>
-        <BottomSheet @onSearch="performSearch1" />
+        <PageContent @onFilter="clearFilters" :bottomFilter="Filters" :filter="navFilter" :config="config" :triggerSearch="triggerSearch"/>
+        <BottomSheet @onFilter="clearFilters" />
         <Footer />
       </v-main>
     </v-app>
@@ -30,6 +30,7 @@
       return {
         config: config[0],
         navFilter: {},
+        Filters: false,
         triggerSearch: false,
       };
     },
@@ -54,6 +55,9 @@
 
       performSearch1() {
         this.triggerSearch = !this.triggerSearch;
+      },
+      clearFilters() {
+        this.Filters = !this.Filters;
       },
       handleNavFilters(filter) {
         if(filter){
