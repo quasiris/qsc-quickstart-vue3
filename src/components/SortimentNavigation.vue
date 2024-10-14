@@ -116,6 +116,7 @@ export default {
       Object.keys(openCategories.value).forEach((key) => {
         if (parseInt(key) > depth) {
           delete openCategories.value[key];
+          parentPath.value.splice(parseInt(key), (parentPath.value.length - 1));
         }
       });
     };
@@ -124,6 +125,7 @@ export default {
       Object.keys(openCategories.value).forEach((key) => {
         if (parseInt(key) == depth) {
           delete openCategories.value[key];
+          parentPath.value.splice(depth, (parentPath.value.length - 1));
         }
       });
     };
