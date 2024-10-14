@@ -2,6 +2,7 @@
     <v-expansion-panels
       v-model="activePanels"
       class="pa-2"
+      variant="popout"
     >
       <template v-for="(child, index) in item.values" :key="index">
         <v-list-item
@@ -88,13 +89,13 @@ export default defineComponent({
 <style>
 .item-title {
   width: 100%;
+  max-width: calc(100% - 5px)!important;
   padding-inline: 6px !important;
   background-color: white;
-  box-shadow: 
-    0px -2px 3px -2px rgba(0, 0, 0, 0.2),    
-    0px 3px 3px -2px rgba(0, 0, 0, 0.2),
-    -2px 0px 3px -2px rgba(0, 0, 0, 0.2),  
-    2px 0px 3px -2px rgba(0, 0, 0, 0.2);    
+  box-shadow: 0px -2px 2px -2px rgba(0, 0, 0, 0.2),
+   0px 3px 3px -2px rgba(0, 0, 0, 0.2), 
+   -2px 0px 3px -2px rgba(0, 0, 0, 0.2),
+   2px 0px 3px -2px rgba(0, 0, 0, 0.2);  
 }
 .item-title.active {
   background-color: rgb(238, 238, 238); 
@@ -111,6 +112,13 @@ export default defineComponent({
 .v-expansion-panel-title {
   font-weight: 500;
   padding: 12px !important;
+}
+.v-expansion-panel{
+  max-width: calc(100% - 5px)!important;
+}
+.v-expansion-panel-title--active{
+  background-color: rgb(238, 238, 238); 
+  color: #007bff !important; 
 }
 .v-expansion-panel-text__wrapper {
   padding: 0 6px 6px !important;

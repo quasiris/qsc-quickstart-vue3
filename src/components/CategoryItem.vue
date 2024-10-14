@@ -29,10 +29,19 @@ export default {
     };
 
     const handleClick = () => {
-      let category = {...props.category}
-      category.fullPath=props.path.join(' : ');
+      let category = { ...props.category };
+      if (category.name !== props.path[0]) {
+        const pathWithoutLast = (props.path[props.path.length - 1] === category.name)
+          ? props.path.slice(0, -1) // Exclude the last item if it's the same as category.name
+          : props.path;
+          
+        category.fullPath = 'Sortiment : ' + pathWithoutLast.join(' : ');
+      } else {
+        category.fullPath = 'Sortiment';
+      }
       emit('go-to-category', category);
     };
+
 
     return {
       handleMouseEnter,
