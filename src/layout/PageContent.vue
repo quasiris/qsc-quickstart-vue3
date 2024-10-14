@@ -454,7 +454,7 @@ export default {
           this.clearFilters();
           if (existingIndex === -1) {
             this.chipsValues.push({ 
-              Sortiment: newVal.name, 
+              [newVal.fullPath]: newVal.name, 
               filter: newFilter 
             });
             this.selectedFilters.push(newFilter);

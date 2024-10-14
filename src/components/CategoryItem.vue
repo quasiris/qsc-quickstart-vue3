@@ -6,7 +6,7 @@
     @click="handleClick"
   >
     <div class="category-link">
-      {{ category.name }}
+      {{ category.name }} ({{ category.count }})
     </div>
   </li>
 </template>
@@ -17,18 +17,21 @@ export default {
     category: Object,
     depth: Number,
     isActive: Boolean,
+    path: Array,
   },
   setup(props, { emit }) {
     const handleMouseEnter = () => {
       if (props.category.children && props.category.children.length > 0) {
-        emit('show-subcategories', props.category.filter, props.depth);
+        emit('show-subcategories', props.category, props.depth);
       }else{
         emit('hide-subcategories', props.depth);
       }
     };
 
     const handleClick = () => {
-      emit('go-to-category', props.category);
+      let category = {...props.category}
+      category.fullPath=props.path.join(' : ');
+      emit('go-to-category', category);
     };
 
     return {

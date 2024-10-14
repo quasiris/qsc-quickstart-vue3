@@ -17,6 +17,7 @@
           v-for="category in categories"
           :key="category.id"
           :category="category"
+          :path="parentPath"
           :depth="0"
           :is-active="isActiveCategory(0, category.filter)"
           @show-subcategories="addOpenCategory"
@@ -33,6 +34,7 @@
           v-for="subcategory in getSubcategories(parentId[1])"
           :key="subcategory.id"
           :category="subcategory"
+          :path="parentPath"
           :depth="parseInt(parentId[0]) + 1"
           :is-active="isActiveCategory(parseInt(parentId[0]) + 1, subcategory.filter)"
           @show-subcategories="addOpenCategory"
@@ -64,6 +66,7 @@ export default {
     const categoryLeft = ref(50);
     const navigation = ref(null);
     const openCategories = ref({}); // track open categories by depth
+    const parentPath = ref([]); 
     let hideTimeout = null;
 
     const fetchCategories = async () => {
@@ -93,7 +96,8 @@ export default {
       hideTimeout = setTimeout(() => {
         showCategories.value = false;
         openCategories.value = {}; // Reset open categories on hide
-      }, 300);
+        parentPath.value = []; 
+      }, 200);
     };
 
     const cancelHideMainCategories = () => {
@@ -105,9 +109,9 @@ export default {
         categoryLeft.value = navRect.left;
       }
     };
-    const addOpenCategory = (filter, depth) => {
-      openCategories.value = { ...openCategories.value, [depth]: filter };
-
+    const addOpenCategory = (category, depth) => {
+      openCategories.value = { ...openCategories.value, [depth]: category.filter };
+      parentPath.value.splice(depth, 1, category.name);
       // Remove deeper levels when selecting a shallower category
       Object.keys(openCategories.value).forEach((key) => {
         if (parseInt(key) > depth) {
@@ -164,6 +168,7 @@ export default {
       categoryLeft,
       showCategories,
       openCategories,
+      parentPath,
       showMainCategories,
       startHideMainCategories,
       cancelHideMainCategories,
@@ -232,7 +237,7 @@ export default {
 }
 
 .main-category-list {
-  width: 160px;
+  width: 180px;
 }
 
 .subcategory-list {
