@@ -99,7 +99,7 @@ Here are a few screenshots to help visualize how the project looks when running.
 ![Alt text](src/assets/Screenshot2.png)
 ### Sortiment Navigation
 ![Alt text](src/assets/Screenshot4.png)
-### Applied filters and Search query
+### Applied filters 
 ![Alt text](src/assets/Screenshot3.png)
 
 ## How to Use the Configuration
@@ -142,3 +142,8 @@ Here’s a simplified example of what the API response from the baseurl might lo
   }
 }
 ```
+## Vue.js Integration
+
+This project is built with Vue.js 3, allowing easy integration of reactive components.
+You can modify the components or extend them as needed. The config.json helps you 
+control what data is shown without modifying the core Vue.js code.
