@@ -55,25 +55,32 @@
           <div class="top-priority" v-if="suggests.length > 0">
             <ul>
               <li
-                v-for="(suggest, index) in suggests"
+                v-for="(suggest, index) in filteredItems"
                 :key="index"
                 :class="{ selected: index === selectedIndex }"
                 style="border-radius: 10px;"
               >
                 <v-list-item
                   class="list-item"
-                  @click="selectSuggestion(suggest.suggest)"
-                  @keydown.enter.prevent="selectSuggestion(suggest.suggest)"
+                  @click="selectSuggestion(suggest)"
+                  @keydown.enter.prevent="selectSuggestion(suggest)"
                   @mouseover="handleMouseOver(index)"
                   @mouseleave="handleMouseLeave"
                   tabindex="0"
                 >
-                  <v-icon
+                  <v-icon v-if="!isInRecentSearches(suggest)"
                     class="no-animation"
                     :class="{
                       'white-font': index === selectedIndex
                     }"
                     >mdi-magnify</v-icon
+                  >
+                  <v-icon v-else
+                    class="no-animation"
+                    :class="{
+                      'white-font': index === selectedIndex
+                    }"
+                    >mdi-history</v-icon
                   >
                   &nbsp; &nbsp;
                   <span
@@ -81,7 +88,7 @@
                       'white-font': index === selectedIndex,
                     }"
                   >
-                    {{ suggest.suggest }}
+                    {{ suggest }}
                   </span>
                 </v-list-item>
               </li>
@@ -149,6 +156,7 @@ export default {
     return {
       localSearchQuery: "",
       suggests: [],
+      recentSearches: [],
       config: config[0],
       isFixedAppBar: false,
       navFilter: false,
@@ -192,7 +200,19 @@ export default {
     ...mapState(['requestId','userId','sessionId','email','searchQuery','bottomSheet']),
     isEmailValid() {
       return ((this.rules.every(rule => rule(this.emailInput) === true)) && (this.email != this.emailInput));
-    }
+    },
+    filteredItems() {
+      const suggestValues = this.suggests.map(item => item.suggest);
+      const recent = this.recentSearches[this.config.id].filter(item => 
+        item && item.toLowerCase().startsWith(this.localSearchQuery.toLowerCase())
+      );      
+      // Combine recent suggestions with filtered items, ensuring no duplicates
+      const uniqueFilteredItems = [...new Set([...recent, ...suggestValues])];
+      if (uniqueFilteredItems.length > 10) {
+        uniqueFilteredItems.length = 10;  // Trim the array to 10 items
+      }
+      return uniqueFilteredItems;
+    },
   },
   async mounted() {
     window.addEventListener("mousemove", this.handleMouseMove);
@@ -208,6 +228,11 @@ export default {
         break; // Exit the loop once a match is found
       }
     }
+    this.recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
+    if(!this.recentSearches[this.config.id]){
+      this.recentSearches[this.config.id]=[]
+      localStorage.setItem('recentsSearch', JSON.stringify(this.recentSearches));
+    }
     this.fetchSuggestions();
   },
   beforeUnmount() {
@@ -220,6 +245,10 @@ export default {
     handleclearSession(){
       this.clearSession();
       this.$store.dispatch('initializeSession');
+    },
+    isInRecentSearches(item) {
+      const recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
+      return recentSearches[this.config.id].includes(item);
     },
     fetchSuggestions() {
       const suggestUrl = this.config.suggestionUrl;
@@ -259,6 +288,15 @@ export default {
         });
     },
     searchProducts() {
+      if(this.localSearchQuery.trim() != ''){
+        this.recentSearches[this.config.id].unshift(this.localSearchQuery.toLowerCase());
+        this.recentSearches[this.config.id]= [...new Set(this.recentSearches[this.config.id])];
+          // Ensure the length is max 10
+          if (this.recentSearches[this.config.id].length > 10) {
+            this.recentSearches[this.config.id].length = 10;  // Trim the array to 10 items
+          }
+        localStorage.setItem('recentsSearch', JSON.stringify(this.recentSearches));
+      }
       this.navFilter=false;
       this.stopBottomSheet();
       this.startFacetsLoading();
@@ -303,7 +341,6 @@ export default {
       }
       this.prevScrollPos = currentScrollPos;
     },
-
     handleWindowClick() {
       this.suggests = []; // Clear the suggests list
     },
@@ -355,6 +392,9 @@ $md: 959px;
 }
 .search-bar {
   width: 85%;
+}
+.mdi-magnify {
+  font-size: 25px !important;
 }
 .search-bar-dropdown {
   height: 40px;
