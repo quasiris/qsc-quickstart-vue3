@@ -78,11 +78,11 @@ The main configuration file for this project is config.json, where you can speci
 
 ## Screenshots
 
-Here are a few screenshots to help visualize how the project looks when running. Replace the paths with actual image links:
+Here are a few screenshots to help visualize how the project looks when running:
 
 ### Home Page
 ![Alt text](src/assets/Screenshot1.png)
-### Main Search
+### Search Suggestions
 ![Alt text](src/assets/Screenshot2.png)
 ### Sortiment Navigation
 ![Alt text](src/assets/Screenshot4.png)
@@ -110,7 +110,15 @@ in this Custom configuration example, we define the name field by combining the 
 
 ### Explanation of the Template field:
 
-- **Custom template**:Previous Custom template example will generate a product card where:
+  ```
+{ ...
+  "document": {
+    ...
+    "template": "<div class='product-card'><a :href='config.url'><div class=\"image\"><img v-if=\"config.image && document.image\" :src=\"config.image\" class=\"rounded\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" /></div>{{config.name}}</a></div>"&
+  }
+}
+```
+- **Custom template**: Custom template example will generate a product card where:
     - The product name and price are displayed as the title `config.name`.
     - The image is shown if image is loaded from the API response `v-if=\"config.image && document.image\"`.
     - The link points to the product's detail page using the url field from the API `config.url`.

@@ -156,7 +156,7 @@ export default {
     return {
       localSearchQuery: "",
       suggests: [],
-      recentSearches: [],
+      recentSearches: {},
       config: config[0],
       isFixedAppBar: false,
       navFilter: false,
@@ -236,8 +236,8 @@ export default {
     this.fetchSuggestions();
   },
   beforeUnmount() {
+        // Remove the event listeners when the component is unmounted
     window.removeEventListener("mousemove", this.handleMouseMove);
-    // Remove the event listener when the component is unmounted
     window.removeEventListener("click", this.handleWindowClick);
   },
   methods: {
@@ -395,6 +395,7 @@ $md: 959px;
 }
 .mdi-magnify {
   font-size: 25px !important;
+  margin-inline-start: 2px !important;
 }
 .search-bar-dropdown {
   height: 40px;

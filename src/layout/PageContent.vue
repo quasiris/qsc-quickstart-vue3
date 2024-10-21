@@ -6,7 +6,7 @@
         <v-card-text
           class="ps-6 d-flex justify-space-between align-center flex-wrap mt-3"
         >
-          <div class="my-2" v-if="!localSearchQuery">
+          <div class="my-2 mb-3" v-if="!localSearchQuery">
             <h3 class="">All Products</h3>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
               {{ totalproducts }} results found <span class="text-caption">({{ responseTime }} seconds)</span>
@@ -495,7 +495,7 @@ export default {
       this.fetchProducts();
     },
     selectedSort(newVal) {
-      if(newVal != this.sorts[0].name && this.sorts.length > 0) {
+      if(newVal != this.sorts[0].name && this.sorts.length > 0 && !this.resetAll) {
         this.startProductsLoading();
         this.fetchProducts();
       }
