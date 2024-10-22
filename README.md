@@ -112,13 +112,17 @@ in this Custom configuration example, we define the name field by combining the 
 
 ### Explanation of the Template field:
 
-  ```
-{ ...
-  "document": {
-    ...
-    "template": "<div class='product-card'><a :href='config.url'><div class=\"image\"><img v-if=\"config.image && document.image\" :src=\"config.image\" class=\"rounded\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" /></div>{{config.name}}</a></div>"&
-  }
-}
+```html
+<div class='product-card'>
+   <a :href='config.url'>
+      <div class="image">
+          <img v-if="config.image && document.image"
+                :src="config.image" class="rounded"
+                style="max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;" />
+       </div>
+      {{config.name}}
+   </a>
+</div>
 ```
 - **Custom template**: Custom template example will generate a product card where:
     - The product name and price are displayed as the title `config.name`.
