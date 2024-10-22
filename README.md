@@ -1,8 +1,10 @@
 # qsc-quickstart-vue3
 
 ## Overview
-
-This is a configurable e-commerce template built with Vue.js 3 and Vuetify 3, designed for rapid integration with various e-commerce APIs. The template is flexible and allows users to easily customize its behavior through a configuration file (`config.json`). This project helps you set up an online shop quickly by configuring endpoints and templates in a Vue.js environment.
+This project proved a configurable e-commerce template built with Vue.js 3 and Vuetify 3,
+designed for rapid integration of the Quasiris Search Cloud APIs.
+The template is flexible and allows users to easily customize its behavior through a configuration file (`config.json`).
+This project helps you set up an ecommerce search quickly by configuring endpoints and templates in a Vue.js environment.
 
 ## Project Setup
 
