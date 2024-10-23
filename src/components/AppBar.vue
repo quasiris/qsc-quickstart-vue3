@@ -18,8 +18,9 @@
         </v-toolbar-title>
         <v-col lg="8" sm="7" class="d-flex align-center justify-space-around">
           <sortiment-navigation :url="config.sortimentUrl" @handleFilter="haldleNavFilter($event)" v-if="(config.sortimentUrl && (display.width._object.width >= 960))" />
-          <div class="search-bar d-flex align-center p-relative">
+          <div class="search-bar d-flex align-center p-relative" ref="searchArea">
             <v-text-field
+              ref="searchInput"
               type="text"
               v-model="localSearchQuery"
               placeholder="article / keyword / product"
@@ -30,6 +31,7 @@
               prepend-inner-icon="mdi-magnify"
               class="search-input"
               @input="sanitizeInput"
+              @focus="showRecentSearches()"
               :style="{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }"
             >
               <template #append>
@@ -52,7 +54,7 @@
               Search
             </v-btn>
           </div>
-          <div class="top-priority" v-if="suggests.length > 0">
+          <div class="top-priority" v-if="filteredItems.length > 0 && showRecents" ref="suggestionsDropdown">
             <ul>
               <li
                 v-for="(suggest, index) in filteredItems"
@@ -160,6 +162,7 @@ export default {
       config: config[0],
       isFixedAppBar: false,
       navFilter: false,
+      showRecents: false,
       prevScrollPos: 0,
       selectedSuggestion: "",
       selectedIndex: -1,
@@ -203,9 +206,9 @@ export default {
     },
     filteredItems() {
       const suggestValues = this.suggests.map(item => item.suggest);
-      const recent = this.recentSearches[this.config.id].filter(item => 
+      const recent = this.recentSearches[this.config.id]?.filter(item => 
         item && item.toLowerCase().startsWith(this.localSearchQuery.toLowerCase())
-      );      
+      ) || [];      
       // Combine recent suggestions with filtered items, ensuring no duplicates
       const uniqueFilteredItems = [...new Set([...recent, ...suggestValues])];
       if (uniqueFilteredItems.length > 10) {
@@ -296,6 +299,7 @@ export default {
             this.recentSearches[this.config.id].length = 10;  // Trim the array to 10 items
           }
         localStorage.setItem('recentsSearch', JSON.stringify(this.recentSearches));
+        this.showRecents=false;
       }
       this.navFilter=false;
       this.stopBottomSheet();
@@ -321,8 +325,14 @@ export default {
       // Replace multiple spaces with a single space
       this.localSearchQuery = event.target.value.replace(/^\s+/, '');
     },
+    showRecentSearches() {
+      setTimeout(() => {
+          this.showRecents = true;
+      }, 100);
+    },
     selectSuggestion(suggestion) {
       this.localSearchQuery = suggestion;
+      this.showRecents = false;
       this.selectedSuggestion = suggestion;
       this.searchProducts();
       this.suggests = []; // Clear the suggestions list
@@ -341,7 +351,13 @@ export default {
       }
       this.prevScrollPos = currentScrollPos;
     },
-    handleWindowClick() {
+    handleWindowClick(event) {
+      const searchArea = this.$refs.searchArea;
+      const suggestionsDropdown = this.$refs.suggestionsDropdown;
+      if (!searchArea.contains(event.target) && (!suggestionsDropdown || !suggestionsDropdown.contains(event.target))) {
+        this.showRecents = false;
+        this.selectedIndex = -1;
+      }
       this.suggests = []; // Clear the suggests list
     },
     handleMouseOver(index) {
@@ -360,18 +376,19 @@ export default {
         this.isMouseOver = false; // Reset the isMouseOver flag when using keyboard navigation
       } else if (event.key === "ArrowDown") {
         event.preventDefault();
-        if (this.selectedIndex < this.suggests.length - 1) {
+        if (this.selectedIndex < this.filteredItems.length - 1) {
           this.selectedIndex++;
         }
         this.isMouseOver = false; // Reset the isMouseOver flag when using keyboard navigation
       } else if (event.key === "Enter") {
         event.preventDefault();
         if (this.selectedIndex !== -1) {
-          const selectedSuggestion = this.suggests[this.selectedIndex]?.suggest;
+          const selectedSuggestion = this.filteredItems[this.selectedIndex] ? this.filteredItems[this.selectedIndex] : this.filteredItems[this.selectedIndex].suggest;
           this.selectSuggestion(selectedSuggestion);
         } else if (this.localSearchQuery.trim() !== "") {
           this.searchProducts();
         }
+        this.$refs.searchInput.blur();
         this.isMouseOver = false; // Reset the isMouseOver flag when using keyboard navigation
       }
     },
