@@ -4,11 +4,13 @@ import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
 import VueSvgInlinePlugin from "vue-svg-inline-plugin";
 import store  from './store/store'
+import router from './router/index.js';
 import "vue-svg-inline-plugin/src/polyfills";
 
 loadFonts()
 
 const app = createApp(App);
+    app.use(router)
     app.use(vuetify)
       .use(VueSvgInlinePlugin, {
         attributes: {

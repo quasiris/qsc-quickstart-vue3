@@ -752,8 +752,14 @@ export default {
             Object.keys(this.config.document).forEach(key => {
               let pattern = this.config.document[key];
               // Check if the pattern is a placeholder or a direct key
+              if(pattern === '#detail'){
+                const baseUrl = window.location.origin + window.location.pathname;
+                // Concatenate the base URL with '/detail' and product.document.id
+                updatedDocument[key] = `${baseUrl}/detail/${product.document.id}`
+                return;
+              }
               if (pattern.includes('${')) {
-                // placeholders ${}
+                // placeholders ${variable}
                 updatedDocument[key] = replacePlaceholders(pattern, product.document);
               } else {
                 // directly map the key

@@ -49,6 +49,13 @@
             this.initializeSession();
             this.setSearchQuery('');
             this.$emit("onFilter");
+            const basePath = `/${this.$route.params.config || ''}`;
+
+            if (this.$route.path.startsWith(basePath)) {
+                this.$router.replace(basePath); 
+            } else {
+                this.$router.push('/');
+            }
         }
     },
   }

@@ -10,7 +10,7 @@
       :class="{ 'list-view': viewMode === 'list' }"
     >
       <a
-        v-bind:href="product.document[config.document.url]"
+        v-bind:href="product.document.url"
       >
         <div class="image">
           <img

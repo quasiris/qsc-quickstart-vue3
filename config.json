@@ -44,7 +44,6 @@
     "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
     "document": {
       "name": "${title} : ${price}",
-      "url": "url",
       "image": "image",
       "template": "<div class=\"card\">\n  <a :href=\"config.url\">\n    <div class=\"d-flex justify-content-between align-end\">\n      <div class=\"flex-grow-1 my-3\">\n        <h6 class=\"mb-0 text-center\" style=\"color:blue;font-size: 10px;\">\n          {{config.name}}\n        </h6>\n      </div>\n    </div>\n    <div class=\"image\"> <img v-if=\"config.image && document.image\" :src=\"config.image\" class=\"rounded\" style=\"max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;\" /> </div>\n <div v-if=\"document.available\" class=\"flex-grow-1 my-3\" ><h5 class=\"mb-0 text-center\" style=\"color:black;font-size: 12px;\">{{document.price}}</h5> </div></a>\n</div>"
     }
@@ -53,11 +52,12 @@
     "id": "docs",
     "baseurl": "https://qsc.quasiris.de/api/v1/search/quasiris/qsc-documentation",
     "suggestionUrl": "https://qsc.quasiris.de/api/v1/search/suggest/quasiris/qsc-documentation?q=",
+    "detailsUrl": "https://qsc.quasiris.de/cdn/qsc/quasiris/docs/",
     "resultSetId": "qsc-documentation",
     "logo": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png",
     "document": {
       "name": "${title}",
-      "url": "url",
+      "url": "#detail",
       "image": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png"
     }
   }
