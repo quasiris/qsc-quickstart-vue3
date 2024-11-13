@@ -309,6 +309,15 @@ export default {
         this.$emit("onSearch");
       else
         this.setSearchQuery(this.localSearchQuery);
+      
+      let localUrl= '/'
+      if(this.config.id != '1')
+        localUrl= localUrl+this.config.id
+      if(window.location.pathname != localUrl){
+        const newUrl = new URL(window.location.origin + localUrl);
+        newUrl.searchParams.set('q', this.localSearchQuery); 
+        window.location.href = newUrl.toString();
+      }
       this.suggests = [];
     },
     haldleNavFilter(filter) {

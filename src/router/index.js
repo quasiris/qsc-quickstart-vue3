@@ -12,7 +12,7 @@ const routes = [
     component: PageContent, 
   },
   {
-    path: '/:config/detail/:pathMatch(.*)*',
+    path: '/:config?/detail/:pathMatch(.*)*',
     name: 'DetailsContent',
     component: DetailsContentPage,
     props: true,

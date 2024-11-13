@@ -248,8 +248,15 @@
                     <v-container v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) && !isProductsLoading" class="d-flex  align-center no-product-container">
                       <v-row>                      
                         <v-col cols="12" class="text-center">
-                          <p class="mb-2 text-h5 font-weight-bold text--grey">No products found for "<span class="highlight">{{ searchQuery }}</span>"</p>
-                          <v-icon class="mb-3" size="x-large" color="grey">mdi-magnify-close</v-icon> 
+                          <p class="mb-2 text-h5 font-weight-bold text--grey">No result found for "<span class="highlight">{{ searchQuery }}</span>"</p>
+                          <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> 
+                          <v-btn
+                            color="primary"
+                            variant="text"
+                            size="x-small"
+                            class="text-capitalize justify-center"
+                            @click="clearSearchQuery()"
+                            >Reset all</v-btn>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -435,7 +442,13 @@ export default {
   },
   created() {
     window.addEventListener("scroll", this.handleScroll);
-    this.items = this.getProducts;
+    let localUrl= '/'
+      if(this.config.id != '1')
+        localUrl= localUrl+this.config.id
+      if(window.location.pathname != localUrl){
+        const newUrl = new URL(window.location.origin + localUrl);
+        window.history.pushState({}, '', newUrl);
+      }
   },
   unmounted() {
     window.removeEventListener("scroll", this.handleScroll);
@@ -753,13 +766,6 @@ export default {
             // Replace placeholders for each key in the config.document
             Object.keys(this.config.document).forEach(key => {
               let pattern = this.config.document[key];
-              // Check if the pattern is a placeholder or a direct key
-              if(pattern === '#detail'){
-                const baseUrl = window.location.origin + window.location.pathname;
-                // Concatenate the base URL with '/detail' and product.document.id
-                updatedDocument[key] = `${baseUrl}/detail/${product.document.id}`
-                return;
-              }
               if (pattern.includes('${')) {
                 // placeholders ${variable}
                 updatedDocument[key] = replacePlaceholders(pattern, product.document);
@@ -1010,7 +1016,7 @@ input[type="number"] {
 .no-product-container {
   padding: 2em;
   color: #515151;
-  min-height: 55vh;
+  min-height: 57vh;
   background-color: #eee;
   border-radius: 5px;
   margin-left: 13px;

@@ -51,7 +51,8 @@ export default {
     async fetchDetails(url) {
       try {
         const response = await fetch(url);
-        const data = await response.text();
+        let data = await response.text();
+        data = data.replace(/---(.*?)---/gs, ''); 
         this.markdownText = data; 
       } catch (error) {
         this.showGlobalSheet();

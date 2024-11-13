@@ -57,7 +57,7 @@
     "logo": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png",
     "document": {
       "name": "${title}",
-      "url": "#detail",
+      "url": "https://master.dtg24ju05cbrd.amplifyapp.com/docs/detail/${id}",
       "image": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png"
     }
   }
