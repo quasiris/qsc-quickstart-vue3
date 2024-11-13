@@ -28,7 +28,7 @@
           </div>
           <div class="d-flex align-center flex-wrap">
             <v-select  v-if="sorts.length > 0"
-              class="d-flex align-end"
+              class="d-flex align-end sort_input"
               :items="sorts"
               label="Sort by"
               v-model="selectedSort"
@@ -88,7 +88,7 @@
             @click="isSidebar = !isSidebar"
           >
           </div>
-          <v-navigation-drawer v-if="facets && !isFacetsLoading" :width="325"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+          <v-navigation-drawer v-if="facets && !isFacetsLoading && products.length > 0" :width="325"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item v-for="facet in facets" :key="facet.id">
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
@@ -245,12 +245,14 @@
                     >Reset all</v-btn
                   > 
                   <v-col cols="12" class="col-auto">
-                    <v-row v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) && !isProductsLoading" class="d-flex flex-column align-center justify-center" style="min-height: 300px;">                      
-                      <v-col cols="12" class="text-center">
-                        <p class="font-weight-bold">No products found for "&nbsp;{{ searchQuery }}&nbsp;"</p>
-                        <v-icon size="x-large" color="grey">mdi-magnify-close</v-icon> 
-                      </v-col>
-                    </v-row>
+                    <v-container v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) && !isProductsLoading" class="d-flex  align-center no-product-container">
+                      <v-row>                      
+                        <v-col cols="12" class="text-center">
+                          <p class="mb-2 text-h5 font-weight-bold text--grey">No products found for "<span class="highlight">{{ searchQuery }}</span>"</p>
+                          <v-icon class="mb-3" size="x-large" color="grey">mdi-magnify-close</v-icon> 
+                        </v-col>
+                      </v-row>
+                    </v-container>
                     <v-data-iterator :items="isProductsLoading ? skeletonProducts : products" hide-default-footer>
                       <!--  Here I have Products-->
                         <v-row >                          
@@ -867,7 +869,7 @@ export default {
   transform: scale(0.8); 
 }
 .box-content{
-  width: calc(100% - 300px);
+  width: calc(100% - 30px);
   border-radius: 8px;
 }
 a {
@@ -895,7 +897,7 @@ a {
 .v-select {
   max-width: 200px; 
 }
-.v-input__control {
+.sort_input .v-input__control {
   min-width: 200px;
   max-height: 46px;
 }
@@ -1004,6 +1006,21 @@ input[type="number"] {
   font-size: 18px;
   color: #333;
   font-weight: bold;
+}
+.no-product-container {
+  padding: 2em;
+  color: #515151;
+  min-height: 55vh;
+  background-color: #eee;
+  border-radius: 5px;
+  margin-left: 13px;
+}
+.mdi-magnify-close{
+  font-size: 50px !important;
+}
+.highlight {
+  font-weight: bold;
+  color: #424242;
 }
 @media (max-width: 768px) {
   .viewIcon{
