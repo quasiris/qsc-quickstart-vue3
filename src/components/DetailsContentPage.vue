@@ -1,8 +1,14 @@
 <template>
-  <div class="pt-5">
-    <v-btn color="primary" class="back-button" @click="NavigateTo()" icon="mdi-arrow-left"></v-btn>
-    <vue-markdown-preview class="markdownText" :source="markdownText" />
-    </div>
+  <v-container>
+    <v-row>
+      <v-col cols="12">
+        <div class="pt-5">
+          <v-btn color="primary" size="small" class="back-button" @click="NavigateTo()" icon="mdi-arrow-left"></v-btn>
+          <vue-markdown-preview class="markdown-wrapper" :source="markdownText" />
+        </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -63,65 +69,15 @@ export default {
 };
 </script>
 
-<style>
-.markdownText{
-  padding: 3%;
-  margin: 20px;
-  .vue-markdown {
-    font-family: 'Arial', sans-serif; 
-    line-height: 1.6;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  table, th, td {
-    border: 1px solid #ddd;
-  }
-
-  th, td {
-    padding: 8px;
-    text-align: left;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    margin-top: 1.25em;
-    margin-bottom: 0.3em;
-  }
-  p,hr {
-    margin: 8px;
-  }
-  ul, ol {
-    padding-left: 1.5em; 
-    margin-bottom: 1em;  
-  }
-  ul {
-    list-style-type: disc; 
-  }
-  ol {
-    list-style-type: decimal; 
-  }
-  ul ul, ol ol {
-    margin-left: 1em; 
-    list-style-type: circle; 
-  }
-  li {
-    margin-bottom: 0.5em; 
-  }
-  li::marker {
-    color: #007ACC; 
-  }
-  li p {
-    margin: 0; 
-  }
-  pre {
-    background-color: #f4f4f4;
-    padding: 14px;
-    border-radius: 4px;
-    margin: 15px;
-  }
-  
+<style lang="scss">
+@import '~@uivjs/vue-markdown-preview/markdown.css';
+.markdown-body {
+  margin: 0 0  0 9px;
+}
+.markdown-wrapper {
+  min-height: 85vh !important;
+  max-width: 100% !important;
+  padding-top: 5%;
 }
 </style>
 <style scoped>
@@ -131,7 +87,6 @@ export default {
   right: 80px;
   color: white;
 }
-
 .back-button:hover {
   background-color: #005F99;
 }
