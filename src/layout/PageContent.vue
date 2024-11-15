@@ -202,7 +202,7 @@
                   </v-icon>
                 </v-btn>
               </div>
-              <div class="box-container">
+              <div class="d-flex flex-column">
                 <v-row>
                   <div class="sQuery mb-1" v-show="searchQuery"  @click="clearSearchQuery" >
                     <span class="chip-text">{{ searchQuery }}</span>
@@ -260,9 +260,9 @@
                         </v-col>
                       </v-row>
                     </v-container>
-                    <v-data-iterator :items="isProductsLoading ? skeletonProducts : products" hide-default-footer>
+                    <v-data-iterator  :items="isProductsLoading ? skeletonProducts : products" hide-default-footer>
                       <!--  Here I have Products-->
-                        <v-row >                          
+                        <v-row style="min-height: 60vh;">                          
                           <v-col
                             v-for="(product, index) in (isProductsLoading ? skeletonProducts : products)"
                             :key="index"

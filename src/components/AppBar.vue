@@ -4,21 +4,19 @@
       <div class="d-flex justify-space-between align-center">
         <v-toolbar-title class="d-flex align-center">
           <div>
-            <a href="javascript:window.location.reload(true);">
               <img
                 class="me-2 logo d-md-block d-none v-image"
-                max-width="170px"
-                max-height="64px"
                 :src="config.logo"
-                style="max-height: 64px; max-width: 170px;"
+                @click="logoRedirect(config?.logoRedirection)"
+                style="max-height: 64px; max-width: 170px; cursor: pointer;"
                 alt=""
               />
-            </a>
           </div>
         </v-toolbar-title>
         <v-col lg="8" sm="7" class="d-flex align-center justify-space-around">
           <sortiment-navigation :url="config.sortimentUrl" @handleFilter="haldleNavFilter($event)" v-if="(config.sortimentUrl && (display.width._object.width >= 960))" />
-          <div class="search-bar d-flex align-center p-relative" ref="searchArea">
+          <div class="search-wrapper d-flex flex-column">
+            <div class="search-bar d-flex align-center p-relative" ref="searchArea">
             <v-text-field
               ref="searchInput"
               type="text"
@@ -53,48 +51,49 @@
             >
               Search
             </v-btn>
-          </div>
-          <div class="top-priority" v-if="filteredItems.length > 0 && showRecents" ref="suggestionsDropdown">
-            <ul>
-              <li
-                v-for="(suggest, index) in filteredItems"
-                :key="index"
-                :class="{ selected: index === selectedIndex }"
-                style="border-radius: 10px;"
-              >
-                <v-list-item
-                  class="list-item"
-                  @click="selectSuggestion(suggest)"
-                  @keydown.enter.prevent="selectSuggestion(suggest)"
-                  @mouseover="handleMouseOver(index)"
-                  @mouseleave="handleMouseLeave"
-                  tabindex="0"
+            </div>
+            <div class="top-priority" v-if="filteredItems.length > 0 && showRecents" ref="suggestionsDropdown">
+              <ul>
+                <li
+                  v-for="(suggest, index) in filteredItems"
+                  :key="index"
+                  :class="{ selected: index === selectedIndex }"
+                  style="border-radius: 10px;"
                 >
-                  <v-icon v-if="!isInRecentSearches(suggest)"
-                    class="no-animation"
-                    :class="{
-                      'white-font': index === selectedIndex
-                    }"
-                    >mdi-magnify</v-icon
+                  <v-list-item
+                    class="list-item"
+                    @click="selectSuggestion(suggest)"
+                    @keydown.enter.prevent="selectSuggestion(suggest)"
+                    @mouseover="handleMouseOver(index)"
+                    @mouseleave="handleMouseLeave"
+                    tabindex="0"
                   >
-                  <v-icon v-else
-                    class="no-animation"
-                    :class="{
-                      'white-font': index === selectedIndex
-                    }"
-                    >mdi-history</v-icon
-                  >
-                  &nbsp; &nbsp;
-                  <span
-                    :class="{
-                      'white-font': index === selectedIndex,
-                    }"
-                  >
-                    {{ suggest }}
-                  </span>
-                </v-list-item>
-              </li>
-            </ul>
+                    <v-icon v-if="!isInRecentSearches(suggest)"
+                      class="no-animation"
+                      :class="{
+                        'white-font': index === selectedIndex
+                      }"
+                      >mdi-magnify</v-icon
+                    >
+                    <v-icon v-else
+                      class="no-animation"
+                      :class="{
+                        'white-font': index === selectedIndex
+                      }"
+                      >mdi-history</v-icon
+                    >
+                    &nbsp; &nbsp;
+                    <span
+                      :class="{
+                        'white-font': index === selectedIndex,
+                      }"
+                    >
+                      {{ suggest }}
+                    </span>
+                  </v-list-item>
+                </li>
+              </ul>
+            </div>
           </div>
         </v-col>
         <v-col cols="1">
@@ -252,6 +251,27 @@ export default {
     isInRecentSearches(item) {
       const recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
       return recentSearches[this.config.id].includes(item);
+    }, 
+    logoRedirect(link = '') {
+      if (link) {
+        // Open the link in a new tab
+        window.open(link, '_blank');
+        return;
+      }
+      let localUrl = '/';
+      if (this.config.id !== '1') {
+        localUrl += this.config.id;
+      }
+      if (window.location.pathname === localUrl) {
+        // If the pathname matches, reload the page
+        const cleanUrl = window.location.origin + localUrl;
+        window.history.replaceState({}, '', cleanUrl); 
+        window.location.reload(); 
+      } else {
+        // Redirect to the constructed URL
+        const newUrl = new URL(window.location.origin + localUrl);
+        window.location.href = newUrl.toString();
+      }
     },
     fetchSuggestions() {
       const suggestUrl = this.config.suggestionUrl;
@@ -416,9 +436,6 @@ $md: 959px;
   flex-grow: 1;
   margin-right: 0;
 }
-.search-bar {
-  width: 85%;
-}
 .mdi-magnify {
   font-size: 25px !important;
   margin-inline-start: 2px !important;
@@ -456,20 +473,30 @@ $md: 959px;
   right: 0;
   z-index: 1000;
   animation: showAppBar 0.5s ease; 
+  overflow: visible;
 }
+.search-wrapper {
+  width: 85%;
+  z-index: 1010; 
+  position: relative;
+}
+
+.search-bar {
+  width: 100%; 
+}
+
 .top-priority {
-  position: fixed;
-  z-index: 2000;
-  width: auto;
-  min-width: 43vw;
+  width: 100%; 
   background-color: white;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+  box-shadow: 1px 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
-  top: 70px;
-  
-  ul {
-    list-style: none; 
-  }
+  position: absolute; 
+  top: 100%;
+  z-index: 2000;
+}
+
+.top-priority ul {
+  list-style: none;
 }
 .list-item {
   font-weight: bold;
@@ -496,7 +523,7 @@ $md: 959px;
   right: 80px;
 }
 @media (max-width: 600px) {
-  .list-item {width: 290px;} /* Set the width for small screens */
+  .list-item {width: 290px;} 
 }
 @media (min-width: 601px) and (max-width: 960px) {
   .list-item {width: 650px;} 

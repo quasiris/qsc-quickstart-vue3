@@ -6,6 +6,7 @@
     "sortimentUrl": "https://qsc-dev.quasiris.de/api/v1/category/demo/navigation-random",
     "resultSetId": "trendware",
     "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
+    "logoRedirection": "https://www.quasiris.com/",
     "document": {
       "name": "title",
       "url": "url",
@@ -55,6 +56,7 @@
     "detailsUrl": "https://qsc.quasiris.de/cdn/qsc/quasiris/docs/",
     "resultSetId": "qsc-documentation",
     "logo": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png",
+    "logoRedirection": "https://www.quasiris.com/",
     "document": {
       "name": "${title}",
       "url": "https://master.dtg24ju05cbrd.amplifyapp.com/docs/detail/${id}",
