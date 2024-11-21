@@ -52,7 +52,6 @@ export default {
   methods: {
     ...mapActions(['setSearchQuery']),
     performSearch1() {
-      console.log('hnee index onSearch')
       this.triggerSearch = !this.triggerSearch;
     },
     clearFilters() {

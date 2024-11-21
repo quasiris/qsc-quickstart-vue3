@@ -184,7 +184,6 @@ export default {
   },
   watch: {
     localSearchQuery(newVal) {
-      console.log(newVal)
       if (newVal !== this.searchQuery ) {
         this.localSearchQuery = newVal; // Sync local data with prop
       }
