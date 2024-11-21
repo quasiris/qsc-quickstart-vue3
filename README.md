@@ -42,9 +42,11 @@ The main configuration file for this project is config.json, where you can speci
     "id": "nam",
     "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware",
     "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/trendware?q=",
+    "detailsUrl": "https://qsc.quasiris.de/cdn/qsc/quasiris/docs/",
     "sortimentUrl": "https://qsc-dev.quasiris.de/api/v1/category/demo/navigation-random",
     "resultSetId": "trendware",
     "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
+    "logoRedirection": "https://www.quasiris.com/",
     "document": {
       "name": "${title} : ${price}",
       "url": "url",
@@ -62,15 +64,34 @@ The main configuration file for this project is config.json, where you can speci
 
 ### Key Configuration Fields
 
-- **id**: A unique identifier for the configuration, set `1`  for default configuration.
+- **id**: A unique identifier for the configuration, set `1`  for default configuration. (Required)
 - **baseurl**: API endpoint for fetching products data. (Required)
 - **suggestionUrl**: API endpoint for search bar suggestions. (Required)
+- **detailsUrl**: API endpoint for products details. If missing, you can configure a redirection Link in document url config. 
 - **sortimentUrl**: API endpoint for the sortiment navigation. If missing, the navigation will not appear.
 - **resultSetId**: Identifier for the result set in the API response. This is critical for rendering the results. (Required)
 - **logo**: URL of your shop logo. (Required)
+- **logoRedirection**: Defines the link destination for the main logo. If not specified, clicking the main logo will redirect the user to the home page, clearing all route parameters in the process.
 - **document**: Configurable object containing keys such as:
   - **name**: The product title displayed in the UI. (Required if no Template used)
-  - **url**: URL of the product details page. (Required if no Template used)
+  - **url**: Specifies the product details page URL. This field is required if no template is used. Users can construct the URL dynamically using their own domain, configuration ID, and relevant attributes (e.g., id or search) based on the detailsUrl's API. Alternatively, a direct link can be assigned, as shown in the following examples:
+
+    - 1.Dynamic Construction  (/Config Id/detail is required):
+
+    ``` ...
+        "document": {
+            "url": "{Your base URL domain}/{Your config ID}/detail/${id}"
+            ...
+          }
+    ```
+    - 2.Direct Link Assignment (Link must be a product attribute from Api response):
+
+    ``` ...
+        "document": {
+            "url": "Link",
+            ...
+          }
+    ```
   - **image**: URL of the product image.
   - **template**: Optional Vue.js template for customizing product card display. 
     - Inside the template json, you can use the `document` object to refer to product fields from the API response.

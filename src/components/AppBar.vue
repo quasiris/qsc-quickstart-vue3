@@ -184,6 +184,7 @@ export default {
   },
   watch: {
     localSearchQuery(newVal) {
+      console.log(newVal)
       if (newVal !== this.searchQuery ) {
         this.localSearchQuery = newVal; // Sync local data with prop
       }
@@ -192,6 +193,9 @@ export default {
           this.searchProducts();
       } else  if (newVal !== this.searchQuery ) {
           this.fetchSuggestions();
+      } else {
+        this.stopProductsLoading();
+        this.stopFacetsLoading();
       }
     },
     searchQuery(newVal) {
@@ -243,7 +247,7 @@ export default {
     window.removeEventListener("click", this.handleWindowClick);
   },
   methods: {
-    ...mapActions(['clearSession', 'setSearchQuery','stopBottomSheet','setUserEmail','startProductsLoading','startFacetsLoading']),
+    ...mapActions(['clearSession', 'setSearchQuery','stopBottomSheet','setUserEmail','startProductsLoading','startFacetsLoading','startProductsLoading','stopFacetsLoading','stopProductsLoading']),
     handleclearSession(){
       this.clearSession();
       this.$store.dispatch('initializeSession');
