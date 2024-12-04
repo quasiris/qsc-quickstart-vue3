@@ -62,5 +62,16 @@
       "url": "https://master.dtg24ju05cbrd.amplifyapp.com/docs/detail/${id}",
       "image": "https://qsc.quasiris.de/console/img/qsc-logo.fee482c1.png"
     }
+  },
+  {
+    "id": "clothes",
+    "baseurl": "https://qsc.quasiris.de/api/v1/search/demo/clothes",
+    "suggestionUrl": "https://qsc.quasiris.de/api/v1/search/suggest/demo/clothes?q=",
+    "resultSetId": "clothes",
+    "logo": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png",
+    "document": {
+      "name": "product_name",
+      "image": "https://qsc.quasiris.de/cdn/qsc/demo/trendware/shop/img/logo.png"
+    }
   }
 ]
