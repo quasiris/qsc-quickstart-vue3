@@ -138,10 +138,22 @@
                   @onFilter="handleNavigationSelection" 
                     />
               </div>
-              <div v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation')">
+              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput')">
+                <div v-if="facet.values.length && facet.showAll" class="mt-2 mb-2">
+                  <v-text-field
+                    v-model="facet.searchQuery"
+                    label="Search filters"
+                    dense
+                    hide-details
+                    append-inner-icon="mdi-magnify"
+                    variant="outlined"
+                    density="compact"
+                    class="search-input"
+                  />
+                </div>
                 <div 
-                v-for="value in facet.values"
-                :key="value.value"
+                v-for="(value, index) in filteredValues(facet)"
+                :key="value.value + '-' + index"
                 >
                   <v-checkbox
                     hide-details
@@ -152,6 +164,7 @@
                     v-model="selectedFilters"
                     :id="'filter-' + value.filter"
                     @change="chipsControle(facet,value)"
+                    v-if="index < maxVisible || facet.showAll"
                   >
                     <template #label>
                       <label
@@ -171,8 +184,19 @@
                     </template>
                   </v-checkbox>
                 </div>
-              </div>
-              <v-divider  v-if="products.length != 0" class="mt-3"></v-divider>
+                <div v-if="facet.values.length > maxVisible" class="mb-2">
+                    <v-btn
+                      class="float-right" 
+                      density="compact"
+                      color="primary"
+                      text
+                      @click="toggleShowAll(facet)"
+                    >
+                      {{ facet?.showAll ? 'Less' : 'More' }}
+                    </v-btn>
+                  </div>
+              </v-container>
+              <v-divider  v-if="facet.type != 'search' && products.length != 0" class="mt-3"></v-divider>
             </v-list-item>
             <v-list-item v-if="facets.length > 0" class="d-flex justify-center mt-3"> 
               <v-btn
@@ -418,6 +442,7 @@ export default {
       isSidebar: false,
       viewMode: "grid",
       totalPages: "",
+      maxVisible: 5,
     };
   },
   props: {
@@ -556,6 +581,19 @@ export default {
             [facet.name]: value.value, 
             filter: value.filter 
           });
+      }
+    },
+    filteredValues(facet) {
+      // Filter the facet values based on the search query
+      if (!facet.searchQuery || !facet.searchQuery.trim()) return facet.values;
+      return facet.values.filter(value =>
+        value.value.toLowerCase().includes(facet.searchQuery.toLowerCase())
+      );
+    },
+    toggleShowAll(facet) {
+      facet.showAll = !facet.showAll;
+      if (!facet.showAll) {
+        facet.searchQuery = '';
       }
     },
     deleteChip(chip) {
@@ -753,7 +791,7 @@ export default {
       if (this.currentPage) {
         queryParameters.push(`page=${this.currentPage}`);
       }
-
+      queryParameters.push("ctrl=loadMoreFacets");
       const queryString = queryParameters.join("&");
       const apiUrlWithQuery = `${apiUrl}?${queryString}`;
       axios
@@ -790,6 +828,10 @@ export default {
               return this.markTempSelected(facet)
             }
             return facet;
+          });
+          this.facets.forEach(facet => {
+            facet.showAll = false; 
+            facet.searchQuery = '';
           });
           this.sorts = response.data.result[this.config.resultSetId].sort.sort;
           if(!this.selectedSort && this.sorts.length > 0)
@@ -867,6 +909,9 @@ export default {
   padding-top:12px;
   margin-right: 25px;
   margin-left: 25px;
+}
+.v-checkbox .v-selection-control{
+  min-height : 0 !important;
 }
 .v-slider-thumb__surface,.v-slider-track__fill{
   background-color: #1867c0 !important;
