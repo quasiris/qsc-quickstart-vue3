@@ -126,7 +126,7 @@
                       :rules="rules"
                       @click.stop
                     ></v-text-field>
-                  <v-btn :disabled="!isEmailValid" size="x-small" class="float-left" color="primary" @click="saveEmail">
+                  <v-btn :disabled="!isEmailValid" size="x-small" class="float-left mr-2" color="primary" @click="saveEmail">
                     Save
                   </v-btn>
                   <v-btn size="x-small" class="float-right" color="secondary" @click="handleclearSession">

@@ -15,6 +15,7 @@
                     label="From"
                     v-model="formattedStartDate"
                     readonly
+                    density="compact"
                     v-bind="props"
                     variant="outlined"
                     append-inner-icon="mdi-calendar"
@@ -40,6 +41,7 @@
                     label="To"
                     v-model="formattedEndDate"
                     readonly
+                    density="compact"
                     v-bind="props"
                     variant="outlined"
                     append-inner-icon="mdi-calendar"

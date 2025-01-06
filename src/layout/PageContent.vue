@@ -91,7 +91,7 @@
           <v-navigation-drawer v-if="facets && !isFacetsLoading && products.length > 0" :width="325"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item v-for="facet in facets" :key="facet.id">
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
-                <h4 class="pt-3 pb-3 d-flex align-start justify-center flex-column">
+                <h4 class="pt-1 pb-3 d-flex align-start justify-center flex-column">
                   {{ facet.name }}
                 </h4>
                 <RangeInput
@@ -112,7 +112,7 @@
                 />
               </div>
               <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'rangeInput'|| facet.type === 'search')"
-                class="pt-3 d-flex align-start justify-center flex-column"
+                class="pt-1 d-flex align-start justify-center flex-column"
               >
                 {{ facet.name }}
               </h4>
@@ -186,13 +186,13 @@
                 </div>
                 <div v-if="facet.values.length > maxVisible" class="mb-2">
                     <v-btn
-                      class="float-right" 
-                      density="compact"
                       color="primary"
-                      text
+                      variant="text"
+                      size="x-small"
+                      class="float-right text-capitalize ml-2 justify-center"
                       @click="toggleShowAll(facet)"
                     >
-                      {{ facet?.showAll ? 'Less' : 'More' }}
+                      {{ facet?.showAll ? 'See Less' : 'See All' }}
                     </v-btn>
                   </div>
               </v-container>
@@ -440,6 +440,9 @@ export default {
       chipsValues:[],
       currentPage: 1,
       isSidebar: false,
+      isRequestInProgress: false,
+      isWatchDisabled: false,
+      isNewQuery: false,
       viewMode: "grid",
       totalPages: "",
       maxVisible: 5,
@@ -525,14 +528,18 @@ export default {
         }
     },
     localSearchQuery(newVal) {
-      if(newVal && newVal != this.searchQuery)
-        this.setSearchQuery(newVal); 
+      if(newVal && newVal != this.searchQuery){
+        this.setSearchQuery(newVal); }
     },
     selectedFilters() {
+      if (this.isWatchDisabled) return; 
+      if (this.isRequestInProgress) return;
+      this.isRequestInProgress = true;
+      //if(this.isNewQuery) this.isNewQuery=false;
       this.scrollToTop();
       this.currentPage= 1;
       this.startProductsLoading();
-      this.fetchProducts();
+      this.fetchProducts()
     },
     selectedSort(newVal) {
       if(newVal != this.sorts[0].name && this.sorts.length > 0 && !this.resetAll) {
@@ -582,6 +589,39 @@ export default {
             filter: value.filter 
           });
       }
+    },
+    initializeSelectedFilters() {
+      this.isWatchDisabled = true;
+      const preselectedFilters = this.facets
+        .map(facet => ({
+          name: facet.name, 
+          values: this.filteredValues(facet).filter(value => value.selected),
+        }))
+        .flat()
+        .filter(facet => facet.values.length > 0)
+        preselectedFilters.forEach(facet => {
+          facet.values.forEach(value => {
+            const existingChip = this.chipsValues.find(
+              chip => chip.filter === value.filter
+            );
+
+            if (!existingChip) {
+              this.chipsValues.push({
+                [facet.name]: value.value,
+                filter: value.filter,
+              });
+            }
+          });
+        });
+        this.selectedFilters = [
+        ...new Set([
+          ...this.selectedFilters,
+          ...preselectedFilters.flatMap(facet => facet.values.map(value => value.filter)),
+        ]),
+      ];     
+      this.$nextTick(() => {
+        this.isWatchDisabled = false;
+      });
     },
     filteredValues(facet) {
       // Filter the facet values based on the search query
@@ -762,8 +802,22 @@ export default {
 
       const queryParameters = [];
 
+      if (this.isNewQuery) {
+        if (!queryParameters.includes('ctrl=userModified')) {
+          queryParameters.push(`ctrl=userModified`);
+        }
+      } else {
+        // Remove the parameter if it exists
+        const index = queryParameters.indexOf('ctrl=userModified');
+        if (index !== -1) {
+          queryParameters.splice(index, 1);
+        }
+      }
       if (this.searchQuery) {
         queryParameters.push(`q=${this.searchQuery}`);
+        this.isNewQuery=true
+      }else{
+        this.isNewQuery=false
       }
       if(this.userId)
       {
@@ -791,9 +845,11 @@ export default {
       if (this.currentPage) {
         queryParameters.push(`page=${this.currentPage}`);
       }
-      queryParameters.push("ctrl=loadMoreFacets");
+      //queryParameters.push("ctrl=loadMoreFacets");
       const queryString = queryParameters.join("&");
-      const apiUrlWithQuery = `${apiUrl}?${queryString}`;
+      const apiUrlWithQuery = apiUrl.includes("?")
+        ? `${apiUrl}&${queryString}`
+        : `${apiUrl}?${queryString}`;
       axios
         .get(apiUrlWithQuery)
         .then(response => {
@@ -841,9 +897,15 @@ export default {
           this.selectedRow=response.data.result[this.config.resultSetId].paging.rows;
           if(!this.requestId)
             this.setRequestId(response.data.requestId);
+          
+          if (this.facets && this.facets.length)
+            this.initializeSelectedFilters();
 
           this.stopProductsLoading(); // Stop loading
           this.stopFacetsLoading(); 
+        })
+        .finally(() => {
+          this.isRequestInProgress = false;
         })
         .catch(() => {
           this.showGlobalSheet();
