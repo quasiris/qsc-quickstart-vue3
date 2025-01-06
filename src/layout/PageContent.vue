@@ -546,6 +546,7 @@ export default {
     selectedSort(newVal) {
       if(newVal != this.sorts[0].name && this.sorts.length > 0 && !this.resetAll) {
         this.startProductsLoading();
+        this.isNewQuery=false;
         this.fetchProducts();
       }
     },
@@ -553,6 +554,7 @@ export default {
       if(newVal && newVal != this.selectedRow){
         this.startProductsLoading();
         this.selectedRow=newVal
+        this.isNewQuery=false;
         this.fetchProducts();}
     },
     selectedRow(newVal) {
@@ -905,6 +907,7 @@ export default {
     nextPage() {
       if (this.currentPage + 1 <= this.totalPages) this.currentPage += 1;
       this.startProductsLoading();
+      this.isNewQuery=false;
       this.fetchProducts();
     },
     myhandleClick() {
@@ -918,6 +921,7 @@ export default {
     formerPage() {
       if (this.currentPage - 1 >= 1) this.currentPage -= 1;
       this.startProductsLoading();
+      this.isNewQuery=false;
       this.fetchProducts();
     },
     scrollToTop() {
