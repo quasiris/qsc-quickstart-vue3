@@ -442,7 +442,7 @@ export default {
       isSidebar: false,
       isRequestInProgress: false,
       isWatchDisabled: false,
-      isNewQuery: false,
+      isNewQuery: true,
       viewMode: "grid",
       totalPages: "",
       maxVisible: 5,
@@ -509,6 +509,7 @@ export default {
       immediate: true
     },
     searchQuery(newVal) {
+      this.isNewQuery=true;
       if(this.localSearchQuery != newVal){
         this.localSearchQuery = newVal;
         this.clearFilters();
@@ -528,14 +529,15 @@ export default {
         }
     },
     localSearchQuery(newVal) {
-      if(newVal && newVal != this.searchQuery){
-        this.setSearchQuery(newVal); }
+      if(newVal && newVal != this.searchQuery)
+        this.setSearchQuery(newVal); 
     },
     selectedFilters() {
       if (this.isWatchDisabled) return; 
       if (this.isRequestInProgress) return;
       this.isRequestInProgress = true;
-      //if(this.isNewQuery) this.isNewQuery=false;
+      if(this.selectedFilters.length && this.isNewQuery)
+        this.isNewQuery=false;
       this.scrollToTop();
       this.currentPage= 1;
       this.startProductsLoading();
@@ -802,22 +804,11 @@ export default {
 
       const queryParameters = [];
 
-      if (this.isNewQuery) {
-        if (!queryParameters.includes('ctrl=userModified')) {
+      if (!this.isNewQuery) {
           queryParameters.push(`ctrl=userModified`);
-        }
-      } else {
-        // Remove the parameter if it exists
-        const index = queryParameters.indexOf('ctrl=userModified');
-        if (index !== -1) {
-          queryParameters.splice(index, 1);
-        }
       }
       if (this.searchQuery) {
         queryParameters.push(`q=${this.searchQuery}`);
-        this.isNewQuery=true
-      }else{
-        this.isNewQuery=false
       }
       if(this.userId)
       {
@@ -939,6 +930,7 @@ export default {
       this.startFacetsLoading();
       this.selectedFilters = [];  
       this.resetAll = true;  
+      this.isNewQuery=true;
       this.chipsValues = [];  
       this.expandedPanels = [];  
       setTimeout(() => {

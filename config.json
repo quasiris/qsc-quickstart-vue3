@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware?ctrl=nocache",
+    "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/trendware?ctrl=noCache",
     "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/trendware?q=",
     "sortimentUrl": "https://qsc-dev.quasiris.de/api/v1/category/demo/navigation-random",
     "resultSetId": "trendware",
