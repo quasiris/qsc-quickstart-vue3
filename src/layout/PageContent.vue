@@ -279,7 +279,7 @@
                             variant="text"
                             size="x-small"
                             class="text-capitalize justify-center"
-                            @click="clearSearchQuery()"
+                            @click="clearSearchQuery();clearFilters();"
                             >Reset all</v-btn>
                         </v-col>
                       </v-row>
@@ -488,6 +488,8 @@ export default {
       this.selectedRow=this.config.rows[0].id;
     }
     this.localSearchQuery=this.searchQuery
+    this.startProductsLoading();
+    this.startFacetsLoading();  
     this.fetchProducts();
   },
   watch: {
