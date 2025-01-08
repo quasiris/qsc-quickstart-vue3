@@ -18,7 +18,7 @@
           <v-avatar
             v-if="color.properties.color === 'bunt'"
             size="35"
-            :style="buntColor"
+            :style="[buntColor, { border: '1px solid #b5b5b5' }]"
             class="mx-auto mb-2"
           >
           </v-avatar>
@@ -26,6 +26,7 @@
             v-else
             size="35"
             :color="color.properties.color"
+            style="border: 1px solid #b5b5b5"
             class="mx-auto mb-2"
           >
           </v-avatar>
@@ -72,6 +73,9 @@
         border-radius: 10px;
         transition: transform 0.2s, border 0.2s;
         margin: 2px;
+        display: grid;
+        justify-content: center;
+        align-items: center;
     }
     .v-col.hovered {
         transform: scale(1.05);
