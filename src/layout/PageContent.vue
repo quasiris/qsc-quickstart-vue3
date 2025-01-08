@@ -442,7 +442,8 @@ export default {
       isSidebar: false,
       isRequestInProgress: false,
       isWatchDisabled: false,
-      isNewQuery: true,
+      isNewQuery: false,
+      isSearchQueryChanged:false,
       viewMode: "grid",
       totalPages: "",
       maxVisible: 5,
@@ -509,8 +510,8 @@ export default {
       immediate: true
     },
     searchQuery(newVal) {
-      this.isNewQuery=true;
       if(this.localSearchQuery != newVal){
+        this.isSearchQueryChanged = true;
         this.localSearchQuery = newVal;
         this.clearFilters();
         this.currentPage=1;
@@ -533,11 +534,14 @@ export default {
         this.setSearchQuery(newVal); 
     },
     selectedFilters() {
-      if (this.isWatchDisabled) return; 
-      if (this.isRequestInProgress) return;
+      if (this.isWatchDisabled || this.isRequestInProgress) {
+        return; 
+      }
+      if(this.isSearchQueryChanged)
+        this.isSearchQueryChanged = false; 
+      else
+        this.isNewQuery=true;
       this.isRequestInProgress = true;
-      if(this.selectedFilters.length && this.isNewQuery)
-        this.isNewQuery=false;
       this.scrollToTop();
       this.currentPage= 1;
       this.startProductsLoading();
@@ -546,7 +550,7 @@ export default {
     selectedSort(newVal) {
       if(newVal != this.sorts[0].name && this.sorts.length > 0 && !this.resetAll) {
         this.startProductsLoading();
-        this.isNewQuery=false;
+        this.isNewQuery=true;
         this.fetchProducts();
       }
     },
@@ -554,7 +558,7 @@ export default {
       if(newVal && newVal != this.selectedRow){
         this.startProductsLoading();
         this.selectedRow=newVal
-        this.isNewQuery=false;
+        this.isNewQuery=true;
         this.fetchProducts();}
     },
     selectedRow(newVal) {
@@ -596,37 +600,43 @@ export default {
     },
     initializeSelectedFilters() {
       this.isWatchDisabled = true;
+
       const preselectedFilters = this.facets
         .map(facet => ({
-          name: facet.name, 
-          values: this.filteredValues(facet).filter(value => value.selected),
+          name: facet.name,
+          values: Array.isArray(this.filteredValues(facet))
+            ? this.filteredValues(facet).filter(value => value.selected) 
+            : [], 
         }))
-        .flat()
-        .filter(facet => facet.values.length > 0)
-        preselectedFilters.forEach(facet => {
-          facet.values.forEach(value => {
-            const existingChip = this.chipsValues.find(
-              chip => chip.filter === value.filter
-            );
+        .filter(facet => facet.values.length > 0); 
 
-            if (!existingChip) {
-              this.chipsValues.push({
-                [facet.name]: value.value,
-                filter: value.filter,
-              });
-            }
-          });
+      preselectedFilters.forEach(facet => {
+        facet.values.forEach(value => {
+          const existingChip = this.chipsValues.find(
+            chip => chip.filter === value.filter
+          );
+
+          if (!existingChip) {
+            this.chipsValues.push({
+              [facet.name]: value.value,
+              filter: value.filter,
+            });
+          }
         });
-        this.selectedFilters = [
+      });
+
+      this.selectedFilters = [
         ...new Set([
           ...this.selectedFilters,
           ...preselectedFilters.flatMap(facet => facet.values.map(value => value.filter)),
         ]),
-      ];     
+      ];
+
       this.$nextTick(() => {
         this.isWatchDisabled = false;
       });
     },
+
     filteredValues(facet) {
       // Filter the facet values based on the search query
       if (!facet.searchQuery || !facet.searchQuery.trim()) return facet.values;
@@ -806,8 +816,9 @@ export default {
 
       const queryParameters = [];
 
-      if (!this.isNewQuery) {
+      if (this.isNewQuery) {
           queryParameters.push(`ctrl=userModified`);
+          this.isNewQuery=false;
       }
       if (this.searchQuery) {
         queryParameters.push(`q=${this.searchQuery}`);
@@ -907,7 +918,7 @@ export default {
     nextPage() {
       if (this.currentPage + 1 <= this.totalPages) this.currentPage += 1;
       this.startProductsLoading();
-      this.isNewQuery=false;
+      this.isNewQuery=true;
       this.fetchProducts();
     },
     myhandleClick() {
@@ -921,7 +932,7 @@ export default {
     formerPage() {
       if (this.currentPage - 1 >= 1) this.currentPage -= 1;
       this.startProductsLoading();
-      this.isNewQuery=false;
+      this.isNewQuery=true;
       this.fetchProducts();
     },
     scrollToTop() {
@@ -934,7 +945,7 @@ export default {
       this.startFacetsLoading();
       this.selectedFilters = [];  
       this.resetAll = true;  
-      this.isNewQuery=true;
+      this.isNewQuery=false;
       this.chipsValues = [];  
       this.expandedPanels = [];  
       setTimeout(() => {
