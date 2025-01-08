@@ -444,6 +444,7 @@ export default {
       isWatchDisabled: false,
       isNewQuery: false,
       isSearchQueryChanged:false,
+      isSortChange: false,
       viewMode: "grid",
       totalPages: "",
       maxVisible: 5,
@@ -550,6 +551,10 @@ export default {
       this.fetchProducts()
     },
     selectedSort(newVal) {
+      if (this.isSortChange) {
+        this.isSortChange = false; 
+        return;
+      }
       if(newVal != this.sorts[0].name && this.sorts.length > 0 && !this.resetAll) {
         this.startProductsLoading();
         this.isNewQuery=true;
@@ -812,7 +817,6 @@ export default {
     },
     fetchProducts() {
       const selectedFilters = this.selectedFilters.join("&");
-      const selectedSort = this.selectedSort;
       const selectedRow = this.selectedRow;
       const apiUrl = this.config.baseurl;
 
@@ -841,8 +845,8 @@ export default {
         queryParameters.push(selectedFilters);
       }
 
-      if (selectedSort && this.sorts.length > 0 && selectedSort !== this.sorts[0]?.name) {
-        queryParameters.push(`sort=${selectedSort}`);
+      if (this.selectedSort && this.sorts.length > 0 && this.selectedSort !== this.sorts[0]?.name) {
+        queryParameters.push(`sort=${this.selectedSort}`);
       }
 
       if (selectedRow) {
@@ -896,9 +900,11 @@ export default {
             facet.searchQuery = '';
           });
           this.sorts = response.data.result[this.config.resultSetId].sort.sort;
-          if(!this.selectedSort && this.sorts.length > 0)
-            this.selectedSort=this.sorts[0].name
-          //this.selectedSort = this.sorts.length > 0 ? this.sorts[0].id : '';
+          if (this.sorts && this.sorts.length > 0) {
+              const selectedSort = this.sorts.find(sort => sort.selected);
+              this.isSortChange = true;
+              this.selectedSort = selectedSort ? selectedSort.name : this.sorts[0].name;
+          }
           this.totalPages=response.data.result[this.config.resultSetId].paging.pageCount;
           this.selectedRow=response.data.result[this.config.resultSetId].paging.rows;
           if(!this.requestId)
