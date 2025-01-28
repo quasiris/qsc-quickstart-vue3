@@ -537,6 +537,9 @@ export default {
         this.setSearchQuery(newVal); 
     },
     selectedFilters() {
+      if (this.isSortChange) {
+        this.isSortChange = false; 
+      }
       if (this.isWatchDisabled || this.isRequestInProgress) {
         return; 
       }

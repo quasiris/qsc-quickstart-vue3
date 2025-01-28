@@ -29,6 +29,40 @@ npm run build
 ```
 npm run lint
 ```
+## Running the Project with Docker
+
+### Build the Docker Image
+Navigate to the root directory of the project (where the Dockerfile is located) and run the following command to build the Docker image:
+```
+docker build -t vue-vuetify-app .
+```
+  Replace vue-vuetify-app with a name of your choice for the Docker image.
+
+### Run the Docker Container
+After building the image, you can run the container using the following command:
+```
+docker run -p 8080:8080 vue-vuetify-app
+```
+  This will start the application and map port 8080 on your local machine to port 8080 in the container.
+
+### Access the Application
+Open your browser and navigate to http://localhost:8080 to view the running application.
+
+## Referencing External Configuration
+
+To reference configuration files (e.g., config.js) or templates from outside the Docker container, you can use Docker volumes. This allows you to mount a local directory or file into the container.
+
+### Prepare Your Configuration File
+Place your config.js file (or any other configuration files) in a directory on your local machine, e.g., /path/to/config.
+
+### Run the Container with a Volume Mount
+Use the -v flag to mount the local directory or file into the container.
+For example:
+```
+  docker run -p 8080:8080 -v /path/to/config:/app/config vue-vuetify-app
+```
+  This command mounts the local /path/to/config directory to /app/config inside the container. You can then reference the configuration file in your application code as /app/config/config.js.
+    
 
 ## Customize configuration
 
