@@ -26,12 +26,13 @@
               results found
             </p>
           </div>
-          <div class="d-flex align-center flex-wrap">
+          <div class="sort d-flex align-center flex-wrap">
             <v-select  v-if="sorts.length > 0"
               class="d-flex align-end sort_input"
               :items="sorts"
               label="Sort by"
               v-model="selectedSort"
+              :data-sort-value="selectedSort" 
               item-title="name"
               item-value="id"
               variant="outlined"
@@ -88,8 +89,8 @@
             @click="isSidebar = !isSidebar"
           >
           </div>
-          <v-navigation-drawer v-if="facets && !isFacetsLoading && products.length > 0" :width="325"  class="drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
-            <v-list-item v-for="facet in facets" :key="facet.id">
+          <v-navigation-drawer v-if="facets && !isFacetsLoading && products.length > 0" :width="325"  class="filters drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
+            <v-list-item class="filter" :data-filter-type="facet.type" v-for="facet in facets" :key="facet.id">
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-1 pb-3 d-flex align-start justify-center flex-column">
                   {{ facet.name }}
@@ -160,6 +161,7 @@
                     class="smaller-checkbox"
                     type="checkbox"
                     color="primary"
+                    :data-filter-value="value.filter"
                     :value="value.filter"
                     v-model="selectedFilters"
                     :id="'filter-' + value.filter"
@@ -286,7 +288,7 @@
                     </v-container>
                     <v-data-iterator  :items="isProductsLoading ? skeletonProducts : products" hide-default-footer>
                       <!--  Here I have Products-->
-                        <v-row style="min-height: 60vh;">                          
+                        <v-row class="products" style="min-height: 60vh;">                          
                           <v-col
                             v-for="(product, index) in (isProductsLoading ? skeletonProducts : products)"
                             :key="index"
@@ -348,19 +350,20 @@
                             justify="center"
                           >
                             <v-spacer></v-spacer>
-                            <v-col cols="12" md="auto" class="d-flex justify-md-end justify-center">
+                            <v-col cols="12" md="auto" class="records d-flex justify-md-end justify-center">
                               <v-select
                                 v-model="records"
                                 :items="showedRows"
                                 label="Records"
                                 variant="outlined"
                                 item-title="name"
+                                :data-records-value="records"
                                 item-value="id"
-                                class="mx-auto" 
+                                class="records_input mx-auto" 
                                 style="width: 100%;"
                               ></v-select>
                             </v-col>
-                            <v-col cols="12" md="auto" class="d-flex justify-md-end justify-center align-start">
+                            <v-col cols="12" md="auto" class="pagination d-flex justify-md-end justify-center align-start">
                               <span class="mr-md-4 mr-2 grey--text">
                                 Page {{ currentPage }} of {{ totalPages }}
                               </span>
@@ -370,8 +373,9 @@
                                 :disabled="currentPage == 1"
                                 @click="handleClick"
                                 small
+                                :data-pagination-id="currentPage"
                                 color="primary"
-                                class="mr-1"
+                                class="prev-pagination mr-1"
                               >
                                 <v-icon>mdi-chevron-left</v-icon>
                               </v-btn>
@@ -381,8 +385,9 @@
                                 :disabled="currentPage == totalPages"
                                 @click="myhandleClick"
                                 small
+                                :data-pagination-id="currentPage"
                                 color="primary"
-                                class="ml-1"
+                                class="next-pagination ml-1"
                               >
                                 <v-icon>mdi-chevron-right</v-icon>
                               </v-btn>

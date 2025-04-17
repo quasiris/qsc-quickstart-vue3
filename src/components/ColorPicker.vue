@@ -1,11 +1,12 @@
 <template>
     <v-container>
-      <v-row>
+      <v-row class="colors">
         <v-col
           v-for="color in facet.values"
           :key="color.filter"
           cols="3" 
-          class="text-center"
+          class="color-btn text-center"
+          :data-color-value="color"
           @click="selectColor(color,facet.name)"
           @mouseover="hoveredColor = color.filter"
           @mouseleave="hoveredColor = null"

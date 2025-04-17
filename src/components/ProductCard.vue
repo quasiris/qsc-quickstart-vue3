@@ -8,6 +8,8 @@
     <v-card v-else
       :style="{ height: cardHeight }"
       :class="{ 'list-view': viewMode === 'list' }"
+      :data-product-id="product.id"
+      class="product"
     >
       <a
         v-bind:href="product.document.url"

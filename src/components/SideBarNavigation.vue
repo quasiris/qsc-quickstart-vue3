@@ -9,6 +9,7 @@
           v-if="!child.children || child.children.values.length === 0"
           class="item-title"
           :class="{ active: child?.selected }"
+          :data-filter-value="child.value"
           @click="handleClick(child, parentName)"
         >
           <v-list-item-title class="pa-1 ">{{ child.value }} ({{ child.count }})</v-list-item-title>
@@ -18,7 +19,9 @@
           v-else
           :value="child.filter"
         >
-          <v-expansion-panel-title @click="handleClick(child,parentName)">
+          <v-expansion-panel-title     
+            :data-filter-value="child.value"
+            @click="handleClick(child,parentName)">
             {{ child.value }} ({{ child.count }})
           </v-expansion-panel-title>
           <v-expansion-panel-text>

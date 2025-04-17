@@ -19,6 +19,7 @@
             <div class="search-bar d-flex align-center p-relative" ref="searchArea">
             <v-text-field
               ref="searchInput"
+              id="search-box"
               type="text"
               v-model="localSearchQuery"
               placeholder="article / keyword / product"
@@ -47,6 +48,7 @@
               v-if="display.width._object.width >= 600"
               @click="searchProducts"
               color="primary"
+              id="search-btn"
               class="text-capitalize search-bar-dropdown"
             >
               Search
