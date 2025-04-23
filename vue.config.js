@@ -2,6 +2,11 @@ const { defineConfig } = require('@vue/cli-service');
 const webpack = require('webpack');
 
 module.exports = defineConfig({
+  devServer: {
+    port: 8080,
+    host: '0.0.0.0',
+    allowedHosts: 'all'    
+  },
   transpileDependencies: true,
   configureWebpack: {
     resolve: {
@@ -18,7 +23,16 @@ module.exports = defineConfig({
       })
     ]
   },
-
+  chainWebpack: (config) => {
+    config.plugin('html').tap((args) => {
+      args[0].templateParameters = {
+        ...(args[0].templateParameters || {}), 
+        BASE_URL: args[0].BASE_URL,
+        QSC_SEARCHHUB_COLLECTOR_ID: process.env.QSC_SEARCHHUB_COLLECTOR_ID,
+      };
+      return args;
+    });
+  },
   pluginOptions: {
     vuetify: {
       // customVariables: ['~/assets/variables.scss']

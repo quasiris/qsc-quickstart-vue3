@@ -21,6 +21,7 @@
               ref="searchInput"
               id="search-box"
               type="text"
+              :data-track-id="'searchBox'"
               v-model="localSearchQuery"
               placeholder="article / keyword / product"
               variant="outlined"
@@ -47,6 +48,7 @@
             <v-btn
               v-if="display.width._object.width >= 600"
               @click="searchProducts"
+              :data-track-id="'searchButton'"
               color="primary"
               id="search-btn"
               class="text-capitalize search-bar-dropdown"
@@ -65,6 +67,7 @@
                   <v-list-item
                     class="list-item"
                     @click="selectSuggestion(suggest)"
+                    :data-track-id="'suggestSearchTerm'"
                     @keydown.enter.prevent="selectSuggestion(suggest)"
                     @mouseover="handleMouseOver(index)"
                     @mouseleave="handleMouseLeave"

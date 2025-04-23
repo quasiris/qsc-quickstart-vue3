@@ -13,6 +13,8 @@
     >
       <a
         v-bind:href="product.document.url"
+         :data-track-id="'product'"
+         :data-product-id="product.id"
       >
         <div class="image">
           <img

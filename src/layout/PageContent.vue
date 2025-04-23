@@ -9,7 +9,7 @@
           <div class="my-2 mb-3" v-if="!localSearchQuery">
             <h3 class="">All Products</h3>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
-              {{ totalproducts }} results found <span class="text-caption">({{ responseTime }} seconds)</span>
+              <span :data-track-id="'resultCountContainer'">{{ totalproducts }} </span>results found <span class="text-caption">({{ responseTime }} seconds)</span>
             </p>
             <p v-else class="gray--text text--darken-1 mb-0">
               <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
@@ -271,7 +271,7 @@
                     >Reset all</v-btn
                   > 
                   <v-col cols="12" class="col-auto">
-                    <v-container v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) && !isProductsLoading" class="d-flex  align-center no-product-container">
+                    <v-container :data-track-id="'zeroResultsContainer'" v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '' )) && !isProductsLoading" class="d-flex  align-center no-product-container">
                       <v-row>                      
                         <v-col cols="12" class="text-center">
                           <p class="mb-2 text-h5 font-weight-bold text--grey">No result found for "<span class="highlight">{{ searchQuery }}</span>"</p>
