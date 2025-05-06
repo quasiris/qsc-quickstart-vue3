@@ -7,12 +7,192 @@
     <link rel="icon" href="<%= BASE_URL %>logo.ico">
     <title>Quasiris Search Cloud - Quick Start</title>
     <script defer src="https://c.searchhub.io/<%= QSC_SEARCHHUB_COLLECTOR_ID %>"></script>
+    <script src="https://unpkg.com/@quasiris/search-data-picker@1.9.1/dist/main.bundle.js"></script>
   </head>
   <body>
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>
-    <!-- built files will be auto injected -->
+    <script>
+      const config = {
+            "sessionConfigurations": {
+                "storage": "cookie",
+                "expiration": 43200
+            },
+            "endpointConfigurations": {
+                "url": "https://qsc-dev.quasiris.de/api/v1/search-data-picker/quasiris/search-data-picker-demo"
+            },
+            "pickerConfigurations": {
+                "documents": [
+                    {
+                        "eventSelector": "div.v-col-sm-6.v-col-md-6.v-col-lg-4.v-col-xl-3.v-col-12  div.v-card",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "title",
+                                "selector": "h6"
+                            }
+                        ]
+                    }
+                ],
+                "sorting": [
+                    {
+                        "eventSelector": ".v-select__content  .v-list-item-title",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "sort_by",
+                                "func": function(element) {
+                                    return element.innerText
+                                }
+    
+                            }]
+                    }
+                ],
+                "filter": [
+                    {
+                        "eventSelector": "div.v-row > div.v-col.v-col-3.text-center",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "type",
+                                "func": function(element) {
+                                    return "filter";
+                                }
+                            },
+                            {
+                                "key": "facet",
+                                "func": function(element) {
+                                    return "color";
+                                }
+                            },
+                            {
+                                "key": "color",
+                         
+                                "func": function(element) {
+                                    return element.querySelectorAll('.color-text')[0].innerText;
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "eventSelector": ".clear-input",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "type",
+                                "func": function(element) {
+                                    return "filter";
+                                }
+                            },
+                         
+                            {
+                                "key": "removed_filter",
+                         
+                                "func": function(element) {
+                                    const siblings = Array.from(element.parentNode.children)
+                                         .filter(child => child !== element);
+                                    return siblings.find(sib => sib.matches('.chip-text'))?.innerText || null;
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "eventSelector": "button[data-filter-value]",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "type",
+                                "func": function(element) {
+                                    return "filter";
+                                }
+                            },
+                         
+                            {
+                                "key": "value",
+                         
+                                "func": function(element) {
+                                    return element.dataset.filterValue;
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "eventSelector": ".slider-price-range",
+                        "event": "observe",
+                        "fields": [
+                            {
+                                "key": "type",
+                                "func": function(element) {
+                                    return "filter";
+                                }
+                            },
+                         
+                            {
+                                "key": "value",
+                         
+                                "func": function(element) {
+                                    const rangeRe = /^(\d+)\s*-\s*(\d+)\s*EUR$/;
+    
+                                    let allChips =  document.querySelector('.slider-price-range');
+                                    return allChips.textContent ;
+                                }
+                            }
+                        ]
+                    }
+                ],
+                'pagination': [
+                    {
+                        "eventSelector": ".pagination > button.v-btn",
+                       
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "page",
+                                "selector": ".pagination > span",
+                                "func": function(elements, helpers) {
+                              
+                                    return helpers.absolutePathFromEventSelector(".pagination > span");
+                                }
+                                
+                            }
+                        ]
+                    }
+                ],
+                "search-query": [
+                    {
+                        "eventSelector": "#search-btn",
+                        "event": "click",
+                        
+                        "fields": [
+                            {
+                                "key": "search_query",
+                                "func": function(element) {
+                                    return document.getElementById('search-box').value;
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "eventSelector": "#search-box",
+                        "event": "keydown",
+                        
+                        "fields": [
+                            {
+                                "key": "search_query",
+                                "func": function(element) {
+                                    return document.getElementById('search-box').value;
+                                }
+                            }
+                        ]
+                    },
+                ]
+            }
+        }
+        setTimeout(() => {
+            picker.initPicker.fromConfigFile(config);
+        }, 3600)
+    </script>
   </body>
 </html>
