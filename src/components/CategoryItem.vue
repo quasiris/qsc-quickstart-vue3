@@ -2,6 +2,7 @@
   <li
     class="category-item"
     :class="{ active: isActive }"
+    :data-category-value="category.name"
     @mouseenter="handleMouseEnter"
     @click="handleClick"
   >

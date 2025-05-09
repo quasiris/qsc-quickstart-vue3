@@ -365,7 +365,7 @@
                             </v-col>
                             <v-col cols="12" md="auto" class="pagination d-flex justify-md-end justify-center align-start">
                               <span class="mr-md-4 mr-2 grey--text">
-                                Page {{ currentPage }} of {{ totalPages }}
+                                Page <span> {{ currentPage }}  </span> of {{ totalPages }}
                               </span>
 
                               <v-btn

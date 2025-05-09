@@ -38,13 +38,27 @@
                 ],
                 "sorting": [
                     {
-                        "eventSelector": ".v-select__content  .v-list-item-title",
-                        "event": "click",
+                        "eventSelector": "div.sort_input",
+                        "event": "observe",
                         "fields": [
                             {
                                 "key": "sort_by",
                                 "func": function(element) {
-                                    return element.innerText
+                                    return element.querySelector('div.v-select__selection span.v-select__selection-text').innerText;
+                                }
+    
+                            }]
+                    }
+                ],
+                "records": [
+                    {
+                        "eventSelector": "div.records_input",
+                        "event": "observe",
+                        "fields": [
+                            {
+                                "key": "records",
+                                "func": function(element) {
+                                    return element.querySelector('div.v-select__selection span.v-select__selection-text').innerText;
                                 }
     
                             }]
@@ -77,7 +91,25 @@
                         ]
                     },
                     {
-                        "eventSelector": ".clear-input",
+                        "eventSelector": ".category-item[data-category-value]",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "type",
+                                "func": function(element) {
+                                    return "sortiment";
+                                }
+                            },
+                            {
+                                "key": "value",
+                                "func": function(element) {
+                                    return element.innerText;
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "eventSelector": "div.clear-input",
                         "event": "click",
                         "fields": [
                             {
@@ -100,6 +132,26 @@
                     },
                     {
                         "eventSelector": "button[data-filter-value]",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "type",
+                                "func": function(element) {
+                                    return "filter";
+                                }
+                            },
+                         
+                            {
+                                "key": "value",
+                         
+                                "func": function(element) {
+                                    return element.dataset.filterValue;
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "eventSelector": "div.v-checkbox[data-filter-value]",
                         "event": "click",
                         "fields": [
                             {
@@ -150,10 +202,10 @@
                         "fields": [
                             {
                                 "key": "page",
-                                "selector": ".pagination > span",
+                                "selector": ".pagination > span > span",
                                 "func": function(elements, helpers) {
                               
-                                    return helpers.absolutePathFromEventSelector(".pagination > span");
+                                    return helpers.absolutePathFromEventSelector(".pagination > span > span");
                                 }
                                 
                             }
