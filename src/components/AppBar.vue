@@ -68,6 +68,7 @@
                     class="list-item"
                     @click="selectSuggestion(suggest)"
                     :data-track-id="'suggestSearchTerm'"
+                    :data-suggest-value="suggest"
                     @keydown.enter.prevent="selectSuggestion(suggest)"
                     @mouseover="handleMouseOver(index)"
                     @mouseleave="handleMouseLeave"

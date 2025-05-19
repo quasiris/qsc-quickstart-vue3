@@ -7,7 +7,7 @@
     <link rel="icon" href="<%= BASE_URL %>logo.ico">
     <title>Quasiris Search Cloud - Quick Start</title>
     <script defer src="https://c.searchhub.io/<%= QSC_SEARCHHUB_COLLECTOR_ID %>"></script>
-    <script src="https://unpkg.com/@quasiris/search-data-picker@1.9.1/dist/main.bundle.js"></script>
+    <script src="https://unpkg.com/@quasiris/search-data-picker@1.9.1/dist/main.bundle.js" onerror="console.warn('Plugin failed to load')"></script>
   </head>
   <body>
     <noscript>
@@ -151,6 +151,26 @@
                         ]
                     },
                     {
+                        "eventSelector": "div[data-filter-value]",
+                        "event": "click",
+                        "fields": [
+                            {
+                                "key": "type",
+                                "func": function(element) {
+                                    return "filter";
+                                }
+                            },
+                         
+                            {
+                                "key": "value",
+                         
+                                "func": function(element) {
+                                    return element.dataset.filterValue;
+                                }
+                            }
+                        ]
+                    },
+                    {
                         "eventSelector": "div.v-checkbox[data-filter-value]",
                         "event": "click",
                         "fields": [
@@ -202,10 +222,17 @@
                         "fields": [
                             {
                                 "key": "page",
-                                "selector": ".pagination > span > span",
-                                "func": function(elements, helpers) {
-                              
-                                    return helpers.absolutePathFromEventSelector(".pagination > span > span");
+                                "func": function(element) {
+                                    let currPage = document.querySelector('.pagination > span > span').innerText
+                                    if (currPage) {
+                                        currPage = Number(currPage);
+                                    }
+                                    if(Array.from(element.classList).includes('prev-pagination')) {
+                                        return --currPage;
+                                    }
+                                    if(Array.from(element.classList).includes('next-pagination')) {
+                                        return ++currPage;
+                                    }
                                 }
                                 
                             }
@@ -232,15 +259,28 @@
                         
                         "fields": [
                             {
-                                "key": "search_query",
+                                "key": "search_query_partial",
                                 "func": function(element) {
                                     return document.getElementById('search-box').value;
                                 }
                             }
                         ]
                     },
+                    {
+                        "eventSelector": ".v-list-item[data-suggest-value]",
+                        "event": "click",
+                        
+                        "fields": [
+                            {
+                                "key": "suggestion_click",
+                                "func": function(element) {
+                                    return element.dataset.suggestValue;
+                                }
+                            }
+                        ]
+                    },
                 ]
-            }
+         }
         }
         setTimeout(() => {
             picker.initPicker.fromConfigFile(config);
