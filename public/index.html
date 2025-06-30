@@ -7,7 +7,7 @@
     <link rel="icon" href="<%= BASE_URL %>logo.ico">
     <title>Quasiris Search Cloud - Quick Start</title>
     <script defer src="https://c.searchhub.io/<%= QSC_SEARCHHUB_COLLECTOR_ID %>"></script>
-    <script src="https://unpkg.com/@quasiris/search-data-picker@1.9.2/dist/main.bundle.js" onerror="console.warn('Plugin failed to load')"></script>
+    <script src="https://unpkg.com/@quasiris/search-data-picker@1.9.4/dist/main.bundle.js" type="text/javascript" onerror="console.warn('Plugin failed to load')"></script>
   </head>
   <body>
     <noscript>
@@ -190,7 +190,7 @@
                             }
                         ]
                     },
-                    {
+                  {
                     "eventSelector": ".slider-price-range",
                     "triggerSelector": ".slider-wrapper",
                     "event": "observe",
@@ -212,9 +212,9 @@
                                 return allChips.textContent ;
                             }
                         }
-                        ]
-                    }
-                ],
+                    ]
+                }
+],
                 'pagination': [
                     {
                         "eventSelector": ".pagination > button.v-btn",
