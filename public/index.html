@@ -7,7 +7,7 @@
     <link rel="icon" href="<%= BASE_URL %>logo.ico">
     <title>Quasiris Search Cloud - Quick Start</title>
     <script defer src="https://c.searchhub.io/<%= QSC_SEARCHHUB_COLLECTOR_ID %>"></script>
-    <script src="https://unpkg.com/@quasiris/search-data-picker@1.9.1/dist/main.bundle.js" onerror="console.warn('Plugin failed to load')"></script>
+    <script src="https://unpkg.com/@quasiris/search-data-picker@1.9.2/dist/main.bundle.js" onerror="console.warn('Plugin failed to load')"></script>
   </head>
   <body>
     <noscript>
@@ -191,26 +191,27 @@
                         ]
                     },
                     {
-                        "eventSelector": ".slider-price-range",
-                        "event": "observe",
-                        "fields": [
-                            {
-                                "key": "type",
-                                "func": function(element) {
-                                    return "filter";
-                                }
-                            },
-                         
-                            {
-                                "key": "value",
-                         
-                                "func": function(element) {
-                                    const rangeRe = /^(\d+)\s*-\s*(\d+)\s*EUR$/;
-    
-                                    let allChips =  document.querySelector('.slider-price-range');
-                                    return allChips.textContent ;
-                                }
+                    "eventSelector": ".slider-price-range",
+                    "triggerSelector": ".slider-wrapper",
+                    "event": "observe",
+                    "fields": [
+                        {
+                            "key": "type",
+                            "func": function(element) {
+                                return "filter";
                             }
+                        },
+                     
+                        {
+                            "key": "value",
+                     
+                            "func": function(element) {
+                        
+
+                                let allChips =  document.querySelector('.slider-price-range');
+                                return allChips.textContent ;
+                            }
+                        }
                         ]
                     }
                 ],
