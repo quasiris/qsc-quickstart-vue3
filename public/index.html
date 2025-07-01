@@ -15,182 +15,130 @@
     </noscript>
     <div id="app"></div>
     <script>
-      const config = {
-            "sessionConfigurations": {
-                "storage": "cookie",
-                "expiration": 43200
-            },
-            "endpointConfigurations": {
-                "url": "https://qsc-dev.quasiris.de/api/v1/search-data-picker/quasiris/search-data-picker-demo"
-            },
-            "pickerConfigurations": {
-                "documents": [
-                    {
-                        "eventSelector": "div.v-col-sm-6.v-col-md-6.v-col-lg-4.v-col-xl-3.v-col-12  div.v-card",
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "title",
-                                "selector": "h6"
+     const config = {
+        "sessionConfigurations": {
+            "storage": "cookie",
+            "expiration": 43200
+        },
+        "endpointConfigurations": {
+            "url": "https://qsc-dev.quasiris.de/api/v1/search-data-picker/quasiris/search-data-picker-demo"
+        },
+        "pickerConfigurations": {
+            "documents": [
+                {
+                    "eventSelector": "div.v-col-sm-6.v-col-md-6.v-col-lg-4.v-col-xl-3.v-col-12  div.v-card",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "title",
+                            "selector": "h6"
+                        }
+                    ]
+                }
+            ],
+            "sorting": [
+                {
+                    "eventSelector": ".v-select__content  .v-list-item-title",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "sort_by",
+                            "func": function(element) {
+                                return element.innerText
                             }
-                        ]
-                    }
-                ],
-                "sorting": [
-                    {
-                        "eventSelector": "div.sort_input",
-                        "event": "observe",
-                        "fields": [
-                            {
-                                "key": "sort_by",
-                                "func": function(element) {
-                                    return element.querySelector('div.v-select__selection span.v-select__selection-text').innerText;
-                                }
-    
-                            }]
-                    }
-                ],
-                "records": [
-                    {
-                        "eventSelector": "div.records_input",
-                        "event": "observe",
-                        "fields": [
-                            {
-                                "key": "records",
-                                "func": function(element) {
-                                    return element.querySelector('div.v-select__selection span.v-select__selection-text').innerText;
-                                }
-    
-                            }]
-                    }
-                ],
-                "filter": [
-                    {
-                        "eventSelector": "div.v-row > div.v-col.v-col-3.text-center",
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "type",
-                                "func": function(element) {
-                                    return "filter";
-                                }
-                            },
-                            {
-                                "key": "facet",
-                                "func": function(element) {
-                                    return "color";
-                                }
-                            },
-                            {
-                                "key": "color",
-                         
-                                "func": function(element) {
-                                    return element.querySelectorAll('.color-text')[0].innerText;
-                                }
+
+                        }]
+                }
+            ],
+            "filter": [
+                {
+                    "eventSelector": "div.v-row > div.v-col.v-col-3.text-center",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "type",
+                            "func": function(element) {
+                                return "filter";
                             }
-                        ]
-                    },
-                    {
-                        "eventSelector": ".category-item[data-category-value]",
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "type",
-                                "func": function(element) {
-                                    return "sortiment";
-                                }
-                            },
-                            {
-                                "key": "value",
-                                "func": function(element) {
-                                    return element.innerText;
-                                }
+                        },
+                        {
+                            "key": "facet",
+                            "func": function(element) {
+                                return "color";
                             }
-                        ]
-                    },
-                    {
-                        "eventSelector": "div.clear-input",
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "type",
-                                "func": function(element) {
-                                    return "filter";
-                                }
-                            },
-                         
-                            {
-                                "key": "removed_filter",
-                         
-                                "func": function(element) {
-                                    const siblings = Array.from(element.parentNode.children)
-                                         .filter(child => child !== element);
-                                    return siblings.find(sib => sib.matches('.chip-text'))?.innerText || null;
-                                }
+                        },
+                        {
+                            "key": "color",
+                     
+                            "func": function(element) {
+                                return element.querySelectorAll('.color-text')[0].innerText;
                             }
-                        ]
-                    },
-                    {
-                        "eventSelector": "button[data-filter-value]",
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "type",
-                                "func": function(element) {
-                                    return "filter";
-                                }
-                            },
-                         
-                            {
-                                "key": "value",
-                         
-                                "func": function(element) {
-                                    return element.dataset.filterValue;
-                                }
+                        }
+                    ]
+                },
+                {
+                    "eventSelector": ".clear-input",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "type",
+                            "func": function(element) {
+                                return "filter";
                             }
-                        ]
-                    },
-                    {
-                        "eventSelector": "div[data-filter-value]",
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "type",
-                                "func": function(element) {
-                                    return "filter";
-                                }
-                            },
-                         
-                            {
-                                "key": "value",
-                         
-                                "func": function(element) {
-                                    return element.dataset.filterValue;
-                                }
+                        },
+                     
+                        {
+                            "key": "removed_filter",
+                     
+                            "func": function(element) {
+                                const siblings = Array.from(element.parentNode.children)
+                                     .filter(child => child !== element);
+                                return siblings.find(sib => sib.matches('.chip-text'))?.innerText || null;
                             }
-                        ]
-                    },
-                    {
-                        "eventSelector": "div.v-checkbox[data-filter-value]",
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "type",
-                                "func": function(element) {
-                                    return "filter";
-                                }
-                            },
-                         
-                            {
-                                "key": "value",
-                         
-                                "func": function(element) {
-                                    return element.dataset.filterValue;
-                                }
+                        }
+                    ]
+                },
+                {
+                    "eventSelector": "button[data-filter-value]",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "type",
+                            "func": function(element) {
+                                return "filter";
                             }
-                        ]
-                    },
-                  {
+                        },
+                     
+                        {
+                            "key": "value",
+                     
+                            "func": function(element) {
+                                return element.dataset.filterValue;
+                            }
+                        }
+                    ]
+                },
+                {
+                    "eventSelector": "div[data-filter-value]",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "type",
+                            "func": function(element) {
+                                return "filter";
+                            }
+                        },
+                     
+                        {
+                            "key": "value",
+                     
+                            "func": function(element) {
+                                return element.dataset.filterValue;
+                            }
+                        }
+                    ]
+                },
+                {
                     "eventSelector": ".slider-price-range",
                     "triggerSelector": ".slider-wrapper",
                     "event": "observe",
@@ -214,78 +162,79 @@
                         }
                     ]
                 }
-],
-                'pagination': [
-                    {
-                        "eventSelector": ".pagination > button.v-btn",
-                       
-                        "event": "click",
-                        "fields": [
-                            {
-                                "key": "page",
-                                "func": function(element) {
-                                    let currPage = document.querySelector('.pagination > span > span').innerText
-                                    if (currPage) {
-                                        currPage = Number(currPage);
-                                    }
-                                    if(Array.from(element.classList).includes('prev-pagination')) {
-                                        return --currPage;
-                                    }
-                                    if(Array.from(element.classList).includes('next-pagination')) {
-                                        return ++currPage;
-                                    }
+            ],
+            'pagination': [
+                {
+                    "eventSelector": ".pagination > button.v-btn",
+                   
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "page",
+                            "func": function(element) {
+                                let currPage = document.querySelector('.pagination > span > span').innerText
+                                if (currPage) {
+                                    currPage = Number(currPage);
                                 }
-                                
-                            }
-                        ]
-                    }
-                ],
-                "search-query": [
-                    {
-                        "eventSelector": "#search-btn",
-                        "event": "click",
-                        
-                        "fields": [
-                            {
-                                "key": "search_query",
-                                "func": function(element) {
-                                    return document.getElementById('search-box').value;
+                                if(Array.from(element.classList).includes('prev-pagination')) {
+                                    return --currPage;
+                                }
+                                if(Array.from(element.classList).includes('next-pagination')) {
+                                    return ++currPage;
                                 }
                             }
-                        ]
-                    },
-                    {
-                        "eventSelector": "#search-box",
-                        "event": "keydown",
-                        
-                        "fields": [
-                            {
-                                "key": "search_query_partial",
-                                "func": function(element) {
-                                    return document.getElementById('search-box').value;
-                                }
+                            
+                        }
+                    ]
+                }
+            ],
+            "search-query": [
+                {
+                    "eventSelector": "#search-btn",
+                    "event": "click",
+                    
+                    "fields": [
+                        {
+                            "key": "search_query",
+                            "func": function(element) {
+                                return document.getElementById('search-box').value;
                             }
-                        ]
-                    },
-                    {
-                        "eventSelector": ".v-list-item[data-suggest-value]",
-                        "event": "click",
-                        
-                        "fields": [
-                            {
-                                "key": "suggestion_click",
-                                "func": function(element) {
-                                    return element.dataset.suggestValue;
-                                }
+                        }
+                    ]
+                },
+                {
+                    "eventSelector": "#search-box",
+                    "event": "keydown",
+                    
+                    "fields": [
+                        {
+                            "key": "search_query_partial",
+                            "func": function(element) {
+                                return document.getElementById('search-box').value;
                             }
-                        ]
-                    },
-                ]
-         }
+                        }
+                    ]
+                },
+                
+                {
+                    "eventSelector": ".search-wrapper .v-list-item",
+                    "event": "click",
+                    
+                    "fields": [
+                        {
+                            "key": "suggestion_click",
+                            "func": function(element) {
+                                return (document.querySelector('.search-wrapper .v-list-item > .v-list-item__content').innerText).trim();
+                            }
+                        }
+                    ]
+                },
+            ]
         }
-        setTimeout(() => {
-            picker.initPicker.fromConfigFile(config);
-        }, 3600)
+    }
+    setTimeout(() => {
+        picker.initPicker.fromConfigFile(config);
+    }, 3600)
     </script>
   </body>
 </html>
