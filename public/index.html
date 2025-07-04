@@ -38,13 +38,13 @@
             ],
             "sorting": [
                 {
-                    "eventSelector": ".v-select__content  .v-list-item-title",
+                    "eventSelector": "div.v-list-item-title",
                     "event": "click",
                     "fields": [
                         {
                             "key": "sort_by",
                             "func": function(element) {
-                                return element.innerText
+                                return element.innerText;
                             }
 
                         }]
@@ -72,28 +72,6 @@
                      
                             "func": function(element) {
                                 return element.querySelectorAll('.color-text')[0].innerText;
-                            }
-                        }
-                    ]
-                },
-                {
-                    "eventSelector": ".clear-input",
-                    "event": "click",
-                    "fields": [
-                        {
-                            "key": "type",
-                            "func": function(element) {
-                                return "filter";
-                            }
-                        },
-                     
-                        {
-                            "key": "removed_filter",
-                     
-                            "func": function(element) {
-                                const siblings = Array.from(element.parentNode.children)
-                                     .filter(child => child !== element);
-                                return siblings.find(sib => sib.matches('.chip-text'))?.innerText || null;
                             }
                         }
                     ]
@@ -161,7 +139,46 @@
                             }
                         }
                     ]
-                }
+                },
+                {
+                    "eventSelector": ".category-item[data-category-value]",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "type",
+                            "func": function(element) {
+                                return "sortiment";
+                            }
+                        },
+                        {
+                            "key": "value",
+                            "func": function(element) {
+                                return element.innerText
+
+                            }   
+                        }
+                    ]
+                },
+                 {
+                    "eventSelector": ".clear-input",
+                    "event": "click",
+                    "fields": [
+                        {
+                            "key": "type",
+                            "func": function(element) {
+                                return "filter";
+                            }
+                        },
+                        {
+                            "key": "removed_filter",
+                            "func": function(element) {
+                                const siblings = Array.from(element.parentNode.children)
+                                     .filter(child => child !== element);
+                                return siblings.find(sib => sib.matches('.chip-text'))?.innerText || null;
+                            }
+                        }
+                    ]
+                },
             ],
             'pagination': [
                 {
@@ -210,21 +227,21 @@
                         {
                             "key": "search_query_partial",
                             "func": function(element) {
-                                return document.getElementById('search-box').value;
+                                return  element.value;
                             }
                         }
                     ]
                 },
                 
                 {
-                    "eventSelector": ".search-wrapper .v-list-item",
+                    "eventSelector": ".v-list-item[data-suggest-value]",
                     "event": "click",
                     
                     "fields": [
                         {
                             "key": "suggestion_click",
                             "func": function(element) {
-                                return (document.querySelector('.search-wrapper .v-list-item > .v-list-item__content').innerText).trim();
+                                return element.dataset.suggestValue;;
                             }
                         }
                     ]
