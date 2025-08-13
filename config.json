@@ -79,7 +79,7 @@
     "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/fruugo",
     "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/fruugo?q=",
     "resultSetId": "fruugo",
-    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScbfBRrzfn61gJ8ttjC5PdY2suk-57bdHQHw&s",
+    "logo": "https://1000logos.net/wp-content/uploads/2023/11/Fruugo-Logo-500x281.png",
     "logoRedirection": "https://www.fruugo.de/",
     "document": {
       "name": "title",
