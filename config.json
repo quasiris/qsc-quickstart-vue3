@@ -50,6 +50,22 @@
     }
   },
   {
+    "id": "fruugo",
+    "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/fruugo",
+    "resultSetId": "fruugo",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScbfBRrzfn61gJ8ttjC5PdY2suk-57bdHQHw&s",
+    "document": {
+     "name": "title",
+    "image": "images"
+     }
+    ,
+    "rows": [
+      { "id": 24, "name": "24 records" },
+      { "id": 48, "name": "48 records" },
+      { "id": 72, "name": "72 records" }
+    ]
+  },
+  {
     "id": "docs",
     "baseurl": "https://qsc.quasiris.de/api/v1/search/quasiris/qsc-documentation",
     "suggestionUrl": "https://qsc.quasiris.de/api/v1/search/suggest/quasiris/qsc-documentation?q=",
