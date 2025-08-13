@@ -21,6 +21,7 @@
             class="rounded-t-lg"
             v-if="product.document && config.document.image"
             :src="product.document.image.replace(/^.*?format=auto\//, '')"
+            @error="onImageError"
             style="max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;"
           />
         </div>
@@ -79,11 +80,14 @@
             this.HtmlTemplate = await this.convertJsonToHtml();
     },
     methods: {
-        async  convertJsonToHtml() {
-            let template = this.config.document.template
-            // Convert escaped newlines to actual newlines
-            return template.replace(/\\n/g, '\n');
-            },
+      async  convertJsonToHtml() {
+        let template = this.config.document.template
+        // Convert escaped newlines to actual newlines
+        return template.replace(/\\n/g, '\n');
+      },
+      onImageError(event) {
+        event.target.src = '/brand/no-image-icon.png'; 
+      }
     },
   };
   </script>
