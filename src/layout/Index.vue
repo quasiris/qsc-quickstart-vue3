@@ -43,6 +43,7 @@ export default {
     for (const configItem of config) {
       if (path.includes(configItem.id)) {
         this.config = configItem;
+        console.log("Config :", configItem.id);
         break;
       }
     }
