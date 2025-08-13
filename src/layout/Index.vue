@@ -40,13 +40,9 @@ export default {
     const url = new URL(window.location.href);
     const path = url.pathname;
     const searchQuery = url.searchParams.get('q');
-      console.log("configs :", config);
-      console.log("path :", path);
-
     for (const configItem of config) {
       if (path.includes(configItem.id)) {
         this.config = configItem;
-        console.log("Config :", configItem.id);
         break;
       }
     }
