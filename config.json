@@ -52,13 +52,13 @@
   {
     "id": "fruugo",
     "baseurl": "https://qsc-dev.quasiris.de/api/v1/search/demo/fruugo",
+    "suggestionUrl": "https://qsc-dev.quasiris.de/api/v1/search/suggest/demo/fruugo?q=",
     "resultSetId": "fruugo",
     "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScbfBRrzfn61gJ8ttjC5PdY2suk-57bdHQHw&s",
     "document": {
-     "name": "title",
-    "image": "images"
-     }
-    ,
+      "name": "title",
+      "image": "images"
+     },
     "rows": [
       { "id": 24, "name": "24 records" },
       { "id": 48, "name": "48 records" },
