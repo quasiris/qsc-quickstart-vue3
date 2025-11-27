@@ -1,5 +1,5 @@
 <template>
-  <nav class="navigation" ref="navigation" @mouseleave="startHideMainCategories">
+  <nav  v-if="categories.length > 0" class="navigation" ref="navigation" @mouseleave="startHideMainCategories">
     <ul class="nav-list">
       <li>
         <v-btn variant="text" size="small" class="sortiment-btn" @mouseenter="showMainCategories">Sortiment</v-btn>
@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { watch,ref,getCurrentInstance,onMounted, onBeforeUnmount } from 'vue';
+import { ref,getCurrentInstance,onMounted, onBeforeUnmount } from 'vue';
 import CategoryItem from './CategoryItem.vue';
 import { useStore } from 'vuex';
 export default {
@@ -73,21 +73,12 @@ export default {
       try {
         const response = await fetch(props.url);
         const data = await response.json();
-        categories.value = data.category.children;
+        categories.value = data?.category?.children ? data?.category?.children : [];
       } catch (error) {
         console.error('Failed to fetch categories', error);
         store.dispatch('showGlobalSheet');
       }
     };
-    watch(
-      () => props.url,
-      (newUrl, oldUrl) => {
-        if (newUrl !== oldUrl) {
-          fetchCategories(); // Fetch categories when URL changes
-        }
-      },
-      { deep: true }
-    );
     const showMainCategories = () => {
       showCategories.value = true;
     };
@@ -155,8 +146,9 @@ export default {
     const isActiveCategory = (depth, filter) => {
       return openCategories.value[depth] === filter;
     };
-
+    
     fetchCategories();
+
     onMounted(() => {
       calculateCategoryPosition();
       window.addEventListener('resize', calculateCategoryPosition);

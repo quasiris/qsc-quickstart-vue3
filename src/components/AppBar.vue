@@ -6,15 +6,15 @@
           <div>
               <img
                 class="me-2 logo d-md-block d-none v-image"
-                :src="config.logo"
-                @click="logoRedirect(config?.logoRedirection)"
+                :src="currentConfig.logo"
+                @click="logoRedirect(currentConfig?.logoRedirection)"
                 style="max-height: 64px; max-width: 170px; cursor: pointer;"
                 alt=""
               />
           </div>
         </v-toolbar-title>
         <v-col lg="8" sm="7" class="d-flex align-center justify-space-around">
-          <sortiment-navigation :url="config.sortimentUrl" @handleFilter="haldleNavFilter($event)" v-if="(config.sortimentUrl && (display.width._object.width >= 960))" />
+          <sortiment-navigation :url="currentConfig?.sortimentUrl" @handleFilter="haldleNavFilter($event)" v-if="(currentConfig?.sortimentUrl && (display.width._object.width >= 960))" />
           <div class="search-wrapper d-flex flex-column">
             <div class="search-bar d-flex align-center p-relative" ref="searchArea">
             <v-text-field
@@ -164,7 +164,7 @@ export default {
       localSearchQuery: "",
       suggests: [],
       recentSearches: {},
-      config: config[0],
+      currentConfig: {},
       isFixedAppBar: false,
       navFilter: false,
       showRecents: false,
@@ -214,7 +214,7 @@ export default {
     },
     filteredItems() {
       const suggestValues = this.suggests.map(item => item.suggest);
-      const recent = this.recentSearches[this.config.id]?.filter(item => 
+      const recent = this.recentSearches[this.currentConfig.id]?.filter(item => 
         item && item.toLowerCase().startsWith(this.localSearchQuery.toLowerCase())
       ) || [];      
       // Combine recent suggestions with filtered items, ensuring no duplicates
@@ -234,14 +234,14 @@ export default {
 
     const url = window.location.href;
     for (const configItem of config) {
-      if (url.includes(configItem.id)) {
-        this.config = configItem;
+      if (url.includes(configItem.id) || (configItem.id === '1' && url === window.location.origin + '/')) {
+        this.currentConfig = configItem;
         break; // Exit the loop once a match is found
       }
     }
     this.recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
-    if(!this.recentSearches[this.config.id]){
-      this.recentSearches[this.config.id]=[]
+    if(!this.recentSearches[this.currentConfig.id]){
+      this.recentSearches[this.currentConfig.id]=[]
       localStorage.setItem('recentsSearch', JSON.stringify(this.recentSearches));
     }
     this.fetchSuggestions();
@@ -259,7 +259,7 @@ export default {
     },
     isInRecentSearches(item) {
       const recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
-      return recentSearches[this.config.id].includes(item);
+      return recentSearches[this.currentConfig.id].includes(item);
     }, 
     logoRedirect(link = '') {
       if (link) {
@@ -268,8 +268,8 @@ export default {
         return;
       }
       let localUrl = '/';
-      if (this.config.id !== '1') {
-        localUrl += this.config.id;
+      if (this.currentConfig.id !== '1') {
+        localUrl += this.currentConfig.id;
       }
       if (window.location.pathname === localUrl) {
         // If the pathname matches, reload the page
@@ -283,7 +283,7 @@ export default {
       }
     },
     fetchSuggestions() {
-      const suggestUrl = this.config.suggestionUrl;
+      const suggestUrl = this.currentConfig.suggestionUrl;
       if (this.selectedSuggestion === this.localSearchQuery) {
         // If the selected suggestion is equal to the current search query,
         // do not make the API call
@@ -321,11 +321,11 @@ export default {
     },
     searchProducts() {
       if(this.localSearchQuery.trim() != ''){
-        this.recentSearches[this.config.id].unshift(this.localSearchQuery.toLowerCase());
-        this.recentSearches[this.config.id]= [...new Set(this.recentSearches[this.config.id])];
+        this.recentSearches[this.currentConfig.id].unshift(this.localSearchQuery.toLowerCase());
+        this.recentSearches[this.currentConfig.id]= [...new Set(this.recentSearches[this.currentConfig.id])];
           // Ensure the length is max 10
-          if (this.recentSearches[this.config.id].length > 10) {
-            this.recentSearches[this.config.id].length = 10;  // Trim the array to 10 items
+          if (this.recentSearches[this.currentConfig.id].length > 10) {
+            this.recentSearches[this.currentConfig.id].length = 10;  // Trim the array to 10 items
           }
         localStorage.setItem('recentsSearch', JSON.stringify(this.recentSearches));
         this.showRecents=false;
@@ -340,8 +340,8 @@ export default {
         this.setSearchQuery(this.localSearchQuery);
       
       let localUrl= '/'
-      if(this.config.id != '1')
-        localUrl= localUrl+this.config.id
+      if(this.currentConfig.id != '1')
+        localUrl= localUrl+this.currentConfig.id
       if(window.location.pathname != localUrl){
         const newUrl = new URL(window.location.origin + localUrl);
         newUrl.searchParams.set('q', this.localSearchQuery); 
