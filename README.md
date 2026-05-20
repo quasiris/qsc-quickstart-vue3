@@ -64,6 +64,36 @@ For example:
   This command mounts the local /path/to/config directory to /app/config inside the container. You can then reference the configuration file in your application code as /app/config/config.js.
     
 
+## Remote tenant configuration
+
+You can deploy a search frontend for any tenant without rebuilding by opening:
+
+```
+/d/{tenant}/{searchCode}
+```
+
+Example:
+
+```
+https://qsc-search.de/d/mohammadsaker1/real-estate
+```
+
+The app loads configuration from CDN:
+
+```
+{VUE_APP_QSC_API_BASE}/cdn/qsc/{tenant}/{searchCode}-quickstart/config.json
+```
+
+Set the API/CDN base in `.env`:
+
+```
+VUE_APP_QSC_API_BASE=https://qsc-dev.quasiris.de
+```
+
+For production deployments use `https://qsc.quasiris.de`.
+
+Remote configs saved from QSC Search Designer include a root-level `template` field; the app normalizes this to `document.template` for the existing product card renderer.
+
 ## Customize configuration
 
 The main configuration file for this project is config.json, where you can specify various API URLs and create your own configurations.

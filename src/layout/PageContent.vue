@@ -409,6 +409,7 @@
 <script>
 
 import { replacePlaceholders } from '@/utils'; 
+import { getBasePath } from '@/services/configLoader';
 import HistogramSlider from "@/components/HistogramSlider.vue";
 import SideBarNavigation from "@/components/SideBarNavigation.vue";
 import ProductCard from "@/components/ProductCard.vue";
@@ -477,13 +478,11 @@ export default {
   },
   created() {
     window.addEventListener("scroll", this.handleScroll);
-    let localUrl= '/'
-      if(this.config.id != '1')
-        localUrl= localUrl+this.config.id
-      if(window.location.pathname != localUrl){
-        const newUrl = new URL(window.location.origin + localUrl);
-        window.history.pushState({}, '', newUrl);
-      }
+    const localUrl = getBasePath(this.config, this.$route);
+    if(window.location.pathname != localUrl){
+      const newUrl = new URL(window.location.origin + localUrl);
+      window.history.pushState({}, '', newUrl);
+    }
   },
   unmounted() {
     window.removeEventListener("scroll", this.handleScroll);

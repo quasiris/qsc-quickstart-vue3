@@ -150,21 +150,27 @@
 </template>
 
 <script>
-import config from "@/../config.json";
 import SortimentNavigation from './SortimentNavigation.vue';
 import { mapState, mapActions } from 'vuex';
 import axios from "axios";
 import { useDisplay } from 'vuetify'
+import { getBasePath } from '@/services/configLoader';
 export default {
   components: {SortimentNavigation},
   name: "AppBar",
+
+  props: {
+    config: {
+      type: Object,
+      required: true
+    }
+  },
 
   data() {
     return {
       localSearchQuery: "",
       suggests: [],
       recentSearches: {},
-      currentConfig: {},
       isFixedAppBar: false,
       navFilter: false,
       showRecents: false,
@@ -189,6 +195,17 @@ export default {
     return { display }
   },
   watch: {
+    config: {
+      handler(newConfig) {
+        if (!newConfig?.id) return;
+        this.recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
+        if (!this.recentSearches[newConfig.id]) {
+          this.recentSearches[newConfig.id] = [];
+          localStorage.setItem('recentsSearch', JSON.stringify(this.recentSearches));
+        }
+      },
+      immediate: true
+    },
     localSearchQuery(newVal) {
       if (newVal !== this.searchQuery ) {
         this.localSearchQuery = newVal; // Sync local data with prop
@@ -209,6 +226,9 @@ export default {
   },
   computed: {
     ...mapState(['requestId','userId','sessionId','email','searchQuery','bottomSheet']),
+    currentConfig() {
+      return this.config || {};
+    },
     isEmailValid() {
       return ((this.rules.every(rule => rule(this.emailInput) === true)) && (this.email != this.emailInput));
     },
@@ -232,13 +252,6 @@ export default {
     window.addEventListener("scroll", this.handleScroll);
     this.localSearchQuery=this.searchQuery
 
-    const url = window.location.href;
-    for (const configItem of config) {
-      if (url.includes(configItem.id) || (configItem.id === '1' && url === window.location.origin + '/')) {
-        this.currentConfig = configItem;
-        break; // Exit the loop once a match is found
-      }
-    }
     this.recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
     if(!this.recentSearches[this.currentConfig.id]){
       this.recentSearches[this.currentConfig.id]=[]
@@ -267,10 +280,7 @@ export default {
         window.open(link, '_blank');
         return;
       }
-      let localUrl = '/';
-      if (this.currentConfig.id !== '1') {
-        localUrl += this.currentConfig.id;
-      }
+      let localUrl = getBasePath(this.currentConfig, this.$route);
       if (window.location.pathname === localUrl) {
         // If the pathname matches, reload the page
         const cleanUrl = window.location.origin + localUrl;
@@ -339,9 +349,7 @@ export default {
       else
         this.setSearchQuery(this.localSearchQuery);
       
-      let localUrl= '/'
-      if(this.currentConfig.id != '1')
-        localUrl= localUrl+this.currentConfig.id
+      const localUrl = getBasePath(this.currentConfig, this.$route);
       if(window.location.pathname != localUrl){
         const newUrl = new URL(window.location.origin + localUrl);
         newUrl.searchParams.set('q', this.localSearchQuery); 

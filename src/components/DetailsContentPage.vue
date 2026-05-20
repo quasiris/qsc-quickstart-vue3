@@ -11,6 +11,7 @@
 <script>
 import {mapActions} from 'vuex';
 import VueMarkdownPreview from '@uivjs/vue-markdown-preview';
+import { getBasePath } from '@/services/configLoader';
 export default {
   name: "DetailsContentPage",
   components: {
@@ -35,7 +36,7 @@ export default {
       let link = this.config.detailsUrl + this.pathSegments
       await this.fetchDetails(link)
     }else{
-      const basePath = `/${this.$route.params.config || ''}`;
+      const basePath = getBasePath(this.config, this.$route);
       if (this.$route.path.startsWith(basePath)) {
           this.$router.replace(basePath); 
       } else {

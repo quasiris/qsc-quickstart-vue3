@@ -72,7 +72,9 @@
     },
     computed: {
         templateExists() {
-        return this.config && this.config.document.template;
+        return Boolean(
+          this.config?.document?.template || this.config?.template
+        );
         }
     },
     async mounted() {
@@ -81,7 +83,7 @@
     },
     methods: {
       async  convertJsonToHtml() {
-        let template = this.config.document.template
+        let template = this.config.document?.template || this.config.template
         // Convert escaped newlines to actual newlines
         return template.replace(/\\n/g, '\n');
       },

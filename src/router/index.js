@@ -4,6 +4,16 @@ import PageContent from '@/layout/PageContent.vue';
 
 const routes = [
   {
+    path: '/d/:tenant/:code',
+    component: PageContent,
+  },
+  {
+    path: '/d/:tenant/:code/detail/:pathMatch(.*)*',
+    name: 'RemoteDetailsContent',
+    component: DetailsContentPage,
+    props: true,
+  },
+  {
     path: '/',
     component: PageContent, 
   },
