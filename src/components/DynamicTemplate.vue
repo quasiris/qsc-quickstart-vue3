@@ -28,7 +28,7 @@ export default {
       });
     }
     catch (e) {
-      console.exception(e.toString())
+      console.log(e.toString())
       return h("div", "Invalid Template")
     }
 
