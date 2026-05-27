@@ -92,8 +92,8 @@ export default {
         this.configError = null;
 
         try {
-          const { tenant, code } = this.$route.params;
-          this.config = await fetchRemoteConfig(tenant, code);
+          const { e, tenant, code } = this.$route.params;
+          this.config = await fetchRemoteConfig(tenant, code, e);
         } catch (error) {
           this.configError = error?.message || 'Unable to load remote configuration.';
         } finally {

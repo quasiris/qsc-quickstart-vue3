@@ -69,28 +69,24 @@ For example:
 You can deploy a search frontend for any tenant without rebuilding by opening:
 
 ```
-/d/{tenant}/{searchCode}
+/d/{env}/{tenant}/{searchCode}
 ```
+
+Where `{env}` is `prod` or `dev` (CDN host: `qsc.quasiris.de` or `qsc-dev.quasiris.de`).
 
 Example:
 
 ```
-https://qsc-search.de/d/mohammadsaker1/real-estate
+https://qsc-search.de/d/prod/mohammadsaker1/real-estate
 ```
 
 The app loads configuration from CDN:
 
 ```
-{VUE_APP_QSC_API_BASE}/cdn/qsc/{tenant}/{searchCode}-quickstart/config.json
+https://{env-host}/cdn/qsc/{tenant}/{searchCode}-quickstart/config.json
 ```
 
-Set the API/CDN base in `.env`:
-
-```
-VUE_APP_QSC_API_BASE=https://qsc-dev.quasiris.de
-```
-
-For production deployments use `https://qsc.quasiris.de`.
+`{env-host}` is `qsc.quasiris.de` for `prod` and `qsc-dev.quasiris.de` for `dev`.
 
 Remote configs saved from QSC Search Designer include a root-level `template` field; the app normalizes this to `document.template` for the existing product card renderer.
 

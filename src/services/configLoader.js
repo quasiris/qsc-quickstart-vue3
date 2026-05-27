@@ -1,19 +1,28 @@
 const CONFIG_FILENAME = 'config.json'
 
-export function getApiBase () {
-  return process.env.VUE_APP_QSC_API_BASE || 'https://qsc.quasiris.de'
+const ENV_API_BASES = {
+  prod: 'https://qsc.quasiris.de',
+  dev: 'https://qsc-dev.quasiris.de',
+}
+
+export function getApiBaseForEnv (env) {
+  const base = ENV_API_BASES[env]
+  if (!base) {
+    throw new Error(`Unknown environment: ${env}`)
+  }
+  return base
 }
 
 export function getAssetCode (searchCode) {
   return `${searchCode}-quickstart`
 }
 
-export function getRemoteConfigUrl (tenant, searchCode) {
-  const base = getApiBase()
+export function getRemoteConfigUrl (tenant, searchCode, env) {
+  const base = getApiBaseForEnv(env)
   return `${base}/cdn/qsc/${encodeURIComponent(tenant)}/${encodeURIComponent(getAssetCode(searchCode))}/${CONFIG_FILENAME}`
 }
 
-export function normalizeRemoteConfig (raw, { tenant, searchCode }) {
+export function normalizeRemoteConfig (raw, { tenant, searchCode, env }) {
   const config = { ...raw }
   const document = { ...(config.document || {}) }
 
@@ -25,14 +34,15 @@ export function normalizeRemoteConfig (raw, { tenant, searchCode }) {
   config.document = document
   config.tenant = tenant
   config.searchCode = searchCode
+  config.env = env
   config.isRemote = true
   config.id = `${tenant}:${searchCode}`
 
   return config
 }
 
-export async function fetchRemoteConfig (tenant, searchCode) {
-  const url = getRemoteConfigUrl(tenant, searchCode)
+export async function fetchRemoteConfig (tenant, searchCode, env) {
+  const url = getRemoteConfigUrl(tenant, searchCode, env)
   const response = await fetch(url, { cache: 'no-store' })
 
   if (!response.ok) {
@@ -42,7 +52,7 @@ export async function fetchRemoteConfig (tenant, searchCode) {
   }
 
   const raw = await response.json()
-  return normalizeRemoteConfig(raw, { tenant, searchCode })
+  return normalizeRemoteConfig(raw, { tenant, searchCode, env })
 }
 
 export function resolveLocalConfig (pathname, configs) {
@@ -60,10 +70,11 @@ export function resolveLocalConfig (pathname, configs) {
 }
 
 export function getBasePath (config, route) {
-  if (config?.isRemote && (config.tenant || route?.params?.tenant) && (config.searchCode || route?.params?.code)) {
+  if (config?.isRemote && (config.env || route?.params?.e) && (config.tenant || route?.params?.tenant) && (config.searchCode || route?.params?.code)) {
+    const env = config.env || route.params.e
     const tenant = config.tenant || route.params.tenant
     const code = config.searchCode || route.params.code
-    return `/d/${tenant}/${code}`
+    return `/d/${env}/${tenant}/${code}`
   }
 
   if (!config?.id || config.id === '1') {
@@ -74,5 +85,5 @@ export function getBasePath (config, route) {
 }
 
 export function isRemoteRoute (route) {
-  return Boolean(route?.params?.tenant && route?.params?.code)
+  return Boolean(route?.params?.e && route?.params?.tenant && route?.params?.code)
 }
