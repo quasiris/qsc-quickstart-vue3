@@ -91,7 +91,7 @@
           </div>
           <v-navigation-drawer v-if="facets && !isFacetsLoading && products.length > 0" :width="325"  class="filters drawer pb-4 shadow-sm"  v-model="isSidebar" :class="{ open: !isSidebar }" >
             <v-list-item class="filter" :data-filter-type="facet.type" v-for="facet in facets" :key="facet.id">
-              <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count !=0">
+              <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-1 pb-3 d-flex align-start justify-center flex-column">
                   {{ facet.name }}
                 </h4>
@@ -100,19 +100,24 @@
                   :facet="facet"
                   :resetAll="resetAll"
                   @price-change="handlePriceRangeChange"
-                /> 
+                />
                 <PriceSlider
                   v-if="facet.type == 'slider'"
                   :facet="facet"
                   @price-change="handlePriceChange"
-                /> 
+                />
                 <HistogramSlider
                   v-if="facet.type == 'histogram'"
                   :facet="facet"
                   @price-change="handlePriceChange"
                 />
+                <DateHistogramSlider
+                  v-if="facet.type == 'date_histogram'"
+                  :facet="facet"
+                  @date-change="handleDateHistogramChange"
+                />
               </div>
-              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'rangeInput'|| facet.type === 'search')"
+              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'date_histogram' || facet.type === 'rangeInput'|| facet.type === 'search')"
                 class="pt-1 d-flex align-start justify-center flex-column"
               >
                 {{ facet.name }}
@@ -139,7 +144,7 @@
                   @onFilter="handleNavigationSelection" 
                     />
               </div>
-              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput')">
+              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput')">
                 <div v-if="facet.values.length && facet.showAll" class="mt-2 mb-2">
                   <v-text-field
                     v-model="facet.searchQuery"
@@ -411,6 +416,7 @@
 import { replacePlaceholders } from '@/utils'; 
 import { getBasePath } from '@/services/configLoader';
 import HistogramSlider from "@/components/HistogramSlider.vue";
+import DateHistogramSlider from "@/components/DateHistogramSlider.vue";
 import SideBarNavigation from "@/components/SideBarNavigation.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import PriceSlider from "@/components/PriceSlider.vue";
@@ -421,7 +427,7 @@ import {mapGetters, mapState, mapActions } from 'vuex';
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 export default {
-  components: {HistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
+  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
   data() {
     return {
       localSearchQuery: "",
@@ -785,7 +791,27 @@ export default {
           facet.isSliderDisabled = true;
         else
           facet.isSliderDisabled = false;
-    },  
+    },
+    handleDateHistogramChange(filter) {
+      // filter.sliderValues sind Millisekunden -> für die Query nach ISO zurück.
+      // Backend erwartet: <filterName>.daterange=<minISO>,<maxISO>
+      if (filter.sliderValues[0] != null && filter.sliderValues[1] != null) {
+        const minIso = new Date(filter.sliderValues[0]).toISOString();
+        const maxIso = new Date(filter.sliderValues[1]).toISOString();
+        let filterValue = filter.filterName + '.daterange=' + minIso + ',' + maxIso;
+        let chipValue = new Date(filter.sliderValues[0]).toLocaleDateString('de-DE')
+          + ' - ' + new Date(filter.sliderValues[1]).toLocaleDateString('de-DE');
+        this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filterName + '.daterange='));
+        this.selectedFilters.push(filterValue);
+        const existingChipIndex = this.chipsValues.findIndex(chip => Object.hasOwn(chip, filter.name));
+        if (existingChipIndex !== -1) {
+          this.chipsValues[existingChipIndex][filter.name] = chipValue;
+          this.chipsValues[existingChipIndex].filter = filter.filterName;
+        } else {
+          this.chipsValues.push({ [filter.name]: chipValue, filter: filter.filterName });
+        }
+      }
+    },
     handlePriceChange(filter) {
       if(filter.sliderValues[0] && filter.sliderValues[1]){
         let filterValue=filter.filterName+'.range='+filter.sliderValues[0]+','+filter.sliderValues[1]
@@ -897,6 +923,9 @@ export default {
             if (facet.type === 'slider' || facet.type === 'histogram') {
               this.initializeFacetData(facet);
             }
+            // date_histogram: die DateHistogramSlider-Komponente initialisiert
+            // sich selbst (created()) und braucht value.filter als Objekt ->
+            // hier NICHT umbauen, unverändert durchreichen.
             if (facet.type ==='navigation'){
               return this.markTempSelected(facet)
             }
