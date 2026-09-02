@@ -1021,8 +1021,12 @@ export default {
 <style >
 
 .drawer {
-  min-height: 85vh;
-  position: relative !important;
+  position: sticky !important;
+  top: calc(var(--app-bar-h, 120px) + 12px);
+  align-self: flex-start;
+  max-height: calc(100vh - var(--app-bar-h, 120px) - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   transform: translateX(-8px) !important;
   border-top-width: thin !important;
   border-top-right-radius: 5px;
@@ -1205,6 +1209,8 @@ input[type="number"] {
   }
   .drawer {
     position: absolute !important;
+    top: auto;
+    max-height: none;
     margin-top: 11vh !important;
   }
   .open {

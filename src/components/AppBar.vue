@@ -250,6 +250,9 @@ export default {
     document.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("click", this.handleWindowClick);
     window.addEventListener("scroll", this.handleScroll);
+    this.updateAppBarHeight();
+    this.appBarResizeObserver = new ResizeObserver(this.updateAppBarHeight);
+    this.appBarResizeObserver.observe(this.$el);
     this.localSearchQuery=this.searchQuery
 
     this.recentSearches = JSON.parse(localStorage.getItem('recentsSearch') || '{}');
@@ -263,9 +266,18 @@ export default {
         // Remove the event listeners when the component is unmounted
     window.removeEventListener("mousemove", this.handleMouseMove);
     window.removeEventListener("click", this.handleWindowClick);
+    if (this.appBarResizeObserver) {
+      this.appBarResizeObserver.disconnect();
+    }
   },
   methods: {
     ...mapActions(['clearSession', 'setSearchQuery','stopBottomSheet','setUserEmail','startProductsLoading','startFacetsLoading','startProductsLoading','stopFacetsLoading','stopProductsLoading']),
+    updateAppBarHeight() {
+      document.documentElement.style.setProperty(
+        "--app-bar-h",
+        `${this.$el.offsetHeight}px`
+      );
+    },
     handleclearSession(){
       this.clearSession();
       this.$store.dispatch('initializeSession');
