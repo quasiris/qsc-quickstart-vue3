@@ -144,7 +144,7 @@
                   @onFilter="handleNavigationSelection" 
                     />
               </div>
-              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput')">
+              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput' || isSubFacet(facet) )">
                 <div v-if="facet.values.length && facet.showAll" class="mt-2 mb-2">
                   <v-text-field
                     v-model="facet.searchQuery"
@@ -203,6 +203,14 @@
                     </v-btn>
                   </div>
               </v-container>
+
+              <SubFacet
+                v-if="isSubFacet(facet) && facet.type !== 'navigation'"
+                :facet="facet"
+                v-model="selectedFilters"
+                @chip="chipsControle"
+              />
+
               <v-divider  v-if="facet.type != 'search' && products.length != 0" class="mt-3"></v-divider>
             </v-list-item>
             <v-list-item v-if="facets.length > 0" class="d-flex justify-center mt-3"> 
@@ -423,11 +431,12 @@ import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
+import SubFacet from "@/components/subfacet.vue";
 import {mapGetters, mapState, mapActions } from 'vuex';
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 export default {
-  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation},
+  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation,SubFacet},
   data() {
     return {
       localSearchQuery: "",
@@ -655,6 +664,10 @@ export default {
       this.$nextTick(() => {
         this.isWatchDisabled = false;
       });
+    },
+
+    isSubFacet(facet){
+      return facet.values != undefined && facet.values.some(value => value.children);
     },
 
     filteredValues(facet) {
