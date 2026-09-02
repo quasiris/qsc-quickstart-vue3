@@ -187,7 +187,7 @@
                       class="text-capitalize mt-3 ml-2 justify-center" @click="clearFilters()">Reset all</v-btn>
                     <v-col cols="12" class="col-auto">
                       <v-container :data-track-id="'zeroResultsContainer'"
-                        v-if="((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '')) && !isProductsLoading"
+                        v-if="hasLoadedProducts && ((products.length === 0 && selectedFilters.length != 0) || (products.length === 0 && searchQuery != '')) && !isProductsLoading"
                         class="d-flex  align-center no-product-container">
                         <v-row>
                           <v-col cols="12" class="text-center">
@@ -296,6 +296,7 @@ export default {
       products: [],
       totalproducts: "",
       responseTime: "",
+      hasLoadedProducts: false,
       selectedFilters: [],
       facets: [],
       sorts: [],
@@ -315,6 +316,7 @@ export default {
       currentPage: 1,
       isSidebar: false,
       isRequestInProgress: false,
+      requestVersion: 0,
       isWatchDisabled: false,
       isNewQuery: false,
       isSearchQueryChanged: false,
@@ -348,8 +350,9 @@ export default {
     window.addEventListener("scroll", this.handleScroll);
     const localUrl = getBasePath(this.config, this.$route);
     if (window.location.pathname != localUrl) {
-      const newUrl = new URL(window.location.origin + localUrl);
-      window.history.pushState({}, '', newUrl);
+      const newUrl = new URL(window.location.href);
+      newUrl.pathname = localUrl;
+      window.history.replaceState({}, '', newUrl);
     }
   },
   unmounted() {
@@ -451,6 +454,7 @@ export default {
     },
     config(newVal) {
       if (newVal) {
+        this.hasLoadedProducts = false;
         this.startProductsLoading();
         this.fetchProducts();
       }
@@ -707,6 +711,7 @@ export default {
       this.selectedFilters = filters;
     },
     fetchProducts() {
+      const requestVersion = ++this.requestVersion;
       const selectedFilters = this.selectedFilters.join("&");
 
       const selectedRow = this.selectedRow;
@@ -752,6 +757,9 @@ export default {
       axios
         .get(apiUrlWithQuery)
         .then(response => {
+          if (requestVersion !== this.requestVersion) {
+            return;
+          }
           const products = response.data.result[this.config.resultSetId].documents;
           this.products = products.map(product => {
             const originalDocument = { ...product.document };
@@ -772,6 +780,7 @@ export default {
             product.document = updatedDocument;
             return product;
           });
+          this.hasLoadedProducts = true;
           this.totalproducts = response.data.result[this.config.resultSetId].total;
           this.responseTime = ((response.data.time) / 1000).toFixed(2);
           this.facets = response.data.result[this.config.resultSetId].facets;
@@ -806,10 +815,14 @@ export default {
           this.stopFacetsLoading();
         })
         .finally(() => {
-          this.isRequestInProgress = false;
+          if (requestVersion === this.requestVersion) {
+            this.isRequestInProgress = false;
+          }
         })
         .catch(() => {
-          this.showGlobalSheet();
+          if (requestVersion === this.requestVersion) {
+            this.showGlobalSheet();
+          }
         })
     },
     nextPage() {
