@@ -76,6 +76,7 @@ export default {
     }
   },
   created() {
+    this.configLoading = isRemoteRoute(this.$route);
     this.resolveConfig();
   },
   methods: {
@@ -83,10 +84,6 @@ export default {
     async resolveConfig() {
       const url = new URL(window.location.href);
       const searchQuery = url.searchParams.get('q');
-
-      if (searchQuery && searchQuery !== this.searchQuery) {
-        this.setSearchQuery(searchQuery);
-      }
 
       if (isRemoteRoute(this.$route)) {
         this.configLoading = true;
@@ -100,12 +97,18 @@ export default {
         } finally {
           this.configLoading = false;
         }
+        if (searchQuery && searchQuery !== this.searchQuery) {
+          this.setSearchQuery(searchQuery);
+        }
         return;
       }
 
       this.configLoading = false;
       this.configError = null;
       this.config = resolveLocalConfig(url.pathname, localConfigs);
+      if (searchQuery && searchQuery !== this.searchQuery) {
+        this.setSearchQuery(searchQuery);
+      }
     },
     performSearch1() {
       this.triggerSearch = !this.triggerSearch;

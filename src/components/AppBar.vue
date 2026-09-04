@@ -269,6 +269,8 @@ export default {
     if (this.appBarResizeObserver) {
       this.appBarResizeObserver.disconnect();
     }
+    document.removeEventListener("keydown", this.handleKeyDown);
+    window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
     ...mapActions(['clearSession', 'setSearchQuery','stopBottomSheet','setUserEmail','startProductsLoading','startFacetsLoading','startProductsLoading','stopFacetsLoading','stopProductsLoading']),
@@ -360,13 +362,6 @@ export default {
         this.$emit("onSearch");
       else
         this.setSearchQuery(this.localSearchQuery);
-      
-      const localUrl = getBasePath(this.currentConfig, this.$route);
-      if(window.location.pathname != localUrl){
-        const newUrl = new URL(window.location.origin + localUrl);
-        newUrl.searchParams.set('q', this.localSearchQuery); 
-        window.location.href = newUrl.toString();
-      }
       this.suggests = [];
     },
     haldleNavFilter(filter) {
@@ -446,7 +441,7 @@ export default {
         } else if (this.localSearchQuery.trim() !== "") {
           this.searchProducts();
         }
-        this.$refs.searchInput.blur();
+        this.$refs.searchInput?.blur();
         this.isMouseOver = false; // Reset the isMouseOver flag when using keyboard navigation
       }
     },
