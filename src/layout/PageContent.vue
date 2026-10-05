@@ -113,7 +113,7 @@
                   @date-change="handleDateHistogramChange"
                 />
               </div>
-              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'date_histogram' || facet.type === 'rangeInput'|| facet.type === 'search')"
+              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'date_histogram' || facet.type === 'rangeInput')"
                 class="pt-1 d-flex align-start justify-center flex-column"
               >
                 {{ facet.name }}
@@ -127,6 +127,10 @@
               </div>
               <div v-if="facet.type === 'navigation'">
                 <SideBarNavigation :item="facet" :parentName="facet.name" @onFilter="handleNavigationSelection" />
+              </div>
+              <div v-if="facet.type === 'search'" class="mb-2">
+                <SearchFacet :facet="facet" :resetAll="resetAll" :activeValue="searchFacetValue(facet)"
+                  @search-change="handleSearchFacetChange" />
               </div>
               <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput' || isSubFacet(facet) )">
                 <div v-if="facet.values.length && facet.showAll" class="mt-2 mb-2">
@@ -165,7 +169,7 @@
                 @chip="chipsControle"
               />
 
-              <v-divider  v-if="facet.type != 'search' && products.length != 0" class="mt-3"></v-divider>
+              <v-divider class="mt-3"></v-divider>
             </v-list-item>
             <v-list-item v-if="facets.length > 0" class="d-flex justify-center mt-3">
               <v-btn color="primary" class="text-capitalize search-bar-dropdown px-10 font-600"
@@ -313,11 +317,12 @@ import ColorPicker from "@/components/ColorPicker.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
 import SubFacet from "@/components/subfacet.vue";
+import SearchFacet from "@/components/SearchFacet.vue";
 import {mapGetters, mapState, mapActions } from 'vuex';
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 export default {
-  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation,SubFacet},
+  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation,SubFacet,SearchFacet},
   data() {
     return {
       localSearchQuery: "",
@@ -580,7 +585,7 @@ export default {
       if (chipIndex !== -1) {
         this.selectedFilters = this.selectedFilters.filter(item => {
           // Filter out both range-based filters and exact matches
-          return !item.startsWith(chip.filter + '.range=') && !item.startsWith(chip.filter + '.daterange=') && item !== chip.filter;
+          return !item.startsWith(chip.filter + '.range=') && !item.startsWith(chip.filter + '.daterange=') && !item.startsWith(chip.filter + '=') && item !== chip.filter;
         });
         const expandedPanelIndex = this.expandedPanels.findIndex(panel => panel.filter === chip.filter);        // If we find a matching key in expandedPanels, remove it
         if (expandedPanelIndex !== -1) {
@@ -649,6 +654,21 @@ export default {
       } else {
         // If the filter exists, remove the chip from chipsValues
         this.chipsValues.splice(chipIndex, 1);
+      }
+    },
+    searchFacetValue(facet) {
+      const chip = this.chipsValues.find(chip => chip.filter === facet.filterName);
+      return chip ? chip[facet.name] : '';
+    },
+    handleSearchFacetChange({ facet, value }) {
+      this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(facet.filterName + '='));
+      const chipIndex = this.chipsValues.findIndex(chip => chip.filter === facet.filterName);
+      if (chipIndex !== -1) {
+        this.chipsValues.splice(chipIndex, 1);
+      }
+      if (value) {
+        this.selectedFilters.push(`${facet.filterName}=${encodeURIComponent(value)}`);
+        this.chipsValues.push({ [facet.name]: value, filter: facet.filterName });
       }
     },
     handleNavigationSelection(event) {
