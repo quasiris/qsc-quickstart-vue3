@@ -37,7 +37,6 @@ export default {
         handler(newFacet) {
           this.localSliderFacet = {...newFacet};
           this.initializeFacetData(this.localSliderFacet);
-          this.localSliderValues = [...this.localSliderFacet.sliderValues];
           this.createBarChart(this.localSliderFacet);
         },
         deep: true,
@@ -45,7 +44,7 @@ export default {
     },
     created (){
       this.initializeFacetData(this.localSliderFacet);
-      this.localSliderValues = [...this.localSliderFacet.sliderValues];
+      this.localSliderValues = [this.sliderMin, this.sliderMax];
     },
     mounted (){
       this.createBarChart(this.localSliderFacet);
@@ -54,6 +53,8 @@ export default {
       return {
         localSliderValues: [...(this.facet.sliderValues || [])],
         localSliderFacet:{...this.facet},
+        sliderMin: null,
+        sliderMax: null,
       };
     },
     methods: {
@@ -63,10 +64,12 @@ export default {
         const minMs = this.dateToMs(first.filter.minValue);
         const maxMs = this.dateToMs(last.filter.maxValue);
 
-        facet.minPrice = minMs;
-        facet.maxPrice = maxMs;
-        facet.sliderValues = [minMs, maxMs];
-        facet.isSliderDisabled = (minMs === maxMs);
+        if (this.sliderMin === null || minMs < this.sliderMin) this.sliderMin = minMs;
+        if (this.sliderMax === null || maxMs > this.sliderMax) this.sliderMax = maxMs;
+
+        facet.minPrice = this.sliderMin;
+        facet.maxPrice = this.sliderMax;
+        facet.isSliderDisabled = (this.sliderMin === this.sliderMax);
       },
 
       dateToMs(value){

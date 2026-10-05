@@ -693,19 +693,24 @@ export default {
       // filter.sliderValues sind Millisekunden -> für die Query nach ISO zurück.
       // Backend erwartet: <filterName>.daterange=<minISO>,<maxISO>
       if (filter.sliderValues[0] != null && filter.sliderValues[1] != null) {
-        const minIso = new Date(filter.sliderValues[0]).toISOString();
-        const maxIso = new Date(filter.sliderValues[1]).toISOString();
-        let filterValue = filter.filterName + '.daterange=' + minIso + ',' + maxIso;
-        let chipValue = new Date(filter.sliderValues[0]).toLocaleDateString('de-DE')
-          + ' - ' + new Date(filter.sliderValues[1]).toLocaleDateString('de-DE');
         this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filterName + '.daterange='));
-        this.selectedFilters.push(filterValue);
         const existingChipIndex = this.chipsValues.findIndex(chip => Object.hasOwn(chip, filter.name));
-        if (existingChipIndex !== -1) {
-          this.chipsValues[existingChipIndex][filter.name] = chipValue;
-          this.chipsValues[existingChipIndex].filter = filter.filterName;
-        } else {
-          this.chipsValues.push({ [filter.name]: chipValue, filter: filter.filterName });
+        const isFullRange = filter.sliderValues[0] === filter.minPrice && filter.sliderValues[1] === filter.maxPrice;
+        if (!isFullRange) {
+          const minIso = new Date(filter.sliderValues[0]).toISOString();
+          const maxIso = new Date(filter.sliderValues[1]).toISOString();
+          let filterValue = filter.filterName + '.daterange=' + minIso + ',' + maxIso;
+          let chipValue = new Date(filter.sliderValues[0]).toLocaleDateString('de-DE')
+            + ' - ' + new Date(filter.sliderValues[1]).toLocaleDateString('de-DE');
+          this.selectedFilters.push(filterValue);
+          if (existingChipIndex !== -1) {
+            this.chipsValues[existingChipIndex][filter.name] = chipValue;
+            this.chipsValues[existingChipIndex].filter = filter.filterName;
+          } else {
+            this.chipsValues.push({ [filter.name]: chipValue, filter: filter.filterName });
+          }
+        } else if (existingChipIndex !== -1) {
+          this.chipsValues.splice(existingChipIndex, 1);
         }
       }
     },
