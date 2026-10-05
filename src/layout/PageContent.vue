@@ -132,7 +132,10 @@
                 <SearchFacet :facet="facet" :resetAll="resetAll" :activeValue="searchFacetValue(facet)"
                   @search-change="handleSearchFacetChange" />
               </div>
-              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput' || isSubFacet(facet) )">
+              <div v-if="facet.type === 'categorySelect'">
+                <CategorySelectFacet :facet="facet" @category-select="handleCategorySelectChange" />
+              </div>
+              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput' || facet.type === 'categorySelect' || isSubFacet(facet) )">
                 <div v-if="facet.values.length && facet.showAll" class="mt-2 mb-2">
                   <v-text-field v-model="facet.searchQuery" label="Search filters" dense hide-details
                     append-inner-icon="mdi-magnify" variant="outlined" density="compact" class="search-input" />
@@ -318,11 +321,12 @@ import DatePicker from "@/components/DatePicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
 import SubFacet from "@/components/subfacet.vue";
 import SearchFacet from "@/components/SearchFacet.vue";
+import CategorySelectFacet from "@/components/CategorySelectFacet.vue";
 import {mapGetters, mapState, mapActions } from 'vuex';
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 export default {
-  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation,SubFacet,SearchFacet},
+  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation,SubFacet,SearchFacet,CategorySelectFacet},
   data() {
     return {
       localSearchQuery: "",
@@ -578,6 +582,11 @@ export default {
       }
     },
     deleteChip(chip) {
+      const treeMatch = (chip.filter || '').match(/^(.+)Tree(\d+)=/);
+      if (treeMatch) {
+        this.dropDeeperLevels(`${treeMatch[1]}Tree${treeMatch[2]}`, parseInt(treeMatch[2], 10));
+        return;
+      }
       const chipIndex = this.chipsValues.findIndex(ch =>
         ch.filter === chip.filter
       );
@@ -669,6 +678,24 @@ export default {
       if (value) {
         this.selectedFilters.push(`${facet.filterName}=${encodeURIComponent(value)}`);
         this.chipsValues.push({ [facet.name]: value, filter: facet.filterName });
+      }
+    },
+    dropDeeperLevels(facetId, fromLevel) {
+      const baseId = facetId.replace(/Tree\d+$/, '');
+      const isSameOrDeeper = (str) => {
+        const match = str.match(new RegExp(`^${baseId}Tree(\\d+)=`));
+        return match !== null && parseInt(match[1], 10) >= fromLevel;
+      };
+      this.selectedFilters = this.selectedFilters.filter(item => !isSameOrDeeper(item));
+      this.chipsValues = this.chipsValues.filter(chip => !isSameOrDeeper(chip.filter || ''));
+    },
+    handleCategorySelectChange({ facet, filter }) {
+      const level = parseInt(facet.id.match(/Tree(\d+)$/)?.[1] ?? '0', 10);
+      this.dropDeeperLevels(facet.id, level);
+      if (filter) {
+        this.selectedFilters.push(filter);
+        const selectedValue = facet.values.find(value => value.filter === filter);
+        this.chipsValues.push({ [facet.name]: selectedValue ? selectedValue.value : filter, filter });
       }
     },
     handleNavigationSelection(event) {
