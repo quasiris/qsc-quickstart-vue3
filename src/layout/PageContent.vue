@@ -16,6 +16,10 @@
           </div>
           <div class="my-2" v-else>
             <h3>Hits for "{{ localSearchQuery }}"</h3>
+            <p v-if="spellCorrection && spellCorrection.corrected === localSearchQuery"
+              class="gray--text text--darken-1 mb-0 text-caption">
+              Showing results for "{{ spellCorrection.corrected }}" instead of "{{ spellCorrection.original }}"
+            </p>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
               {{ totalproducts }} results found <span class="text-caption">({{ responseTime }} seconds)</span>
             </p>
@@ -348,6 +352,7 @@ export default {
       viewMode: "grid",
       totalPages: "",
       maxVisible: 5,
+      spellCorrection: null,
     };
   },
   props: {
@@ -765,6 +770,7 @@ export default {
     },
     fetchProducts() {
       const requestVersion = ++this.requestVersion;
+      const requestQuery = this.searchQuery;
       const selectedFilters = this.selectedFilters.join("&");
 
       const selectedRow = this.selectedRow;
@@ -812,6 +818,27 @@ export default {
         .then(response => {
           if (requestVersion !== this.requestVersion) {
             return;
+          }
+          const didYouMean = response.data.didYouMeanResult;
+          if (didYouMean && didYouMean.type === 'corrected' && didYouMean.corrected
+              && didYouMean.corrected !== didYouMean.original) {
+            this.spellCorrection = { original: didYouMean.original, corrected: didYouMean.corrected };
+            this.isWatchDisabled = true;
+            this.localSearchQuery = didYouMean.corrected;
+            this.setSearchQuery(didYouMean.corrected);
+            this.selectedFilters = [];
+            this.chipsValues = [];
+            this.currentPage = 1;
+            this.$nextTick(() => {
+              this.isWatchDisabled = false;
+              this.startProductsLoading();
+              this.startFacetsLoading();
+            });
+            this.fetchProducts();
+            return;
+          }
+          if (!this.spellCorrection || this.spellCorrection.corrected !== requestQuery) {
+            this.spellCorrection = null;
           }
           const products = response.data.result[this.config.resultSetId].documents;
           this.products = products.map(product => {
