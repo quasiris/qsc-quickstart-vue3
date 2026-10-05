@@ -7,12 +7,11 @@
           <div class="my-2 mb-3" v-if="!localSearchQuery">
             <h3 class="">All Products</h3>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
-              <span :data-track-id="'resultCountContainer'">{{ totalproducts }} </span>results found <span
+              <span :data-track-id="'resultCountContainer'">{{ totalproducts }}</span> results found <span
                 class="text-caption">({{ responseTime }} seconds)</span>
             </p>
             <p v-else class="gray--text text--darken-1 mb-0">
               <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
-              results found
             </p>
           </div>
           <div class="my-2" v-else>
@@ -22,7 +21,6 @@
             </p>
             <p v-else class="gray--text text--darken-1 mb-0">
               <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
-              results found
             </p>
           </div>
           <div class="sort d-flex align-center flex-wrap">
@@ -81,8 +79,9 @@
         <div class="box-wrapper">
           <div class="box-overlay" :class="{ open: isSidebar }" @click="isSidebar = !isSidebar">
           </div>
-          <v-navigation-drawer v-if="facets && !isFacetsLoading && products.length > 0" :width="325"
-            class="filters drawer pb-4 shadow-sm" v-model="isSidebar" :class="{ open: !isSidebar }">
+          <v-navigation-drawer v-if="facets && !isFacetsLoading && facets.length > 0" :width="340"
+            :mobile-breakpoint="768" class="filters drawer pb-4 shadow-sm" v-model="isSidebar"
+            :class="{ open: !isSidebar }">
             <v-list-item class="filter" :data-filter-type="facet.type" v-for="facet in facets" :key="facet.id">
               <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-1 pb-3 d-flex align-start justify-center flex-column">
@@ -139,7 +138,7 @@
                     <template #label>
                       <label :for="'filter-' + value.filter" class="text-decoration-none grey--text text--darken-2">
                         <span class="hover-color" @mouseover="hoverColor = true" @mouseout="hoverColor = false"
-                          style="font-size: 12px;">
+                          style="font-size: 13px;">
                           {{ value.value }}
                           &nbsp; ({{ value.count }})
                         </span>
@@ -170,8 +169,8 @@
                 Filters</v-btn>
             </v-list-item>
           </v-navigation-drawer>
-          <v-navigation-drawer v-if="isFacetsLoading" :width="325" class="drawer pb-4 shadow-sm" v-model="isSidebar"
-            :class="{ open: !isSidebar }">
+          <v-navigation-drawer v-if="isFacetsLoading" :width="340" :mobile-breakpoint="768"
+            class="drawer pb-4 shadow-sm" v-model="isSidebar" :class="{ open: !isSidebar }">
             <v-list-item v-for="(skeleton, index) in skeletonProducts.slice(0, 8)" :key="index"
               class="d-flex justify-center mt-3">
               <v-skeleton-loader class="mx-auto border" min-width="250" type="text,paragraph,chip"></v-skeleton-loader>
@@ -926,9 +925,9 @@ export default {
 <style>
 .drawer {
   position: sticky !important;
-  top: calc(var(--app-bar-h, 120px) + 12px);
+  top: calc(var(--app-bar-h, 120px) + 12px) !important;
   align-self: flex-start;
-  max-height: calc(100vh - var(--app-bar-h, 120px) - 24px);
+  max-height: calc(100vh - var(--app-bar-h, 120px) - 24px) !important;
   overflow-y: auto;
   overscroll-behavior: contain;
   transform: translateX(-8px) !important;
