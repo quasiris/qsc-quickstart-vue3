@@ -4,7 +4,8 @@
       <template v-if="configLoading">
         <v-container class="d-flex flex-column align-center justify-center" style="min-height: 60vh;">
           <v-progress-circular indeterminate color="primary" size="64" />
-          <p class="text-grey mt-4">Loading frontend configuration…</p>
+          <p class="text-grey mt-4">Loading frontend confi
+            guration…</p>
         </v-container>
       </template>
 

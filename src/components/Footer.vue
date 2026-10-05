@@ -4,7 +4,7 @@
         <img src="/brand/cloud-v5.png" alt="Logo" style="max-width: 270px;" class="img-fluid"/>
         <v-spacer></v-spacer>
         <div class="text-white ms-2">
-          <p class="CopyRight">Copy right reserved © {{ currentYear }} Quasiris GmbH</p>
+          <p class="CopyRight">Copyright reserved © {{ currentYear }} Quasiris GmbH</p>
         </div>
       </div>
     </v-footer>

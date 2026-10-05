@@ -7,22 +7,24 @@
           <div class="my-2 mb-3" v-if="!localSearchQuery">
             <h3 class="">All Products</h3>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
-              <span :data-track-id="'resultCountContainer'">{{ totalproducts }} </span>results found <span
+              <span :data-track-id="'resultCountContainer'">{{ totalproducts }}</span> results found <span
                 class="text-caption">({{ responseTime }} seconds)</span>
             </p>
             <p v-else class="gray--text text--darken-1 mb-0">
               <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
-              results found
             </p>
           </div>
           <div class="my-2" v-else>
             <h3>Hits for "{{ localSearchQuery }}"</h3>
+            <p v-if="spellCorrection && spellCorrection.corrected === localSearchQuery"
+              class="gray--text text--darken-1 mb-0 text-caption">
+              Showing results for "{{ spellCorrection.corrected }}" instead of "{{ spellCorrection.original }}"
+            </p>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
               {{ totalproducts }} results found <span class="text-caption">({{ responseTime }} seconds)</span>
             </p>
             <p v-else class="gray--text text--darken-1 mb-0">
               <v-progress-circular color="primary" :size="17" indeterminate></v-progress-circular>
-              results found
             </p>
           </div>
           <div class="sort d-flex align-center flex-wrap">
@@ -81,22 +83,39 @@
         <div class="box-wrapper">
           <div class="box-overlay" :class="{ open: isSidebar }" @click="isSidebar = !isSidebar">
           </div>
-          <v-navigation-drawer v-if="facets && !isFacetsLoading && products.length > 0" :width="325"
-            class="filters drawer pb-4 shadow-sm" v-model="isSidebar" :class="{ open: !isSidebar }">
+          <v-navigation-drawer v-if="facets && !isFacetsLoading && facets.length > 0" :width="340"
+            :mobile-breakpoint="768" class="filters drawer pb-4 shadow-sm" v-model="isSidebar"
+            :class="{ open: !isSidebar }">
             <v-list-item class="filter" :data-filter-type="facet.type" v-for="facet in facets" :key="facet.id">
-              <div
-                v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput') && facet.count != 0">
+              <div v-if="(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'rangeInput') && facet.count !=0">
                 <h4 class="pt-1 pb-3 d-flex align-start justify-center flex-column">
                   {{ facet.name }}
                 </h4>
-                <RangeInput v-if="facet.type == 'rangeInput'" :facet="facet" :resetAll="resetAll"
-                  @price-change="handlePriceRangeChange" />
-                <PriceSlider v-if="facet.type == 'slider'" :facet="facet" @price-change="handlePriceChange" />
-                <HistogramSlider v-if="facet.type == 'histogram'" :facet="facet" @price-change="handlePriceChange" />
+                <RangeInput
+                  v-if="facet.type == 'rangeInput'"
+                  :facet="facet"
+                  :resetAll="resetAll"
+                  @price-change="handlePriceRangeChange"
+                />
+                <PriceSlider
+                  v-if="facet.type == 'slider'"
+                  :facet="facet"
+                  @price-change="handlePriceChange"
+                />
+                <HistogramSlider
+                  v-if="facet.type == 'histogram'"
+                  :facet="facet"
+                  @price-change="handlePriceChange"
+                />
+                <DateHistogramSlider
+                  v-if="facet.type == 'date_histogram'"
+                  :facet="facet"
+                  @date-change="handleDateHistogramChange"
+                />
               </div>
-              <h4
-                v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'rangeInput' || facet.type === 'search')"
-                class="pt-1 d-flex align-start justify-center flex-column">
+              <h4 v-if="!(facet.type === 'slider' || facet.type === 'histogram'|| facet.type === 'date_histogram' || facet.type === 'rangeInput')"
+                class="pt-1 d-flex align-start justify-center flex-column"
+              >
                 {{ facet.name }}
               </h4>
               <div v-if="facet.type === 'datePicker'">
@@ -109,8 +128,14 @@
               <div v-if="facet.type === 'navigation'">
                 <SideBarNavigation :item="facet" :parentName="facet.name" @onFilter="handleNavigationSelection" />
               </div>
-              <v-container
-                v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'colorPicker' || facet.type === 'search' || facet.type === 'datePicker' || facet.type === 'navigation' || facet.type === 'rangeInput')">
+              <div v-if="facet.type === 'search'" class="mb-2">
+                <SearchFacet :facet="facet" :resetAll="resetAll" :activeValue="searchFacetValue(facet)"
+                  @search-change="handleSearchFacetChange" />
+              </div>
+              <div v-if="facet.type === 'categorySelect'">
+                <CategorySelectFacet :facet="facet" @category-select="handleCategorySelectChange" />
+              </div>
+              <v-container v-if="!(facet.type === 'slider' || facet.type === 'histogram' || facet.type === 'date_histogram' || facet.type === 'colorPicker' || facet.type === 'search'|| facet.type === 'datePicker'|| facet.type === 'navigation' || facet.type === 'rangeInput' || facet.type === 'categorySelect' || isSubFacet(facet) )">
                 <div v-if="facet.values.length && facet.showAll" class="mt-2 mb-2">
                   <v-text-field v-model="facet.searchQuery" label="Search filters" dense hide-details
                     append-inner-icon="mdi-magnify" variant="outlined" density="compact" class="search-input" />
@@ -124,7 +149,7 @@
                     <template #label>
                       <label :for="'filter-' + value.filter" class="text-decoration-none grey--text text--darken-2">
                         <span class="hover-color" @mouseover="hoverColor = true" @mouseout="hoverColor = false"
-                          style="font-size: 12px;">
+                          style="font-size: 13px;">
                           {{ value.value }}
                           &nbsp; ({{ value.count }})
                         </span>
@@ -139,7 +164,15 @@
                   </v-btn>
                 </div>
               </v-container>
-              <v-divider v-if="facet.type != 'search' && products.length != 0" class="mt-3"></v-divider>
+
+              <SubFacet
+                v-if="isSubFacet(facet) && facet.type !== 'navigation'"
+                :facet="facet"
+                v-model="selectedFilters"
+                @chip="chipsControle"
+              />
+
+              <v-divider class="mt-3"></v-divider>
             </v-list-item>
             <v-list-item v-if="facets.length > 0" class="d-flex justify-center mt-3">
               <v-btn color="primary" class="text-capitalize search-bar-dropdown px-10 font-600"
@@ -147,8 +180,8 @@
                 Filters</v-btn>
             </v-list-item>
           </v-navigation-drawer>
-          <v-navigation-drawer v-if="isFacetsLoading" :width="325" class="drawer pb-4 shadow-sm" v-model="isSidebar"
-            :class="{ open: !isSidebar }">
+          <v-navigation-drawer v-if="isFacetsLoading" :width="340" :mobile-breakpoint="768"
+            class="drawer pb-4 shadow-sm" v-model="isSidebar" :class="{ open: !isSidebar }">
             <v-list-item v-for="(skeleton, index) in skeletonProducts.slice(0, 8)" :key="index"
               class="d-flex justify-center mt-3">
               <v-skeleton-loader class="mx-auto border" min-width="250" type="text,paragraph,chip"></v-skeleton-loader>
@@ -279,17 +312,21 @@
 import { replacePlaceholders } from '@/utils';
 import { getBasePath } from '@/services/configLoader';
 import HistogramSlider from "@/components/HistogramSlider.vue";
+import DateHistogramSlider from "@/components/DateHistogramSlider.vue";
 import SideBarNavigation from "@/components/SideBarNavigation.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import PriceSlider from "@/components/PriceSlider.vue";
 import ColorPicker from "@/components/ColorPicker.vue";
 import DatePicker from "@/components/DatePicker.vue";
 import RangeInput from "@/components/RangeInput.vue";
-import { mapGetters, mapState, mapActions } from 'vuex';
+import SubFacet from "@/components/subfacet.vue";
+import SearchFacet from "@/components/SearchFacet.vue";
+import CategorySelectFacet from "@/components/CategorySelectFacet.vue";
+import {mapGetters, mapState, mapActions } from 'vuex';
 import { useDisplay } from 'vuetify'
 import axios from "axios";
 export default {
-  components: { HistogramSlider, ColorPicker, DatePicker, PriceSlider, ProductCard, RangeInput, SideBarNavigation },
+  components: {HistogramSlider,DateHistogramSlider,ColorPicker,DatePicker,PriceSlider,ProductCard,RangeInput,SideBarNavigation,SubFacet,SearchFacet,CategorySelectFacet},
   data() {
     return {
       localSearchQuery: "",
@@ -324,6 +361,7 @@ export default {
       viewMode: "grid",
       totalPages: "",
       maxVisible: 5,
+      spellCorrection: null,
     };
   },
   props: {
@@ -526,6 +564,10 @@ export default {
       });
     },
 
+    isSubFacet(facet){
+      return facet.values != undefined && facet.values.some(value => value.children);
+    },
+
     filteredValues(facet) {
       // Filter the facet values based on the search query
       if (!facet.searchQuery || !facet.searchQuery.trim()) return facet.values;
@@ -540,6 +582,11 @@ export default {
       }
     },
     deleteChip(chip) {
+      const treeMatch = (chip.filter || '').match(/^(.+)Tree(\d+)=/);
+      if (treeMatch) {
+        this.dropDeeperLevels(`${treeMatch[1]}Tree${treeMatch[2]}`, parseInt(treeMatch[2], 10));
+        return;
+      }
       const chipIndex = this.chipsValues.findIndex(ch =>
         ch.filter === chip.filter
       );
@@ -547,7 +594,7 @@ export default {
       if (chipIndex !== -1) {
         this.selectedFilters = this.selectedFilters.filter(item => {
           // Filter out both range-based filters and exact matches
-          return !item.startsWith(chip.filter + '.range=') && !item.startsWith(chip.filter + '.daterange=') && item !== chip.filter;
+          return !item.startsWith(chip.filter + '.range=') && !item.startsWith(chip.filter + '.daterange=') && !item.startsWith(chip.filter + '=') && item !== chip.filter;
         });
         const expandedPanelIndex = this.expandedPanels.findIndex(panel => panel.filter === chip.filter);        // If we find a matching key in expandedPanels, remove it
         if (expandedPanelIndex !== -1) {
@@ -618,6 +665,39 @@ export default {
         this.chipsValues.splice(chipIndex, 1);
       }
     },
+    searchFacetValue(facet) {
+      const chip = this.chipsValues.find(chip => chip.filter === facet.filterName);
+      return chip ? chip[facet.name] : '';
+    },
+    handleSearchFacetChange({ facet, value }) {
+      this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(facet.filterName + '='));
+      const chipIndex = this.chipsValues.findIndex(chip => chip.filter === facet.filterName);
+      if (chipIndex !== -1) {
+        this.chipsValues.splice(chipIndex, 1);
+      }
+      if (value) {
+        this.selectedFilters.push(`${facet.filterName}=${encodeURIComponent(value)}`);
+        this.chipsValues.push({ [facet.name]: value, filter: facet.filterName });
+      }
+    },
+    dropDeeperLevels(facetId, fromLevel) {
+      const baseId = facetId.replace(/Tree\d+$/, '');
+      const isSameOrDeeper = (str) => {
+        const match = str.match(new RegExp(`^${baseId}Tree(\\d+)=`));
+        return match !== null && parseInt(match[1], 10) >= fromLevel;
+      };
+      this.selectedFilters = this.selectedFilters.filter(item => !isSameOrDeeper(item));
+      this.chipsValues = this.chipsValues.filter(chip => !isSameOrDeeper(chip.filter || ''));
+    },
+    handleCategorySelectChange({ facet, filter }) {
+      const level = parseInt(facet.id.match(/Tree(\d+)$/)?.[1] ?? '0', 10);
+      this.dropDeeperLevels(facet.id, level);
+      if (filter) {
+        this.selectedFilters.push(filter);
+        const selectedValue = facet.values.find(value => value.filter === filter);
+        this.chipsValues.push({ [facet.name]: selectedValue ? selectedValue.value : filter, filter });
+      }
+    },
     handleNavigationSelection(event) {
       const newFilter = event.filter;
       const filterPrefix = newFilter.split('=')[0];
@@ -654,12 +734,37 @@ export default {
           facet.maxRange
         ];
       }
-      facet.minPrice = facet.minRange;
-      facet.maxPrice = facet.maxRange;
-      if (facet.minPrice === facet.maxPrice)
-        facet.isSliderDisabled = true;
-      else
-        facet.isSliderDisabled = false;
+      facet.minPrice  = facet.minRange;
+      facet.maxPrice  = facet.maxRange;
+      if(facet.minPrice===facet.maxPrice)
+          facet.isSliderDisabled = true;
+        else
+          facet.isSliderDisabled = false;
+    },
+    handleDateHistogramChange(filter) {
+      // filter.sliderValues sind Millisekunden -> für die Query nach ISO zurück.
+      // Backend erwartet: <filterName>.daterange=<minISO>,<maxISO>
+      if (filter.sliderValues[0] != null && filter.sliderValues[1] != null) {
+        this.selectedFilters = this.selectedFilters.filter(item => !item.startsWith(filter.filterName + '.daterange='));
+        const existingChipIndex = this.chipsValues.findIndex(chip => Object.hasOwn(chip, filter.name));
+        const isFullRange = filter.sliderValues[0] === filter.minPrice && filter.sliderValues[1] === filter.maxPrice;
+        if (!isFullRange) {
+          const minIso = new Date(filter.sliderValues[0]).toISOString();
+          const maxIso = new Date(filter.sliderValues[1]).toISOString();
+          let filterValue = filter.filterName + '.daterange=' + minIso + ',' + maxIso;
+          let chipValue = new Date(filter.sliderValues[0]).toLocaleDateString('de-DE')
+            + ' - ' + new Date(filter.sliderValues[1]).toLocaleDateString('de-DE');
+          this.selectedFilters.push(filterValue);
+          if (existingChipIndex !== -1) {
+            this.chipsValues[existingChipIndex][filter.name] = chipValue;
+            this.chipsValues[existingChipIndex].filter = filter.filterName;
+          } else {
+            this.chipsValues.push({ [filter.name]: chipValue, filter: filter.filterName });
+          }
+        } else if (existingChipIndex !== -1) {
+          this.chipsValues.splice(existingChipIndex, 1);
+        }
+      }
     },
     handlePriceChange(filter) {
       if (filter.sliderValues[0] && filter.sliderValues[1]) {
@@ -712,6 +817,7 @@ export default {
     },
     fetchProducts() {
       const requestVersion = ++this.requestVersion;
+      const requestQuery = this.searchQuery;
       const selectedFilters = this.selectedFilters.join("&");
 
       const selectedRow = this.selectedRow;
@@ -760,6 +866,27 @@ export default {
           if (requestVersion !== this.requestVersion) {
             return;
           }
+          const didYouMean = response.data.didYouMeanResult;
+          if (didYouMean && didYouMean.type === 'corrected' && didYouMean.corrected
+              && didYouMean.corrected !== didYouMean.original) {
+            this.spellCorrection = { original: didYouMean.original, corrected: didYouMean.corrected };
+            this.isWatchDisabled = true;
+            this.localSearchQuery = didYouMean.corrected;
+            this.setSearchQuery(didYouMean.corrected);
+            this.selectedFilters = [];
+            this.chipsValues = [];
+            this.currentPage = 1;
+            this.$nextTick(() => {
+              this.isWatchDisabled = false;
+              this.startProductsLoading();
+              this.startFacetsLoading();
+            });
+            this.fetchProducts();
+            return;
+          }
+          if (!this.spellCorrection || this.spellCorrection.corrected !== requestQuery) {
+            this.spellCorrection = null;
+          }
           const products = response.data.result[this.config.resultSetId].documents;
           this.products = products.map(product => {
             const originalDocument = { ...product.document };
@@ -788,7 +915,10 @@ export default {
             if (facet.type === 'slider' || facet.type === 'histogram') {
               this.initializeFacetData(facet);
             }
-            if (facet.type === 'navigation') {
+            // date_histogram: die DateHistogramSlider-Komponente initialisiert
+            // sich selbst (created()) und braucht value.filter als Objekt ->
+            // hier NICHT umbauen, unverändert durchreichen.
+            if (facet.type ==='navigation'){
               return this.markTempSelected(facet)
             }
             return facet;
@@ -873,8 +1003,12 @@ export default {
 </script>
 <style>
 .drawer {
-  min-height: 85vh;
-  position: relative !important;
+  position: sticky !important;
+  top: calc(var(--app-bar-h, 120px) + 12px) !important;
+  align-self: flex-start;
+  max-height: calc(100vh - var(--app-bar-h, 120px) - 24px) !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   transform: translateX(-8px) !important;
   border-top-width: thin !important;
   border-top-right-radius: 5px;
@@ -1092,6 +1226,8 @@ input[type="number"] {
 
   .drawer {
     position: absolute !important;
+    top: auto;
+    max-height: none;
     margin-top: 11vh !important;
   }
 
