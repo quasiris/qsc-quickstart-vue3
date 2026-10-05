@@ -1,7 +1,7 @@
 <template>
     <v-expansion-panels
       v-model="activePanels"
-      class="pa-2"
+      class="pa-1"
       variant="popout"
     >
       <template v-for="(child, index) in item.values" :key="index">
@@ -19,10 +19,15 @@
           v-else
           :value="child.filter"
         >
-          <v-expansion-panel-title     
+          <v-expansion-panel-title
+            hide-actions
             :data-filter-value="child.value"
-            @click="handleClick(child,parentName)">
-            {{ child.value }} ({{ child.count }})
+            @click="onTitleClick($event, child, parentName)"
+          >
+            <span class="nav-title-label">{{ child.value }} ({{ child.count }})</span>
+            <v-icon size="20" class="nav-toggle-icon">
+              {{ activePanels.includes(child.filter) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+            </v-icon>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-list v-if="child.children && child.children.values.length > 0">
@@ -79,10 +84,18 @@ export default defineComponent({
     const buildFullParentName = (name,childValue) => {
       return name ? `${name} : ${childValue}` : childValue;
     };
+    const onTitleClick = (event, child, name) => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickedToggleIcon = event.clientX > rect.right - 36;
+      if (!clickedToggleIcon) {
+        handleClick(child, name);
+      }
+    };
 
     return {
       handleClick,
       buildFullParentName,
+      onTitleClick,
       activePanels,
     };
   },
@@ -106,7 +119,7 @@ export default defineComponent({
   color: #007bff; 
 }
 .v-list-item {
-  padding-left: 16px;
+  padding-left: 10px;
   cursor: pointer;
 }
 .v-list {
@@ -114,7 +127,13 @@ export default defineComponent({
 }
 .v-expansion-panel-title {
   font-weight: 500;
-  padding: 12px !important;
+  font-size: 13px;
+  line-height: 1.3;
+  padding: 10px 8px !important;
+}
+.nav-title-label {
+  flex: 1 1 auto;
+  cursor: pointer;
 }
 .v-expansion-panel{
   max-width: calc(100% - 5px)!important;
