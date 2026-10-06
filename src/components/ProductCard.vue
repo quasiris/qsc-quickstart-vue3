@@ -1,10 +1,11 @@
 <template>
-    <DynamicTemplate
-        v-if="templateExists"
+    <div v-if="templateExists" class="dynamic-card">
+      <DynamicTemplate
         :product="product.origin || {}"
         :document="product.document || {}"
         :template="HtmlTemplate"
       />
+    </div>
     <v-card v-else
       :style="{ height: cardHeight }"
       :class="{ 'list-view': viewMode === 'list' }"
@@ -94,4 +95,16 @@
   };
   </script>
   
-  
+<style scoped>
+.dynamic-card {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dynamic-card :deep(*) {
+  min-width: 0;
+}
+.dynamic-card :deep(img) {
+  max-width: 100%;
+}
+</style>
