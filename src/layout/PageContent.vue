@@ -16,9 +16,14 @@
           </div>
           <div class="my-2" v-else>
             <h3>Hits for "{{ localSearchQuery }}"</h3>
-            <p v-if="spellCorrection && spellCorrection.corrected === localSearchQuery"
+            <p v-if="!isProductsLoading && spellCorrection && spellCorrection.type === 'corrected'"
               class="gray--text text--darken-1 mb-0 text-caption">
-              Showing results for "{{ spellCorrection.corrected }}" instead of "{{ spellCorrection.original }}"
+              Showing results for "{{ spellCorrection.corrected }}".
+              Search instead for <a href="#" class="spell-link" @click.prevent="searchWithoutSpellcheck(spellCorrection.original)">"{{ spellCorrection.original }}"</a>
+            </p>
+            <p v-if="!isProductsLoading && spellCorrection && spellCorrection.type === 'didYouMean'"
+              class="mb-0">
+              Did you mean <a href="#" class="spell-link" @click.prevent="searchSuggestion(spellCorrection.corrected)">"{{ spellCorrection.corrected }}"</a>?
             </p>
             <p v-if="!isProductsLoading" class="gray--text text--darken-1 mb-0">
               {{ totalproducts }} results found <span class="text-caption">({{ responseTime }} seconds)</span>
@@ -362,6 +367,7 @@ export default {
       totalPages: "",
       maxVisible: 5,
       spellCorrection: null,
+      spellcheckDisabledQuery: null,
     };
   },
   props: {
@@ -426,6 +432,9 @@ export default {
       immediate: true
     },
     searchQuery(newVal) {
+      if (newVal !== this.spellcheckDisabledQuery) {
+        this.spellcheckDisabledQuery = null;
+      }
       if (this.localSearchQuery != newVal) {
         this.isSearchQueryChanged = true;
         this.localSearchQuery = newVal;
@@ -825,9 +834,17 @@ export default {
 
       const queryParameters = [];
 
+      const ctrl = [];
       if (this.isNewQuery) {
-        queryParameters.push(`ctrl=userModified`);
+        ctrl.push('userModified');
         this.isNewQuery = false;
+      }
+      const spellcheckDisabled = !!this.spellcheckDisabledQuery && this.spellcheckDisabledQuery === this.searchQuery;
+      if (spellcheckDisabled) {
+        ctrl.push('spellcheckDisabled');
+      }
+      if (ctrl.length) {
+        queryParameters.push(`ctrl=${ctrl.join(',')}`);
       }
       if (this.searchQuery) {
         queryParameters.push(`q=${this.searchQuery}`);
@@ -867,24 +884,25 @@ export default {
             return;
           }
           const didYouMean = response.data.didYouMeanResult;
-          if (didYouMean && didYouMean.type === 'corrected' && didYouMean.corrected
-              && didYouMean.corrected !== didYouMean.original) {
-            this.spellCorrection = { original: didYouMean.original, corrected: didYouMean.corrected };
-            this.isWatchDisabled = true;
-            this.localSearchQuery = didYouMean.corrected;
-            this.setSearchQuery(didYouMean.corrected);
-            this.selectedFilters = [];
-            this.chipsValues = [];
-            this.currentPage = 1;
-            this.$nextTick(() => {
-              this.isWatchDisabled = false;
-              this.startProductsLoading();
-              this.startFacetsLoading();
-            });
-            this.fetchProducts();
-            return;
-          }
-          if (!this.spellCorrection || this.spellCorrection.corrected !== requestQuery) {
+          if (!spellcheckDisabled && didYouMean && (didYouMean.type === 'corrected' || didYouMean.type === 'didYouMean')
+              && didYouMean.corrected && didYouMean.corrected !== didYouMean.original) {
+            this.spellCorrection = {
+              type: didYouMean.type,
+              original: didYouMean.original,
+              corrected: didYouMean.corrected
+            };
+            if (didYouMean.type === 'corrected') {
+              this.localSearchQuery = didYouMean.corrected;
+              this.setSearchQuery(didYouMean.corrected);
+              // Older search pipelines swallow the restart and return the hits of the
+              // misspelled query (0) - search the corrected query once more in that case.
+              if (response.data.result[this.config.resultSetId].total === 0) {
+                this.fetchProducts();
+                return;
+              }
+            }
+          } else if (!this.spellCorrection || this.spellCorrection.type !== 'corrected'
+              || this.spellCorrection.corrected !== requestQuery) {
             this.spellCorrection = null;
           }
           const products = response.data.result[this.config.resultSetId].documents;
@@ -997,6 +1015,16 @@ export default {
       this.startFacetsLoading();
       this.localSearchQuery = "";
       this.setSearchQuery(this.localSearchQuery);
+    },
+    searchSuggestion(query) {
+      this.startProductsLoading();
+      this.setSearchQuery(query);
+    },
+    searchWithoutSpellcheck(query) {
+      this.spellcheckDisabledQuery = query;
+      this.spellCorrection = null;
+      this.startProductsLoading();
+      this.setSearchQuery(query);
     }
   }
 };
@@ -1044,6 +1072,11 @@ export default {
 
 a {
   text-decoration: none;
+}
+
+.spell-link {
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .image:hover img {
