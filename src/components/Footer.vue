@@ -1,13 +1,10 @@
 <template>
-    <v-footer color="primary">  
-      <div class="px-4 py-2 w-100 d-flex align-center">
-        <img src="/brand/cloud-v5.png" alt="Logo" style="max-width: 270px;" class="img-fluid"/>
-        <v-spacer></v-spacer>
-        <div class="text-white ms-2">
-          <p class="CopyRight">Copyright reserved © {{ currentYear }} Quasiris GmbH</p>
-        </div>
-      </div>
-    </v-footer>
+  <footer class="app-footer">
+    <div class="qs-container app-footer__inner">
+      <img src="/brand/qsc-logo.png" alt="Quasiris Search Cloud" class="app-footer__logo" />
+      <p class="app-footer__copy">© {{ currentYear }} Quasiris GmbH · Powered by Quasiris Search Cloud</p>
+    </div>
+  </footer>
 </template>
 <script>
 export default {
@@ -19,15 +16,28 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-.v-footer {
-  padding-top: 3rem;
-  max-height: 110px !important;
-  padding-bottom:   3rem;
+<style>
+.app-footer {
+  margin-top: auto;
+  background: #fff;
+  border-top: 1px solid var(--qs-border);
+  color: var(--qs-muted);
 }
-.CopyRight {
-  margin-bottom: 0px !important ;
-  font-size: 14px !important;
-  font-weight: bold;
+.app-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.app-footer__logo {
+  height: 30px;
+  width: auto;
+}
+.app-footer__copy {
+  margin: 0;
+  font-size: 13px;
 }
 </style>

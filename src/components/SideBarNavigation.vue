@@ -1,8 +1,10 @@
 <template>
     <v-expansion-panels
       v-model="activePanels"
-      class="pa-1"
-      variant="popout"
+      class="nav-tree"
+      variant="accordion"
+      multiple
+      flat
     >
       <template v-for="(child, index) in item.values" :key="index">
         <v-list-item
@@ -12,7 +14,10 @@
           :data-filter-value="child.value"
           @click="handleClick(child, parentName)"
         >
-          <v-list-item-title class="pa-1 ">{{ child.value }} ({{ child.count }})</v-list-item-title>
+          <v-list-item-title class="nav-row">
+            <span class="nav-title-label">{{ child.value }}</span>
+            <span class="nav-count">{{ child.count }}</span>
+          </v-list-item-title>
         </v-list-item>
 
         <v-expansion-panel
@@ -24,7 +29,8 @@
             :data-filter-value="child.value"
             @click="onTitleClick($event, child, parentName)"
           >
-            <span class="nav-title-label">{{ child.value }} ({{ child.count }})</span>
+            <span class="nav-title-label">{{ child.value }}</span>
+            <span class="nav-count">{{ child.count }}</span>
             <v-icon size="20" class="nav-toggle-icon">
               {{ activePanels.includes(child.filter) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
             </v-icon>
@@ -103,46 +109,91 @@ export default defineComponent({
 </script>
 
 <style>
-.item-title {
-  width: 100%;
-  max-width: calc(100% - 5px)!important;
-  padding-inline: 6px !important;
-  background-color: white;
-  box-shadow: 0px -2px 2px -2px rgba(0, 0, 0, 0.2),
-   0px 3px 3px -2px rgba(0, 0, 0, 0.2), 
-   -2px 0px 3px -2px rgba(0, 0, 0, 0.2),
-   2px 0px 3px -2px rgba(0, 0, 0, 0.2);  
+.nav-tree {
+  margin: 0 -6px;
 }
-.item-title.active {
-  background-color: rgb(238, 238, 238); 
-  font-weight: bold !important; 
-  color: #007bff; 
+.nav-tree .v-expansion-panel {
+  max-width: 100% !important;
+  background: transparent !important;
+  border-radius: 8px !important;
 }
-.v-list-item {
-  padding-left: 10px;
-  cursor: pointer;
+.nav-tree .v-expansion-panel::after {
+  display: none;
 }
-.v-list {
-  padding: 0px !important;
+.nav-tree .v-expansion-panel__shadow {
+  display: none;
 }
-.v-expansion-panel-title {
+.nav-tree .v-expansion-panel-title {
+  min-height: 34px !important;
+  padding: 6px 8px !important;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
-  font-size: 13px;
   line-height: 1.3;
-  padding: 10px 8px !important;
+}
+.nav-tree .v-expansion-panel-title__overlay {
+  display: none;
+}
+.nav-tree .v-expansion-panel-title:hover {
+  background: rgba(27, 31, 39, 0.04);
+}
+.nav-tree .v-expansion-panel-title--active {
+  color: rgb(var(--v-theme-primary)) !important;
+  font-weight: 600;
+}
+.nav-tree .v-expansion-panel-text__wrapper {
+  padding: 0 0 4px 12px !important;
+}
+.nav-tree .v-expansion-panel-text .nav-tree {
+  margin: 0;
+  border-left: 2px solid rgba(var(--v-theme-primary), 0.18);
+  padding-left: 4px;
 }
 .nav-title-label {
   flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
 }
-.v-expansion-panel{
-  max-width: calc(100% - 5px)!important;
+.nav-count {
+  flex: 0 0 auto;
+  margin: 0 6px 0 8px;
+  font-size: 12px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: rgba(27, 31, 39, 0.6);
 }
-.v-expansion-panel-title--active{
-  background-color: rgb(238, 238, 238); 
-  color: #007bff !important; 
+.nav-toggle-icon {
+  color: rgba(27, 31, 39, 0.45);
 }
-.v-expansion-panel-text__wrapper {
-  padding: 0 6px 6px !important;
+.item-title {
+  width: 100%;
+  min-height: 34px !important;
+  padding: 6px 8px !important;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.item-title:hover {
+  background: rgba(27, 31, 39, 0.04);
+}
+.item-title .v-list-item__overlay {
+  display: none;
+}
+.item-title.active {
+  background: rgba(var(--v-theme-primary), 0.08);
+  color: rgb(var(--v-theme-primary));
+  font-weight: 600;
+}
+.nav-row {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.nav-tree .v-list {
+  padding: 0 !important;
+  background: transparent;
 }
 </style>

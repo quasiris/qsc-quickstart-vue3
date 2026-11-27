@@ -1,152 +1,131 @@
 <template>
-  <v-card class="fixed-app-bar">
-    <v-container>
-      <div class="d-flex justify-space-between align-center">
-        <v-toolbar-title class="d-flex align-center">
-          <div>
-              <img
-                class="me-2 logo d-md-block d-none v-image"
-                :src="currentConfig.logo"
-                @click="logoRedirect(currentConfig?.logoRedirection)"
-                style="max-height: 64px; max-width: 170px; cursor: pointer;"
-                alt=""
-              />
-          </div>
-        </v-toolbar-title>
-        <v-col lg="8" sm="7" class="d-flex align-center justify-space-around">
-          <sortiment-navigation :url="currentConfig?.sortimentUrl" @handleFilter="haldleNavFilter($event)" v-if="(currentConfig?.sortimentUrl && (display.width._object.width >= 960))" />
-          <div class="search-wrapper d-flex flex-column">
-            <div class="search-bar d-flex align-center p-relative" ref="searchArea">
-            <v-text-field
-              ref="searchInput"
-              id="search-box"
-              type="text"
-              :data-track-id="'searchBox'"
-              v-model="localSearchQuery"
-              placeholder="article / keyword / product"
-              variant="outlined"
-              rounded
-              hide-details
-              density="compact"
-              prepend-inner-icon="mdi-magnify"
-              class="search-input"
-              @input="sanitizeInput"
-              @focus="showRecentSearches()"
-              :style="{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }"
-            >
-              <template #append>
-                <span
-                  v-if="localSearchQuery.trim() && display.width._object.width >= 600"
-                  class="clear-input"
-                  style="right: 100px;"
-                  @click="clearSearchQuery"
-                >
-                  &times;
-                </span>
-              </template>
-            </v-text-field>
-            <v-btn
-              v-if="display.width._object.width >= 600"
-              @click="searchProducts"
-              :data-track-id="'searchButton'"
-              color="primary"
-              id="search-btn"
-              class="text-capitalize search-bar-dropdown"
-            >
-              Search
-            </v-btn>
-            </div>
-            <div class="top-priority" v-if="filteredItems.length > 0 && showRecents" ref="suggestionsDropdown">
-              <ul>
-                <li
-                  v-for="(suggest, index) in filteredItems"
-                  :key="index"
-                  :class="{ selected: index === selectedIndex }"
-                  style="border-radius: 10px;"
-                >
-                  <v-list-item
-                    class="list-item"
-                    @click="selectSuggestion(suggest)"
-                    :data-track-id="'suggestSearchTerm'"
-                    :data-suggest-value="suggest"
-                    @keydown.enter.prevent="selectSuggestion(suggest)"
-                    @mouseover="handleMouseOver(index)"
-                    @mouseleave="handleMouseLeave"
-                    tabindex="0"
-                  >
-                    <v-icon v-if="!isInRecentSearches(suggest)"
-                      class="no-animation"
-                      :class="{
-                        'white-font': index === selectedIndex
-                      }"
-                      >mdi-magnify</v-icon
-                    >
-                    <v-icon v-else
-                      class="no-animation"
-                      :class="{
-                        'white-font': index === selectedIndex
-                      }"
-                      >mdi-history</v-icon
-                    >
-                    &nbsp; &nbsp;
-                    <span
-                      :class="{
-                        'white-font': index === selectedIndex,
-                      }"
-                    >
-                      {{ suggest }}
-                    </span>
-                  </v-list-item>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </v-col>
-        <v-col cols="1">
-          <div class="float-right">
-          <v-menu
-            v-model:menu="menu"
-            activator="parent"
-            offset-y
-            :close-on-click="false"
+  <header class="fixed-app-bar app-header">
+    <div class="qs-container app-header__inner">
+      <a class="app-header__brand" href="#" @click.prevent="logoRedirect(currentConfig?.logoRedirection)">
+        <img
+          v-if="currentConfig.logo"
+          class="logo"
+          :src="currentConfig.logo"
+          alt="Logo"
+        />
+      </a>
+
+      <sortiment-navigation
+        v-if="currentConfig?.sortimentUrl && display.width._object.width >= 960"
+        :url="currentConfig?.sortimentUrl"
+        @handleFilter="haldleNavFilter($event)"
+      />
+
+      <div class="search-wrapper">
+        <div class="search-bar" :class="{ 'is-open': showRecents && filteredItems.length > 0 }" ref="searchArea">
+          <v-icon class="search-bar__icon" size="20">mdi-magnify</v-icon>
+          <input
+            ref="searchInput"
+            id="search-box"
+            type="search"
+            autocomplete="off"
+            :data-track-id="'searchBox'"
+            v-model="localSearchQuery"
+            placeholder="Search products, brands, article numbers …"
+            class="search-bar__input"
+            @input="sanitizeInput"
+            @focus="showRecentSearches()"
+          />
+          <button
+            v-if="localSearchQuery.trim()"
+            type="button"
+            class="clear-input search-bar__clear"
+            aria-label="Clear search"
+            @click="clearSearchQuery"
           >
-            <template v-slot:activator="{props }">
-              <v-icon 
-                v-bind="props" 
-                size="large" 
-                color="grey"
-                class="icon-pointer"
-              >
-                mdi-cog
-              </v-icon>
-            </template>
-            <v-card class="pb-2">
-              <v-card-text>
-                <v-form>
-                    <v-text-field 
-                      v-model="emailInput"
-                      label="Email address"
-                      placeholder="qsc.user@gmail.com"
-                      type="email"
-                      variant="underlined"
-                      :rules="rules"
-                      @click.stop
-                    ></v-text-field>
-                  <v-btn :disabled="!isEmailValid" size="x-small" class="float-left mr-2" color="primary" @click="saveEmail">
-                    Save
-                  </v-btn>
-                  <v-btn size="x-small" class="float-right" color="secondary" @click="handleclearSession">
-                    Clear Session
-                  </v-btn>
-                </v-form>
-              </v-card-text>
-            </v-card>
-          </v-menu>
+            <v-icon size="18">mdi-close</v-icon>
+          </button>
+          <v-btn
+            v-if="display.width._object.width >= 600"
+            @click="searchProducts"
+            :data-track-id="'searchButton'"
+            color="primary"
+            id="search-btn"
+            flat
+            class="search-bar__submit"
+          >
+            Search
+          </v-btn>
         </div>
-        </v-col>
+        <div class="top-priority" v-if="filteredItems.length > 0 && showRecents" ref="suggestionsDropdown">
+          <ul>
+            <li
+              v-for="(suggest, index) in filteredItems"
+              :key="index"
+              :class="{ selected: index === selectedIndex }"
+            >
+              <v-list-item
+                class="list-item"
+                @click="selectSuggestion(suggest)"
+                :data-track-id="'suggestSearchTerm'"
+                :data-suggest-value="suggest"
+                @keydown.enter.prevent="selectSuggestion(suggest)"
+                @mouseover="handleMouseOver(index)"
+                @mouseleave="handleMouseLeave"
+                tabindex="0"
+              >
+                <div class="d-flex align-center">
+                  <v-icon size="18" class="no-animation suggest-icon">
+                    {{ isInRecentSearches(suggest) ? 'mdi-history' : 'mdi-magnify' }}
+                  </v-icon>
+                  <span class="suggest-text" v-html="highlightSuggestion(suggest)"></span>
+                </div>
+              </v-list-item>
+            </li>
+          </ul>
+        </div>
       </div>
-    </v-container>
-  </v-card>
+
+      <div class="app-header__actions">
+        <v-menu v-model="menu" location="bottom end" :close-on-content-click="false">
+          <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" icon variant="text" size="small" aria-label="Session settings">
+              <v-icon color="grey-darken-1">mdi-cog-outline</v-icon>
+            </v-btn>
+          </template>
+          <v-card class="settings-card pa-4" rounded="lg" min-width="300">
+            <div class="text-subtitle-2 mb-2">Results</div>
+            <v-btn-toggle :model-value="pagingMode" @update:model-value="setPagingMode" mandatory
+              density="compact" variant="outlined" divided color="primary" class="paging-toggle mb-4">
+              <v-btn value="pages" prepend-icon="mdi-book-open-page-variant-outline" size="small">Pages</v-btn>
+              <v-btn value="infinite" prepend-icon="mdi-infinity" size="small">Endless scroll</v-btn>
+            </v-btn-toggle>
+            <div class="text-subtitle-2 mb-2">Filters</div>
+            <v-btn-toggle :model-value="filterMode" @update:model-value="setFilterMode" mandatory
+              density="compact" variant="outlined" divided color="primary" class="filter-mode-toggle mb-4">
+              <v-btn value="instant" prepend-icon="mdi-flash-outline" size="small">Instant</v-btn>
+              <v-btn value="apply" prepend-icon="mdi-check" size="small">Apply button</v-btn>
+            </v-btn-toggle>
+            <div class="text-subtitle-2 mb-3">Session</div>
+            <v-form @submit.prevent="saveEmail">
+              <v-text-field
+                v-model="emailInput"
+                label="Email address"
+                placeholder="qsc.user@example.com"
+                type="email"
+                density="compact"
+                :rules="rules"
+                @click.stop
+              ></v-text-field>
+              <div class="d-flex justify-space-between mt-1">
+                <v-btn :disabled="!isEmailValid" size="small" color="primary" flat @click="saveEmail">
+                  Save
+                </v-btn>
+                <v-btn size="small" variant="tonal" @click="handleclearSession">
+                  Clear session
+                </v-btn>
+              </div>
+            </v-form>
+          </v-card>
+        </v-menu>
+      </div>
+    </div>
+  </header>
 </template>
 
 <script>
@@ -225,7 +204,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['requestId','userId','sessionId','email','searchQuery','bottomSheet']),
+    ...mapState(['requestId','userId','sessionId','email','searchQuery','bottomSheet','pagingMode','filterMode']),
     currentConfig() {
       return this.config || {};
     },
@@ -273,7 +252,7 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
-    ...mapActions(['clearSession', 'setSearchQuery','stopBottomSheet','setUserEmail','startProductsLoading','startFacetsLoading','startProductsLoading','stopFacetsLoading','stopProductsLoading']),
+    ...mapActions(['setPagingMode', 'setFilterMode', 'clearSession', 'setSearchQuery','stopBottomSheet','setUserEmail','startProductsLoading','startFacetsLoading','startProductsLoading','stopFacetsLoading','stopProductsLoading']),
     updateAppBarHeight() {
       document.documentElement.style.setProperty(
         "--app-bar-h",
@@ -337,10 +316,13 @@ export default {
       axios
      .get(`${suggestUrl}${queryString}`)
         .then(response => {
-          this.suggests = response.data;
+          // search-app suggest (/search/suggest/...) returns a list,
+          // a dedicated suggest config (/suggest/...) returns {result: {<code>: [...]}}
+          const data = response.data;
+          this.suggests = Array.isArray(data) ? data : Object.values(data?.result || {})[0] || [];
         })
         .catch(error => {
-          console.log(error);
+          console.error(error);
         });
     },
     searchProducts() {
@@ -445,6 +427,17 @@ export default {
         this.isMouseOver = false; // Reset the isMouseOver flag when using keyboard navigation
       }
     },
+    highlightSuggestion(suggest) {
+      const escape = (value) => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const query = this.localSearchQuery.trim();
+      const text = escape(suggest);
+      if (!query || !String(suggest).toLowerCase().startsWith(query.toLowerCase())) {
+        return text;
+      }
+      const prefix = escape(String(suggest).slice(0, query.length));
+      const rest = escape(String(suggest).slice(query.length));
+      return `<span class="suggest-prefix">${prefix}</span><strong>${rest}</strong>`;
+    },
     clearSearchQuery() {
       
       this.startFacetsLoading();
@@ -455,109 +448,170 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$md: 959px;
-.search-input {
-  flex-grow: 1;
-  margin-right: 0;
-}
-.mdi-magnify {
-  font-size: 25px !important;
-  margin-inline-start: 2px !important;
-}
-.search-bar-dropdown {
-  height: 40px;
-  border-radius: 22px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: 1px solid transparent;
-  box-shadow: none;
-  line-height: 39px; 
-  padding: 0 35px;
-  margin-left: -80px;
-}
-.v-hidden {
-  visibility: hidden;
-}
-.line {
-  border-bottom: 0.1px solid gray; 
-  margin-top: 7px; 
-}
-@keyframes showAppBar {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-.fixed-app-bar {
+.app-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  animation: showAppBar 0.5s ease; 
-  overflow: visible;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--qs-border);
+}
+.app-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 72px;
+}
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.logo {
+  display: block;
+  height: 40px;
+  max-width: 190px;
+  object-fit: contain;
 }
 .search-wrapper {
-  width: 85%;
-  z-index: 1010; 
   position: relative;
+  flex: 1 1 auto;
+  max-width: 760px;
+  margin: 0 auto;
+  z-index: 1010;
 }
-
 .search-bar {
-  width: 100%; 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 4px 4px 4px 14px;
+  background: #f1f3f6;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
-
-.top-priority {
-  width: 100%; 
-  background-color: white;
-  box-shadow: 1px 4px 8px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  position: absolute; 
-  top: 100%;
-  z-index: 2000;
+.search-bar:hover {
+  background: #eceff3;
 }
-
-.top-priority ul {
-  list-style: none;
+.search-bar:focus-within {
+  background: #fff;
+  border-color: rgba(var(--v-theme-primary), 0.5);
+  box-shadow: 0 0 0 4px rgba(var(--v-theme-primary), 0.12);
 }
-.list-item {
-  font-weight: bold;
-  min-width: 100%;
-  width: 490px;
+.search-bar.is-open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
-.selected {
-  background-color: #1867c0;
+.search-bar__icon {
+  color: var(--qs-muted);
 }
-.icon-pointer {
+.search-bar__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  color: rgb(var(--v-theme-on-surface));
+}
+.search-bar__input::placeholder {
+  color: rgba(27, 31, 39, 0.45);
+}
+.search-bar__input::-webkit-search-cancel-button {
+  display: none;
+}
+.search-bar__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--qs-muted);
   cursor: pointer;
 }
-.white-font {
-  color: white;
+.search-bar__clear:hover {
+  background: rgba(27, 31, 39, 0.06);
+  color: rgb(var(--v-theme-on-surface));
+}
+.search-bar__submit {
+  height: 40px !important;
+  padding: 0 22px !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+}
+.top-priority {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid rgba(var(--v-theme-primary), 0.5);
+  border-top: 1px solid var(--qs-border);
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 18px 40px -16px rgba(16, 24, 40, 0.28);
+}
+.top-priority ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.top-priority li {
+  border-radius: 10px;
+}
+.list-item {
+  min-height: 40px !important;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.suggest-icon {
+  color: var(--qs-muted);
+  margin-right: 12px;
+}
+.suggest-text :deep(.suggest-prefix) {
+  color: var(--qs-muted);
+}
+.suggest-text :deep(strong) {
+  font-weight: 600;
+}
+.selected {
+  background-color: rgba(var(--v-theme-primary), 0.08);
+}
+.selected .suggest-icon {
+  color: rgb(var(--v-theme-primary));
+}
+.app-header__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
 }
 .no-animation {
   transition: none !important;
 }
-.closeBtn {
-  font-size:  1.2em;
-  color: #1867c0;
-  cursor: pointer;
-  margin-right: 17px;
-  right: 80px;
+@media (max-width: 959px) {
+  .app-header__inner {
+    gap: 12px;
+    height: 64px;
+  }
+  .logo {
+    height: 30px;
+    max-width: 110px;
+  }
 }
 @media (max-width: 600px) {
-  .list-item {width: 290px;} 
-}
-@media (min-width: 601px) and (max-width: 960px) {
-  .list-item {width: 650px;} 
-}
-@media (max-width: $md) {
-  .search-bar-dropdown {display: inline-block !important;}
-}
-@media (max-width: 960px) {
-  .search-bar-dropdown {
+  .app-header__brand {
     display: none;
+  }
+  .search-bar {
+    height: 44px;
   }
 }
 </style>
