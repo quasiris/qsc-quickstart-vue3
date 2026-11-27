@@ -5,7 +5,15 @@ module.exports = defineConfig({
   devServer: {
     port: 8080,
     host: '0.0.0.0',
-    allowedHosts: 'all'    
+    allowedHosts: 'all',
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false,
+        // harmless browser notice when resizing the window
+        runtimeErrors: (error) => !/ResizeObserver loop/.test(error?.message ?? ''),
+      },
+    },
   },
   transpileDependencies: true,
   configureWebpack: {

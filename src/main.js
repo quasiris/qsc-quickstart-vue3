@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
+import './styles/app.css'
 import { loadFonts } from './plugins/webfontloader'
 import VueSvgInlinePlugin from "vue-svg-inline-plugin";
 import store  from './store/store'

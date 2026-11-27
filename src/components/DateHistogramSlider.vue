@@ -14,7 +14,7 @@
         class="date-slider-h"
         :disabled="localSliderFacet.isSliderDisabled"
         hide-details
-        @mouseup="handleDateChange"
+        @end="handleDateChange"
       ></v-range-slider>
     </div>
   </div>
@@ -109,11 +109,12 @@ export default {
           .attr("transform", `translate(${margin.left},${margin.top})`);
 
 
+        // time scale over the full slider range, so bars stay aligned with the slider
+        // even when a date filter narrows the returned months
         const x = d3
-          .scaleBand()
-          .domain(data.map(d => d.value))
-          .range([0, width])
-          .padding(0.1);
+          .scaleLinear()
+          .domain([this.sliderMin, this.sliderMax])
+          .range([0, width]);
 
         const y = d3
           .scaleLinear()
@@ -130,17 +131,17 @@ export default {
           .enter()
           .append("rect")
           .attr("class", "bar")
-          .attr("x", d => x(d.value))
+          .attr("x", d => x(this.dateToMs(d.filter.value)) - maxBarWidth / 2)
           .attr("y", height)
-          .attr("width", Math.min(x.bandwidth(), maxBarWidth))
+          .attr("width", maxBarWidth)
           .attr("height", 0)
           .attr("fill", d => {
             // d.value ist ein Label ("01.2023"), nicht parsebar -> ISO aus filter.value nehmen
             const ms = this.dateToMs(d.filter.value);
             if (ms >= minSelected && ms <= maxSelected) {
-              return "#475772";
+              return "#1d6fd8";
             }
-            return "#b6b6b6";
+            return "#d5dbe3";
           })
           .attr("rx", 1)
           .attr("ry", 1)

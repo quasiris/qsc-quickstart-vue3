@@ -20,3 +20,26 @@ export function replacePlaceholders(pattern, replacements) {
     return pattern;
   }
     
+function scrollParent(el) {
+  for (let node = el.parentElement; node; node = node.parentElement) {
+    const overflowY = getComputedStyle(node).overflowY;
+    if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) return node;
+  }
+  return null;
+}
+
+// Runs a change that expands/collapses content and scrolls so that `anchor`
+// (e.g. the "Show all/less" button) stays at the same screen position instead of jumping.
+export async function keepInPlace(anchor, change) {
+  if (!anchor) return change();
+  const before = anchor.getBoundingClientRect().top;
+  await change();
+  let delta = anchor.getBoundingClientRect().top - before;
+  const container = scrollParent(anchor);
+  if (delta && container) {
+    const start = container.scrollTop;
+    container.scrollTop = start + delta;
+    delta -= container.scrollTop - start;
+  }
+  if (delta) window.scrollBy(0, delta);
+}

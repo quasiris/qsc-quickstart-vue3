@@ -3,6 +3,23 @@ import VueCookies from 'vue-cookies';
 import CryptoJS from 'crypto-js'; 
 import { v4 as uuidv4 } from 'uuid';
 
+// Viewer preferences from the settings menu, kept in localStorage.
+function readSetting(key, allowed, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return allowed.includes(value) ? value : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+function writeSetting(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    // storage unavailable (private mode) - keep the setting for this page view only
+  }
+}
+
 export default createStore({
   state: {
     searchQuery: "", // Search Query
@@ -14,6 +31,8 @@ export default createStore({
     productsLoading: true, // products loading state
     facetsLoading: true, // facets loading state
     globalSheet: false, //  errror state
+    pagingMode: readSetting('qsc-paging-mode', ['pages', 'infinite'], 'pages'),
+    filterMode: readSetting('qsc-filter-mode', ['instant', 'apply'], 'instant'),
   },
   mutations: {
     setSearchQuery(state, q) {
@@ -69,6 +88,14 @@ export default createStore({
     stopBottomSheet(state, value) {
       state.bottomSheet = value; 
     },
+    setPagingMode(state, mode) {
+      state.pagingMode = mode;
+      writeSetting('qsc-paging-mode', mode);
+    },
+    setFilterMode(state, mode) {
+      state.filterMode = mode;
+      writeSetting('qsc-filter-mode', mode);
+    },
   },
   actions: {
     initializeSession({ commit }) {
@@ -113,6 +140,12 @@ export default createStore({
     stopFacetsLoading({ commit }) {
       commit('setFacetsLoading', false); 
     }, 
+    setPagingMode({ commit }, mode) {
+      commit('setPagingMode', mode);
+    },
+    setFilterMode({ commit }, mode) {
+      commit('setFilterMode', mode);
+    },
     hideGlobalSheet({ commit }) {
       commit('setGlobalSheet', false); 
     },

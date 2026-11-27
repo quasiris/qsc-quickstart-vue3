@@ -1,10 +1,9 @@
 <template>
     <div class="slider-chart-container">
       <span class="slider-price-range">
-        {{ localSliderValues[0] }}&nbsp;
-        <span v-if="facet.unit">{{ facet.unit }}</span> - 
-        {{ localSliderValues[1] }}&nbsp;
-        <span v-if="facet.unit">{{ facet.unit }}</span>
+        {{ localSliderValues[0] }}<span v-if="facet.unit">&nbsp;{{ facet.unit }}</span>
+        -
+        {{ localSliderValues[1] }}<span v-if="facet.unit">&nbsp;{{ facet.unit }}</span>
       </span>
       <!-- D3 Chart Background -->
       <div :id="'chart-' + facet.id" class="chart"></div>
@@ -17,7 +16,7 @@
           class="price-slider-h"
           :disabled="facet.isSliderDisabled"
           hide-details
-          @mouseup="handlePriceChange"
+          @end="handlePriceChange"
         ></v-range-slider>
       </div>
     </div>
@@ -54,31 +53,6 @@
         };
     },
     methods: {
-        initializeFacetData(facet) {
-            if(facet.minValue && facet.maxValue){
-                facet.sliderValues = [
-                facet.minValue,
-                facet.maxValue
-                ];
-            }else{
-                facet.sliderValues = [
-                facet.minRange,
-                facet.maxRange
-                ];
-            }
-            facet.minPrice  = facet.minRange;
-            facet.maxPrice  = facet.maxRange;
-            if(facet.minPrice===facet.maxPrice)
-                facet.isSliderDisabled = true;
-                else
-                facet.isSliderDisabled = false;
-            if (facet.type === 'histogram') {
-            // Create the bar chart after data is initialized
-                this.$nextTick(async () => {
-               
-                });
-            }
-        },
         async createBarChart(facet) {
             const data = facet.values;
             const chartId = `chart-${facet.id}`;
@@ -94,12 +68,10 @@
             const height = chartElement.offsetHeight - margin.top - margin.bottom;
             // Remove any existing chart ID SVG
             d3.select(`#${chartId}`).selectAll("*").remove();
-            const tooltip = d3
-                    .select("body")
-                    .append("div")
-                    .attr("class", "chart-tooltip")
-                    .style("opacity", 0);
-            console.log(tooltip)
+            // one shared tooltip element; previously every redraw appended a new one
+            if (d3.select("body > .chart-tooltip").empty()) {
+                d3.select("body").append("div").attr("class", "chart-tooltip").style("opacity", 0);
+            }
             const svg = d3
                 .select(`#${chartId}`)
                 .append("svg")
@@ -135,9 +107,9 @@
                 .attr("fill", d => {
                     // Highlight bars within the selected range
                     if (d.value >= minSelected && d.value <= maxSelected) {
-                        return "#475772"; // Highlight color 
+                        return "#1d6fd8"; // Highlight color 
                     }
-                    return "#b6b6b6"; // Default bar color (grey)
+                    return "#d5dbe3"; // Default bar color (grey)
                     })
                 .attr("rx", 1)  // Set the x-axis radius for rounded corners
                 .attr("ry", 1)  // Set the y-axis radius for rounded corners

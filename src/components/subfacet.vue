@@ -1,12 +1,13 @@
 <template>
-  <v-container>
+  <div class="facet-values">
     <div
       v-for="(value, index) in facet.values"
       :key="value.value + '-' + index"
     >
       <v-checkbox
         hide-details
-        class="smaller-checkbox"
+        density="compact"
+        class="smaller-checkbox facet-checkbox"
         type="checkbox"
         color="primary"
         :data-filter-value="value.filter"
@@ -18,24 +19,25 @@
         <template #label>
           <label
             :for="'filter-' + value.filter"
-            class="text-decoration-none grey--text text--darken-2"
+            
           >
-            <span class="hover-color" style="font-size: 12px;">
-              {{ value.value }}
-              &nbsp; ({{ value.count }})
+            <span class="facet-value">
+              <span class="facet-value__name">{{ value.value }}</span>
+              <span class="facet-value__count">{{ value.count }}</span>
             </span>
           </label>
         </template>
       </v-checkbox>
 
-      <div v-if="value.children && selected.includes(value.filter)" class="ml-6">
+      <div v-if="value.children && selected.includes(value.filter)" class="facet-children">
         <div
           v-for="(child, childIndex) in value.children.values"
           :key="child.value + '-' + childIndex"
         >
           <v-checkbox
             hide-details
-            class="smaller-checkbox"
+            density="compact"
+        class="smaller-checkbox facet-checkbox"
             type="checkbox"
             color="primary"
             :data-filter-value="child.filter"
@@ -47,11 +49,11 @@
             <template #label>
               <label
                 :for="'filter-' + child.filter"
-                class="text-decoration-none grey--text text--darken-2"
+                
               >
-                <span class="hover-color" style="font-size: 12px;">
-                  {{ child.value }}
-                  &nbsp; ({{ child.count }})
+                <span class="facet-value">
+                  <span class="facet-value__name">{{ child.value }}</span>
+                  <span class="facet-value__count">{{ child.count }}</span>
                 </span>
               </label>
             </template>
@@ -59,7 +61,7 @@
         </div>
       </div>
     </div>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -95,7 +97,9 @@ export default {
 </script>
 
 <style scoped>
-.smaller-checkbox {
-  font-size: 12px;
+.facet-children {
+  margin-left: 14px;
+  padding-left: 8px;
+  border-left: 2px solid rgba(var(--v-theme-primary), 0.18);
 }
 </style>

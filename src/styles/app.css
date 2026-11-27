@@ -1,0 +1,44 @@
+:root {
+  --qs-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --qs-radius: 14px;
+  --qs-border: rgba(27, 31, 39, 0.09);
+  --qs-muted: rgba(27, 31, 39, 0.6);
+  --qs-max-width: 1520px;
+}
+
+html,
+body,
+.v-application,
+.v-application .text-h1, .v-application .text-h2, .v-application .text-h3,
+.v-application .text-h4, .v-application .text-h5, .v-application .text-h6,
+.v-application .text-body-1, .v-application .text-body-2,
+.v-application .text-caption, .v-application .text-button {
+  font-family: var(--qs-font) !important;
+}
+
+body {
+  background: rgb(var(--v-theme-background));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.qs-container {
+  width: 100%;
+  max-width: var(--qs-max-width);
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (max-width: 600px) {
+  .qs-container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* no browser scroll anchoring in the filter drawer: expanding a facet would otherwise
+   scroll the list to its end; collapsing is anchored in code (keepInPlace) */
+.filters .v-navigation-drawer__content {
+  overflow-anchor: none;
+}
