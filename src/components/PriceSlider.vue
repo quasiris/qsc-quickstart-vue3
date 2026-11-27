@@ -40,7 +40,7 @@
         class="price-slider"
         :disabled="localSliderFacet.isSliderDisabled"
         hide-details
-        @mouseup="handlePriceChange"
+        @end="handlePriceChange"
       ></v-range-slider>
     </div>
   </template>
